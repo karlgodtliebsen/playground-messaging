@@ -118,8 +118,8 @@ public static class RabbitMqConfigurator
         {
             rabbit.HostName = "localhost";
             rabbit.Port = 5672;
-            rabbit.UserName = "bve";
-            rabbit.Password = "4FF1lhjNOOSUcyBLOXl6hoNw";
+            rabbit.UserName = "guest";
+            rabbit.Password = "guest";
             rabbit.VirtualHost = "/"; // optional
 
             // Connection pool settings
