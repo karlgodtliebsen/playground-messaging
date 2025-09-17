@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
 
   <ItemGroup>
 	  <PackageReference Include="Serilog" Version="4.3.0" />
@@ -50,11 +53,5 @@
 	  </PackageReference>
   </ItemGroup>
 
-
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
 
 </Project>
