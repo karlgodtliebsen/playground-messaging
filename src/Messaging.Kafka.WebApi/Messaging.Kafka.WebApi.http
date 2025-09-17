@@ -1,0 +1,38 @@
+@Messaging.WebApi_HostAddress = http://localhost:5179
+
+GET {{Messaging.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{Messaging.WebApi_HostAddress}}/messages/information/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "SenderId" : "the sender",
+  "Content": "Hello World"
+}
+
+###
+
+POST {{Messaging.WebApi_HostAddress}}/orders/create/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "CustomerName" : "the customer",
+  "Amount": 42
+}
+
+###
+POST {{Messaging.WebApi_HostAddress}}/api/orders/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "CustomerName" : "the customer",
+  "Amount": 4242
+}
+
+###

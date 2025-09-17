@@ -1,0 +1,32 @@
+name: Build Messaging solution
+
+on:
+  push:
+    branches:
+      #- '**'
+      - main
+
+jobs:
+  build-pack-Messaging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore NuGet packages
+#        env:
+#         NUGET_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
+        run: dotnet restore src/Messaging.sln --verbosity minimal
+
+      - name: Build Messaging solution
+        run: dotnet build src/Messaging.sln --configuration Release --no-restore --verbosity minimal
+     
+#      - name: Run Tests from Messaging
+#        run: dotnet test src/Messaging.sln --no-build --configuration Release --logger "console;verbosity=minimal" 
+      
