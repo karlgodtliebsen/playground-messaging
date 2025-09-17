@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Serilog;
+using Serilog.Enrichers.Span;
+using Serilog.Events;
 
 using ILogger = Serilog.ILogger;
 
@@ -19,28 +21,18 @@ public static class SerilogConfigurator
         optionsAction?.Invoke(services, loggingBuilder, configuration);
     }
 
-    //public static Serilog.ILogger SetupSerilogWithSink(this IServiceProvider serviceProvider, LogEventLevel level = LogEventLevel.Information)
-    //{
-    //    var memoryMappedQueue = serviceProvider.GetRequiredService<IMemoryMappedQueue>();
-    //    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    //    var logCfg = CreateMemoryMappedLogger(memoryMappedQueue, configuration, level);
-    //    Log.Logger = logCfg;
-    //    return logCfg;
-    //}
-
-    //public static ILogger CreateMemoryMappedLogger(IMemoryMappedQueue memoryMappedQueue, IConfiguration configuration, LogEventLevel level = LogEventLevel.Information)
-    //{
-    //    var logConfig = new LoggerConfiguration()
-    //        .Enrich.WithMachineName()
-    //        .Enrich.WithThreadId()
-    //        .Enrich.FromLogContext()
-    //        .Enrich.WithSpan()
-    //        .Enrich.With<TraceIdEnricher>()
-    //        .WriteTo.Sink(new LogEventMemoryMappedSink(memoryMappedQueue, level), level)
-    //        .ReadFrom.Configuration(configuration);
-
-    //    return logConfig.CreateLogger();
-    //}
+    public static Serilog.ILogger SetupSerilog(this IServiceProvider serviceProvider, LogEventLevel level = LogEventLevel.Information)
+    {
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var logger = new LoggerConfiguration()
+            .Enrich.WithMachineName()
+            .Enrich.WithThreadId()
+            .Enrich.FromLogContext()
+            .Enrich.WithSpan()
+            .ReadFrom.Configuration(configuration).CreateLogger();
+        Log.Logger = logger;
+        return logger;
+    }
 
     public static ILogger CreateConsumerLogger(IConfiguration configuration, string? context = null)
     {
