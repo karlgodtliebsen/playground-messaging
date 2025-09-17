@@ -1,5 +1,4 @@
 using Messaging.Kafka.Library.Configuration;
-using Messaging.Kafka.Library.Orders;
 using Messaging.Kafka.WebApi.Configuration;
 using Messaging.Library.Messages;
 using Messaging.Library.Orders;
@@ -17,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //var kafkaConfig = builder.Configuration.GetSection("Kafka").Get<KafkaConfig>();
 //var kafkaConfig = builder.Configuration.GetSection("Kafka");
-builder.Host.UseWolverine(KafkaMqConfigurator.Build);
+builder.Host.UseWolverine(KafkaConfigurator.Build);
 
 
 builder.AddServiceDefaults();

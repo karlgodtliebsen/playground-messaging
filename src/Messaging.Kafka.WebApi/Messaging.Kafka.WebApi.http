@@ -1,9 +1,5 @@
-@Messaging.WebApi_HostAddress = http://localhost:5179
+@Messaging.WebApi_HostAddress = http://localhost:5178
 
-GET {{Messaging.WebApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
 
 POST {{Messaging.WebApi_HostAddress}}/messages/information/
 Accept: application/json
@@ -16,7 +12,7 @@ Content-Type: application/json
 
 ###
 
-POST {{Messaging.WebApi_HostAddress}}/orders/create/
+POST {{Messaging.WebApi_HostAddress}}/orders/
 Accept: application/json
 Content-Type: application/json
 
@@ -26,13 +22,25 @@ Content-Type: application/json
 }
 
 ###
-POST {{Messaging.WebApi_HostAddress}}/api/orders/
+PUT {{Messaging.WebApi_HostAddress}}/orders/b3109a48-ec5d-4292-b985-4aa9d5dbf994/status/
 Accept: application/json
 Content-Type: application/json
 
 {
-  "CustomerName" : "the customer",
-  "Amount": 4242
+  "Status":"Going Well"
+}
+
+
+###
+
+POST {{Messaging.WebApi_HostAddress}}/payments/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "OrderId" : "b3109a48-ec5d-4292-b985-4aa9d5dbf994",
+  "Amount": 4242,
+  "PaymentMethod":"Paypal"
 }
 
 ###

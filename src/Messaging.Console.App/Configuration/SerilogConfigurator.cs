@@ -33,35 +33,5 @@ public static class SerilogConfigurator
         Log.Logger = logger;
         return logger;
     }
-
-    public static ILogger CreateConsumerLogger(IConfiguration configuration, string? context = null)
-    {
-        var config = new LoggerConfiguration()
-            .Enrich.WithMachineName()
-            .Enrich.WithThreadId()
-            .Enrich.FromLogContext();
-
-        if (!string.IsNullOrEmpty(context))
-        {
-            config = config.Enrich.WithProperty("TechnicalContext", context);
-        }
-
-        return config.ReadFrom.Configuration(configuration)
-            .CreateLogger();
-    }
-
-    public static ILogger CreateMonitoringLogger(IConfiguration configuration, string? context = null)
-    {
-        var config = new LoggerConfiguration()
-            .Enrich.WithProperty("LogCategory", "Monitoring");
-        if (!string.IsNullOrEmpty(context))
-        {
-            config = config.Enrich.WithProperty("TechnicalContext", context);
-        }
-
-        return config
-            .ReadFrom.Configuration(configuration)
-            .CreateLogger();
-    }
 }
 

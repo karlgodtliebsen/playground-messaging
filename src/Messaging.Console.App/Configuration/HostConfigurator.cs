@@ -1,85 +1,108 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Messaging.Console.App.Services;
+using Messaging.Kafka.Library.Configuration;
+using Messaging.RabbitMq.Library.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using Wolverine;
 using ILogger = Serilog.ILogger;
 
 namespace Messaging.Console.App.Configuration;
 
 public static class HostConfigurator
 {
-    public static IHost BuildApplicationLoggingHostUsingSqLite()
+    public static IHost BuildKafkaProducerHost()
     {
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                var logger = SerilogConfigurator.CreateConsumerLogger(context.Configuration);
-                services.AddSingleton<ILogger>(logger);
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-
+                services.AddHostedService<MessagingProducerServiceHost>();
             });
 
+
+        builder.UseWolverine(KafkaProducerConfigurator.Build);
         var host = builder.Build();
+        host.Services.SetupSerilog();
         return host;
     }
 
-    //This is dedicated to TestContainer PostgreSql, which is why the connection string is transferred. Can be done in a better way, but beyond the scope
-    public static IHost BuildApplicationLoggingHostUsingPostgreSql(string connectionString)
+    public static IHost BuildKafkaConsumerHost()
     {
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                var logger = SerilogConfigurator.CreateConsumerLogger(context.Configuration);
-                services.AddSingleton<ILogger>(logger);
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingConsumerServiceHost>();
             });
 
+
+        builder.UseWolverine(KafkaConfigurator.Build);
         var host = builder.Build();
+        host.Services.SetupSerilog();
         return host;
     }
 
-    public static IHost BuildApplicationLoggingHostUsingMsSql()
+    public static IHost BuildRabbitMqProducerHost()
     {
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                var logger = SerilogConfigurator.CreateConsumerLogger(context.Configuration);
-                services.AddSingleton<ILogger>(logger);
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-
+                services.AddHostedService<MessagingProducerServiceHost>();
             });
 
-        var host = builder.Build();
 
+        builder.UseWolverine(RabbitMqProducerConfigurator.Build);
+        var host = builder.Build();
+        host.Services.SetupSerilog();
         return host;
     }
 
-    //public static IHost BuildProducerHost()
-    //{
-    //    var builder = Host.CreateDefaultBuilder()
-    //        .ConfigureServices((context, services) =>
-    //        {
-    //            services.AddMemoryMappedServices(context.Configuration);
-    //            services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-    //            services.AddHostedService<LogProducerConsoleHost>();
-    //        });
-
-    //    var host = builder.Build();
-    //    host.Services.SetupSerilogWithSink();
-    //    return host;
-    //}
-
-    public static IHost BuildMonitorHost()
+    public static IHost BuildRabbitMqDiagnosticsProducerHost()
     {
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                var logger = SerilogConfigurator.CreateMonitoringLogger(context.Configuration);
-                services.AddSingleton<ILogger>(logger);
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
 
+
+        builder.UseWolverine(RabbitMqProducerConfigurator.BuildDiagnostics);
         var host = builder.Build();
+        host.Services.SetupSerilog();
+        return host;
+    }
+
+    public static IHost BuildRabbitMqConsumerHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingConsumerServiceHost>();
+            });
+
+        builder.UseWolverine(RabbitMqConfigurator.Build);
+        var host = builder.Build();
+        host.Services.SetupSerilog();
+        return host;
+    }
+
+
+    public static IHost BuildRabbitMqDiagnosticsConsumerHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingConsumerServiceHost>();
+            });
+
+        builder.UseWolverine(RabbitMqConfigurator.BuildDiagnostics);
+        var host = builder.Build();
+        host.Services.SetupSerilog();
         return host;
     }
 

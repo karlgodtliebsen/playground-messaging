@@ -1,41 +1,47 @@
 # playground-messaging
 
 ## Purpose
-- Explore using WolverineFx as Messaging abstraction for Kafka, RabbitMq, Azure Service Bus, PostgreSql etc
+- Explore using WolverineFx as Messaging bus for Kafka, RabbitMq, Azure Service Bus, PostgreSql etc
 
 - It also give an opportunity to use both MessagePack and MemoryPack
 - And to se how far the Kafka messaging can bring us in that world
 
 
+## Status
+
+### Kafka
+You now have a solid setup with (Claude):
+
+Kafka with KRaft (no Zookeeper dependency)
+WolverineFx publishing and consuming messages
+Auto-topic creation working properly
+Redpanda Console for easy management at http://localhost:8080
+
+This gives you a great foundation for exploring more advanced messaging patterns with WolverineFx and Kafka. You can now experiment with:
+
+- Different message types and handlers
+- Batch processing
+- Error handling and retry policies
+- Saga patterns
+- Event sourcing
+
+### RabbitMq
+
+- A solid setup using RabbitMQ
+
+
+
 ### Docker commands to run RabbitMq with Management UI
-
-```shell
-docker pull rabbitmq
-docker pull rabbitmq:3-management
-
-docker run -d --hostname RabbitMq --name rabbitmq-5673 -p 5673:5672 -p 15673:15672 rabbitmq:3-management
+- Messaging.RabbitMq.WebApi/README.md
 
 
--e RABBITMQ_DEFAULT_USER=guest -e RABBITMQ_DEFAULT_PASS=guest 
+### Docker commands to run Kafka using docker-compose.yml
+- Messaging.Kafka.WebApi/README.md
+ 
 
-docker start rabbitmq-5673
-
-add this if relevant:
-
--v /temp/rabbitmq/rabbitmq-data:/var/lib/rabbitmq 
-
-After it’s up, you can point your browser to http://localhost:15673 
-
-docker stop rabbitmq-5673
-docker stop rabbitmq:3-management
-
-(login is guest/guest by default)
-```
-
-
-### Look into:
-//The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
-// https://wolverine.netlify.app/guide/codegen.html
+### Info:
+- The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
+- https://wolverine.netlify.app/guide/codegen.html
 
 ```csharp
 

@@ -82,4 +82,11 @@
 	  <PackageReference Include="WolverineFx.SqlServer" Version="4.12.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Messaging.Kafka.Library\Messaging.Kafka.Library.csproj" />
+    <ProjectReference Include="..\Messaging.Library\Messaging.Library.csproj" />
+    <ProjectReference Include="..\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
+    <ProjectReference Include="..\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
+  </ItemGroup>
+
 </Project>

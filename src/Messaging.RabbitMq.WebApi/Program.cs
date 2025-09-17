@@ -1,4 +1,3 @@
-using Messaging.Kafka.Library.Orders;
 using Messaging.Library.Messages;
 using Messaging.Library.Orders;
 using Messaging.Library.Payments;

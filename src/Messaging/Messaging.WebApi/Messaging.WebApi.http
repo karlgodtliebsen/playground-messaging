@@ -1,0 +1,17 @@
+@Messaging.WebApi_HostAddress = http://localhost:5179
+
+GET {{Messaging.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{Messaging.WebApi_HostAddress}}/messages/information/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "SenderId" : "the sender",
+  "Content": "Hello World"
+}
+
+###

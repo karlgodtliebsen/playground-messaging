@@ -1,3 +1,3 @@
-﻿namespace Messaging.Kafka.Library.Orders;
+﻿namespace Messaging.Library.Orders;
 
 public record UpdateOrderStatusRequest(string Status);

@@ -4,12 +4,12 @@ using Wolverine;
 
 namespace Messaging.Library.Orders.Handlers;
 
-public class OrderHandler(IMessageBus messageBus, ILogger<OrderHandler> logger)
+public class OrderCommandHandler(IMessageBus messageBus, ILogger<OrderCommandHandler> logger)
 {
     // This handles the command and returns a response
     public async Task<CreateOrderResponse> Handle(CreateOrderCommand command)
     {
-        logger.LogInformation("OrderHandler  Received Create Order Command order {amount} for {customerName}", command.Amount, command.CustomerName);
+        logger.LogInformation("OrderCommandHandler  Received Create Order Command order {amount} for {customerName}", command.Amount, command.CustomerName);
         var orderId = Guid.NewGuid();
 
         // Create the response first

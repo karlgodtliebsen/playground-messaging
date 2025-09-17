@@ -40,27 +40,11 @@
 
 
 	  <PackageReference Include="WolverineFx" Version="4.12.0" />
-    <PackageReference Include="WolverineFx.AzureServiceBus" Version="4.12.0" />
-
     <PackageReference Include="WolverineFx.Http" Version="4.12.0" />
-
     <PackageReference Include="WolverineFx.Http.FluentValidation" Version="4.12.0" />
-
     <PackageReference Include="WolverineFx.Kafka" Version="4.12.0" />
-
-    <PackageReference Include="WolverineFx.Marten" Version="4.12.0" />
-
     <PackageReference Include="WolverineFx.MemoryPack" Version="4.12.0" />
-
     <PackageReference Include="WolverineFx.MessagePack" Version="4.12.0" />
-
-    <PackageReference Include="WolverineFx.Postgresql" Version="4.12.0" />
-
-    <PackageReference Include="WolverineFx.RabbitMQ" Version="4.12.0" />
-
-    <PackageReference Include="WolverineFx.RDBMS" Version="4.12.0" />
-
-    <PackageReference Include="WolverineFx.SqlServer" Version="4.12.0" />
 
     <PackageReference Include="DynamicData" Version="9.4.1" />
     <PackageReference Include="Dapper" Version="2.1.66" />

@@ -5,7 +5,7 @@ using Wolverine.Kafka;
 
 namespace Messaging.Kafka.Library.Configuration;
 
-public static class KafkaMqConfigurator
+public static class KafkaConfigurator
 {
     public static void Build(WolverineOptions opts)
     {
@@ -14,16 +14,16 @@ public static class KafkaMqConfigurator
         //        cooldown: TimeSpan.FromSeconds(2),
         //        maxCooldown: TimeSpan.FromSeconds(10));
 
-        opts.UseKafka("localhost:9092");
+        opts.UseKafka("localhost:9094"); //default is 9092, so this is wired to the docker-compose setup
 
         //// With consumer group and client ID
-        //opts.UseKafka("localhost:9092;group.id=my-consumer-group;client.id=my-app");
+        //opts.UseKafka("localhost:9094;group.id=my-consumer-group;client.id=my-app");
 
         //// Production with multiple brokers
-        //opts.UseKafka("broker1:9092,broker2:9092,broker3:9092");
+        //opts.UseKafka("broker1:9094,broker2:9094,broker3:9094");
 
         //// With SSL/SASL (production)
-        //opts.UseKafka("broker:9092;security.protocol=SASL_SSL;sasl.mechanism=PLAIN;sasl.username=user;sasl.password=pass");
+        //opts.UseKafka("broker:9094;security.protocol=SASL_SSL;sasl.mechanism=PLAIN;sasl.username=user;sasl.password=pass");
 
         // Topic configuration and message routing
 
