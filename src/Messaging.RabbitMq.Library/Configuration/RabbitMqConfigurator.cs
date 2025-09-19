@@ -14,6 +14,8 @@ namespace Messaging.RabbitMq.Library.Configuration;
 
 public static class RabbitMqConfigurator
 {
+    private const string Consumer = "consumer";
+    private const string Producer = "producer";
 
     public static IServiceCollection AddRabbitMqServices(this IServiceCollection service, IConfiguration configuration)
     {
@@ -38,8 +40,8 @@ public static class RabbitMqConfigurator
     public static void BuildWolverine(WolverineOptions opts, IServiceCollection serviceCollection, Action<WolverineOptions>? extendAction = null)
     {
         var sp = serviceCollection.BuildServiceProvider();
-        var listeningCollection = sp.GetKeyedService<IServiceCollection>("consumer");
-        var publishingCollection = sp.GetKeyedService<IServiceCollection>("producer");
+        var listeningCollection = sp.GetKeyedService<IServiceCollection>(Consumer);
+        var publishingCollection = sp.GetKeyedService<IServiceCollection>(Producer);
         var options = sp.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
         var setupOptions = sp.GetRequiredService<IOptions<RabbitMqSetupOptions>>().Value;
 
@@ -55,10 +57,9 @@ public static class RabbitMqConfigurator
             rabbit.RequestedConnectionTimeout = options.DefaultConnectionTimeout;
         });
 
-        rabbit
-            .AutoProvision()
-            .AutoPurgeOnStartup()
-            ;
+        rabbit.AutoProvision();
+        if (setupOptions.AutoPurge) rabbit.AutoPurgeOnStartup();
+
         extendAction?.Invoke(opts);
         var services = opts.Services;
         if (setupOptions.UseLegacyMapping)
@@ -80,8 +81,8 @@ public static class RabbitMqConfigurator
         }
         if (listeningCollection is not null)
         {
-            var messageQueueNameRegistration = sp.GetRequiredKeyedService<TypeToQueueMapper>("consumer");
-            var assemblies = sp.GetKeyedService<Assembly[]>("consumer");
+            var messageQueueNameRegistration = sp.GetRequiredKeyedService<TypeToQueueMapper>(Consumer);
+            var assemblies = sp.GetKeyedService<Assembly[]>(Consumer);
 
             var listeningMessagesMaps = listeningCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
 
@@ -101,7 +102,7 @@ public static class RabbitMqConfigurator
                 }
             }
 
-            //setup the listening
+            //wiring up the listening
             foreach (var messageMap in listeningMessagesMaps)
             {
                 ArgumentNullException.ThrowIfNull(messageMap);
@@ -134,7 +135,7 @@ public static class RabbitMqConfigurator
                             //queue.TimeToLive(TimeSpan.FromSeconds(messageMap.TimeToLive));
                         });
                     }
-                } //TODO.. other options?
+                } //TODO: should we handle other options or is this enough to fulfill the simple goal
             }
             if (assemblies is not null)
             {
@@ -146,9 +147,9 @@ public static class RabbitMqConfigurator
         }
         if (publishingCollection is not null)
         {
-            var assemblies = sp.GetKeyedService<Assembly[]>("producer");
+            var assemblies = sp.GetKeyedService<Assembly[]>(Producer);
 
-            var messageQueueNameRegistration = sp.GetRequiredKeyedService<TypeToQueueMapper>("producer");
+            var messageQueueNameRegistration = sp.GetRequiredKeyedService<TypeToQueueMapper>(Producer);
 
             var publishingMessagesMaps =
                 publishingCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
@@ -210,7 +211,7 @@ public static class RabbitMqConfigurator
                         pr.ToRabbitQueue(messageMap.BindingPattern);
                     });
                 }
-            }
+            } //TODO: should we handle other options or is this enough to fulfill the simple goal
             if (assemblies is not null)
             {
                 foreach (var assembly in assemblies)

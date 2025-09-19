@@ -3,39 +3,60 @@ using System.Collections.Concurrent;
 namespace Messaging.RabbitMq.Library.Configuration;
 
 
-//Mapping { "FullName of the legacy type", FullName of the new type },
+//Mapping { "FullName, AssemblyName of the legacy type" to and from FullName of the serialization type that WolverineFx uses},
 // No assembly name in included a Wolverine does not seem to support it
 
 public class LegacyTypeMapper
 {
-    private readonly IDictionary<string, string> map = new ConcurrentDictionary<string, string>();
+    private readonly IDictionary<(string, string), string> map = new ConcurrentDictionary<(string, string), string>();
+    private readonly IDictionary<string, (string, string)> reverseMap = new ConcurrentDictionary<string, (string, string)>();
 
     public void Register(string fromTypeName, string toTypeName)
     {
-        map.TryAdd(fromTypeName, toTypeName);
+        var (typeName, assemblyName) = ShortSplitFqn(fromTypeName);
+        map.TryAdd((typeName, assemblyName), toTypeName);
+        reverseMap.TryAdd(toTypeName, (typeName, assemblyName));
     }
     public void Register(Type fromType, string toTypeName)
     {
-        map.TryAdd(fromType.FullName!, toTypeName);
+        Register(fromType.AssemblyQualifiedName!, toTypeName);
     }
     public void Register<T>(string toTypeName)
     {
-        map.TryAdd(typeof(T).FullName!, toTypeName);
+        Register(typeof(T), toTypeName);
     }
 
-    public string MapFrom(string fromTypeName)
+    public string MapFromLegacy(string typeName, string assemblyName)
     {
-        map.TryGetValue(fromTypeName, out var typeFullName);
-        return typeFullName ?? fromTypeName;
+        map.TryGetValue((typeName, assemblyName), out var typeFullName);
+        return typeFullName ?? typeName;
     }
-    public string MapFrom(Type fromType)
+
+    public (string typeName, string assemblyName) MapToLegacy(string fromTypeName)
     {
-        map.TryGetValue(fromType.FullName!, out var typeFullName);
-        return typeFullName ?? fromType.FullName!;
+        if (reverseMap.TryGetValue(fromTypeName, out var result))
+        {
+            return result;
+        }
+        return (fromTypeName, "");
     }
-    public string MapFrom<T>()
+
+    public (string typeName, string assemblyName) MapToLegacy(Type type)
     {
-        map.TryGetValue(typeof(T).FullName!, out var typeFullName);
-        return typeFullName ?? typeof(T).FullName!;
+        return MapToLegacy(type.FullName!);
+    }
+    public (string typeName, string assemblyName) MapToLegacy<T>()
+    {
+
+        return MapToLegacy(typeof(T));
+    }
+    private static (string typeName, string assemblyName) ShortSplitFqn(string typeFullName)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(typeFullName);
+        var parts = typeFullName.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length is not 2 and not 5) throw new InvalidOperationException($"{nameof(LegacyTypeMapper)} - Invalid {nameof(typeFullName)} - {typeFullName}");
+        var typeName = parts[0];
+        var assemblyName = string.Join(',', parts.Skip(1).Take(1).ToArray());
+        return (typeName, assemblyName);
     }
 }

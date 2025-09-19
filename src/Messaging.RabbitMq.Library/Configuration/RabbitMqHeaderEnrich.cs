@@ -31,7 +31,7 @@ public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnv
         if (typeFullName is null) return;
         if (!string.IsNullOrWhiteSpace(typeFullName))
         {
-            var name = mapper.MapFrom(typeFullName);
+            var name = mapper.MapFromLegacy(typeFullName, assemblyBase ?? "");
             envelope.MessageType = name;
         }
 
@@ -52,9 +52,10 @@ public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnv
         if (m is not null)
         {
             var type = m.GetType();
-            var (typeFullName, assemblyName) = type.AssemblyQualifiedName!.ShortSplitFqn();
+            var (typeFullName, assemblyName) = mapper.MapToLegacy(type.FullName!);
+
             outgoing.Headers["AssemblyBaseName"] = assemblyName;
-            outgoing.Headers["TypeFullName"] = mapper.MapFrom(typeFullName);
+            outgoing.Headers["TypeFullName"] = typeFullName;
         }
 
         //outgoing.Headers["SendBy"] = "TextMessage Producer Console App";

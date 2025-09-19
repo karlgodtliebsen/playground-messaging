@@ -53,5 +53,9 @@
 	  </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
+  </ItemGroup>
+
 
 </Project>

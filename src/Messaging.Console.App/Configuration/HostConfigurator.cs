@@ -62,12 +62,10 @@ public static class HostConfigurator
 
         //publishing messages
         var publishingCollection = new ServiceCollection();
-        //publishingCollection.AddSingleton<MessageMap<TextMessage>>();
         publishingCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
             new MessageMap<TextMessage>()
             {
-                QueueName = "text-message-queue",
-                DurableQueue = true//to show customization
+                QueueName = "text-message-queue",//to show customization
             }
         );
         publishingCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
@@ -104,12 +102,10 @@ public static class HostConfigurator
 
         //listening to messages
         var listeningCollection = new ServiceCollection();
-        //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
         listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
             new MessageMap<TextMessage>()
             {
-                QueueName = "text-message-queue",
-                DurableQueue = true,//to show customization
+                QueueName = "text-message-queue",//to show customization
             }
         );
 
@@ -133,14 +129,14 @@ public static class HostConfigurator
     }
     public static IHost BuildRabbitMqProducerHost()
     {
+        var independentServices = new ServiceCollection();
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddProducerServices(context.Configuration);
+                independentServices.AddProducerServices(context.Configuration);
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
-
 
         builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, opt.Services));
         var host = builder.Build();
@@ -150,10 +146,11 @@ public static class HostConfigurator
 
     public static IHost BuildRabbitMqConsumerHost()
     {
+        var independentServices = new ServiceCollection();
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddConsumerServices(context.Configuration);
+                independentServices.AddConsumerServices(context.Configuration);
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
@@ -164,15 +161,16 @@ public static class HostConfigurator
     }
     public static IHost BuildRabbitMqCombinedHost()
     {
+        var independentServices = new ServiceCollection();
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddProducerServices(context.Configuration);
-                services.AddConsumerServices(context.Configuration);
+                independentServices.AddProducerServices(context.Configuration);
+                independentServices.AddConsumerServices(context.Configuration);
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
-        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, opt.Services));
+        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, independentServices));
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;

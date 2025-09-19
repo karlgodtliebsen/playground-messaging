@@ -12,7 +12,6 @@ CancellationTokenSource cancellationTokenSource = new();
 //var kafkaProducerHost = HostConfigurator.BuildKafkaProducerHost();
 //var kafkaConsumerHost = HostConfigurator.BuildKafkaConsumerHost();
 
-
 //var rabbitMqConsumerHost = HostConfigurator.BuildRabbitMqConsumerHost();
 //var rabbitMqProducerHost = HostConfigurator.BuildRabbitMqProducerHost();
 //var host = rabbitMqProducerHost;
