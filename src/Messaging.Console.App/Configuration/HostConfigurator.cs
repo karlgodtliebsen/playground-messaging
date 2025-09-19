@@ -47,23 +47,8 @@ public static class HostConfigurator
         return host;
     }
 
+
     public static IHost BuildRabbitMqProducerHost()
-    {
-        var builder = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingProducerServiceHost>();
-            });
-
-
-        builder.UseWolverine(RabbitMqProducerConfigurator.Build);
-        var host = builder.Build();
-        host.Services.SetupSerilog();
-        return host;
-    }
-
-    public static IHost BuildRabbitMqDiagnosticsProducerHost()
     {
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
@@ -117,11 +102,11 @@ public static class HostConfigurator
 
         //TODO: use some setup via DI. So the Current services needs build a provider and the provider used to get these objects
 
-        builder.UseWolverine((opt) => RabbitMqdDiagnosticsProducerConfigurator.BuildDiagnostics(opt, options, setupOptions,
+        builder.UseWolverine((opt) => RabbitMqDiagnosticsConfigurator.BuildWolverine(opt, options, setupOptions,
             listeningCollection,
             publishingCollection,
             messageQueueNameRegistration,
-            assemblies));
+            assemblies: assemblies));
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
@@ -133,30 +118,54 @@ public static class HostConfigurator
             .ConfigureServices((context, services) =>
             {
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingConsumerServiceHost>();
+                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
 
-        builder.UseWolverine(RabbitMqConfigurator.Build);
-        var host = builder.Build();
-        host.Services.SetupSerilog();
-        return host;
-    }
+        RabbitMqOptions options = new RabbitMqOptions();
+        RabbitMqSetupOptions setupOptions = new RabbitMqSetupOptions();
+
+        var assemblies = new Assembly[]
+        {
+            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
+            typeof(Messaging.Library.Configuration.Anchor).Assembly
+        };
 
 
-    public static IHost BuildRabbitMqDiagnosticsConsumerHost()
-    {
-        var builder = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
+        //listening to messages
+        var listeningCollection = new ServiceCollection();
+        //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
+
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
+            new MessageMap<TextMessage>()
             {
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingConsumerServiceHost>();
-            });
+                QueueName = "text-message-queue",
+                DurableQueue = true,//to show customization
+            }
+        );
 
-        builder.UseWolverine(RabbitMqDiagnosticsConfigurator.BuildDiagnostics);
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+
+
+        //publishing messages
+        var publishingCollection = new ServiceCollection();
+
+        TypeToQueueMapper messageQueueNameRegistration = new TypeToQueueMapper();
+        messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
+        messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
+
+        //TODO: use some setup via DI. So the Current services needs build a provider and the provider used to get these objects
+
+        builder.UseWolverine((opt) => RabbitMqDiagnosticsConfigurator.BuildWolverine(opt, options, setupOptions,
+            listeningCollection,
+            publishingCollection,
+            messageQueueNameRegistration,
+            assemblies: assemblies));
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
     }
+
 
     public static Task RunHostAsync(IHost host, string title, Microsoft.Extensions.Logging.ILogger logger, CancellationToken cancellationToken)
     {

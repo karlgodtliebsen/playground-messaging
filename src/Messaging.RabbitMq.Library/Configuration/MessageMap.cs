@@ -21,7 +21,7 @@ public class MessageMap<T> : IMessageMap where T : IMessage, new()
     public bool UseExchange { get; set; } = true;
     public bool DurableExchange { get; set; } = true;
     public bool DurableQueue { get; set; } = true;
-    public bool UseQueue { get; set; }
+    public bool UseQueue { get; set; } = true;
     public bool UseHeaderMapping { get; set; } = true;
     public string Exchange { get; set; }
     public string BindingPattern { get; set; }
