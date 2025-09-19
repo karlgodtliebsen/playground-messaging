@@ -1,5 +1,6 @@
 ﻿
 using Messaging.Console.App.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -9,7 +10,7 @@ Console.Title = title;
 Console.WriteLine(title);
 CancellationTokenSource cancellationTokenSource = new();
 
-//var rabbitMqDiagnosticsConsumerHost = HostConfigurator.BuildRabbitMqDiagnosticsConsumerHost();
+var rabbitMqDiagnosticsConsumerHost = HostConfigurator.BuildRabbitMqDiagnosticsConsumerHost();
 var rabbitMqDiagnosticsProducerHost = HostConfigurator.BuildRabbitMqDiagnosticsProducerHost();
 
 //var kafkaProducerHost = HostConfigurator.BuildKafkaProducerHost();
@@ -26,5 +27,5 @@ logger.Information("Starting Multi Host {title}", title);
 //start multiple hosts
 await HostConfigurator.RunHostsAsync([
     /*kafkaProducerHost, kafkaConsumerHost, rabbitMqProducerHost, rabbitMqConsumerHost,*/
-    rabbitMqDiagnosticsProducerHost //, rabbitMqDiagnosticsConsumerHost
+    rabbitMqDiagnosticsProducerHost , rabbitMqDiagnosticsConsumerHost
 ], title, mLogger, cancellationTokenSource.Token);

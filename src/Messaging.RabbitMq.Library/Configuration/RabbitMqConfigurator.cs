@@ -1,7 +1,9 @@
 ﻿using Messaging.Library.Orders;
 using Messaging.Library.Payments;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -12,6 +14,7 @@ public static class RabbitMqConfigurator
     public static void Build(WolverineOptions opts)
     {
         // Basic RabbitMQ connection
+        // use confguration
         var rabbit = opts.UseRabbitMq(rabbit =>
         {
             rabbit.HostName = "localhost";
@@ -111,72 +114,4 @@ public static class RabbitMqConfigurator
         //    .RetryWithCooldown(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5));
     }
 
-    public static void BuildDiagnostics(WolverineOptions opts)
-    {
-        // Basic RabbitMQ connection
-        var rabbit = opts.UseRabbitMq(rabbit =>
-        {
-            rabbit.HostName = "localhost";
-            rabbit.Port = 5672;
-            rabbit.UserName = "guest";
-            rabbit.Password = "guest";
-            rabbit.VirtualHost = "/"; // optional
-
-            // Connection pool settings
-            rabbit.RequestedHeartbeat = TimeSpan.FromSeconds(30);
-            rabbit.RequestedConnectionTimeout = TimeSpan.FromSeconds(10);
-        });
-
-        //rabbit.AutoProvision();
-        //rabbit.AutoPurgeOnStartup();
-        //rabbit.PrefixIdentifiersWithMachineName();
-        //rabbit.PrefixIdentifiers("msg");
-
-        // Enable detailed logging
-        opts.Services.AddLogging(logging =>
-        {
-            logging.SetMinimumLevel(LogLevel.Debug);
-            logging.AddConsole();
-        });
-
-        opts.Discovery.IncludeAssembly(typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly);
-
-        rabbit.DeclareExchange("go.main.diagnostics", exchange =>
-        {
-            exchange.ExchangeType = ExchangeType.Topic;
-            exchange.IsDurable = true;
-        });
-
-        rabbit.DeclareExchange("go.main.textmessage", exchange =>
-        {
-            exchange.ExchangeType = ExchangeType.Topic;
-            exchange.IsDurable = true;
-        });
-
-        // Specific queue configuration
-        opts.ListenToRabbitQueue("nextgen", queue =>
-        {
-            queue.BindExchange("go.main.diagnostics", "diagnostics.#");
-            queue.IsDurable = true;
-            queue.PurgeOnStartup = false;
-        });
-
-        opts.ListenToRabbitQueue("nextgen", queue =>
-        {
-            queue.BindExchange("go.main.textmessage", "textmessage.#");
-            queue.IsDurable = true; // Survives broker restart
-            queue.PurgeOnStartup = false;
-        });
-
-
-        //opts.PublishMessage<TextMessage>()
-        //    //.ToRabbitQueue("go.mains.diagnostics-queue")
-        //    .ToRabbitQueue("textmessage.#")
-        //    ;
-
-        //opts.PublishMessage<PingMessage>()
-        //    //.ToRabbitQueue("go.mains.diagnostics-queue")
-        //    .ToRabbitQueue("diagnostics.#")
-        //    ;
-    }
 }

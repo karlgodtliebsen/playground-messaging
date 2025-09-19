@@ -1,7 +1,4 @@
-using Messaging.Library.Messages;
-using Messaging.Library.Orders;
 using Microsoft.Extensions.Logging;
-using Wolverine;
 
 namespace Messaging.RabbitMq.Library;
 

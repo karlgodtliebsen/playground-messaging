@@ -1,30 +1,30 @@
-using Wolverine.Runtime;
-
 namespace Messaging.RabbitMq.Library;
 
-public class TextMessage
+public class TextMessage : IMessage
 {
-    public DateTimeOffset InternalTimeStamp { get; set; }
 
-    //protected override string GetExchangeName() => "textmessage";
-    //protected override string GetRoutingKey() => "textmessage.route";
+    public string ExchangeName { get; } = "textmessage";
+    public string RoutingKey { get; } = "textmessage.route";
+    public string BindingPattern { get; } = "textmessage.#";
+
+
     public TextMessage(string hostName, string appName, string messageData, DateTimeOffset dateTime)
     {
+        HostName = hostName;
+        AppName = appName;
         InternalTimeStamp = dateTime;
         MessageData = messageData;
-        PointId = hostName;
-        Ident = appName;
     }
 
     public TextMessage()
     {
     }
-
-    public string PointId { get; set; } = "";
-    public string Ident { get; set; } = "";
+    public string? QueueName { get; set; } = null;
+    public string HostName { get; set; }
+    public string AppName { get; set; }
+    public DateTimeOffset InternalTimeStamp { get; set; }
 
     public string MessageData { get; set; } = "";
-
     public int Version { get; set; } = 1;
 
     /*
@@ -45,4 +45,5 @@ public class TextMessage
     "PointId":"KGO-P16G2-2401",
     "InternalTimeStamp":"2025-09-17T22:07:43.5957631+00:00"}
      */
+
 }

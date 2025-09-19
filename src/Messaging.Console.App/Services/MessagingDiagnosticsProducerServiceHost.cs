@@ -1,7 +1,8 @@
-﻿using Messaging.Library.Orders;
-using Messaging.RabbitMq.Library;
+﻿using Messaging.RabbitMq.Library;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Wolverine;
 
 namespace Messaging.Console.App.Services;
@@ -21,28 +22,18 @@ public sealed class MessagingDiagnosticsProducerServiceHost(IMessageBus messageB
         {
             while (!ct.IsCancellationRequested)
             {
-                var orderId = Guid.NewGuid();
                 await messageBus.PublishAsync(
-                    new TextMessage("the host", "the app", "hellow world", DateTimeOffset.UtcNow),
+                    new TextMessage("the host", "the app", "Hello world", DateTimeOffset.UtcNow),
                     new DeliveryOptions
                     {
-                        Headers =
-                        {
-                            ["SendBy"] = "TextMessage Producer Console App",
-                            ["Timestamp"] = DateTimeOffset.UtcNow.ToString("O"),
-                            ["CorrelationId"] = Guid.CreateVersion7(DateTimeOffset.UtcNow).ToString()
-                        }
+
                     });
 
                 await messageBus.PublishAsync(
                     new PingMessage("the host", "the app", DateTimeOffset.UtcNow),
                     new DeliveryOptions
                     {
-                        Headers =
-                        {
-                            ["Application"] = "TextMessage Producer Console App",
-                            ["ProcessedAt"] = DateTimeOffset.UtcNow.ToString("O")
-                        }
+
                     });
 
                 await Task.Delay(10, ct);
