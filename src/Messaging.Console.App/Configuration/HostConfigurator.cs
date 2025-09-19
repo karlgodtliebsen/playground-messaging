@@ -1,11 +1,12 @@
 ﻿using Messaging.Console.App.Services;
 using Messaging.Kafka.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Wolverine;
-using ILogger = Serilog.ILogger;
 
 namespace Messaging.Console.App.Configuration;
 
@@ -68,8 +69,10 @@ public static class HostConfigurator
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
 
+        RabbitMqOptions options = new RabbitMqOptions();
+        RabbitMqSetupOptions setupOptions = new RabbitMqSetupOptions();
 
-        builder.UseWolverine(RabbitMqProducerConfigurator.BuildDiagnostics);
+        builder.UseWolverine((opt) => RabbitMqdDiagnosticsProducerConfigurator.BuildDiagnostics(opt, options, setupOptions));
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
@@ -100,7 +103,7 @@ public static class HostConfigurator
                 services.AddHostedService<MessagingConsumerServiceHost>();
             });
 
-        builder.UseWolverine(RabbitMqConfigurator.BuildDiagnostics);
+        builder.UseWolverine(RabbitMqDiagnosticsConfigurator.BuildDiagnostics);
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
