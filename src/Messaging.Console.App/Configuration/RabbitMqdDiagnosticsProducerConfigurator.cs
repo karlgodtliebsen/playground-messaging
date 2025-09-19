@@ -1,8 +1,9 @@
-﻿using Messaging.RabbitMq.Library;
-using Messaging.RabbitMq.Library.Configuration;
+﻿using Messaging.RabbitMq.Library.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
+using System.Reflection;
 
 using Wolverine;
 using Wolverine.RabbitMQ;
@@ -12,7 +13,10 @@ namespace Messaging.Console.App.Configuration;
 
 public static class RabbitMqdDiagnosticsProducerConfigurator
 {
-    public static void BuildDiagnostics(WolverineOptions opts, RabbitMqOptions options, RabbitMqSetupOptions setupOptions)
+    public static void BuildDiagnostics(WolverineOptions opts, RabbitMqOptions options, RabbitMqSetupOptions setupOptions,
+        ServiceCollection listeningCollection, ServiceCollection publishingCollection,
+        TypeToQueueMapper messageQueueNameRegistration,
+        Assembly[]? assemblies = null)
     {
         // Basic RabbitMQ connection
         var rabbit = opts.UseRabbitMq(rabbit =>
@@ -50,28 +54,6 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
             });
         }
 
-
-        TypeToQueueMapper messageQueueNameRegistration = new TypeToQueueMapper();
-
-        messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
-        messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
-
-
-
-        //listening to messages
-        var listeningCollection = new ServiceCollection();
-        //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
-
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
-            new MessageMap<TextMessage>()
-            {
-                QueueName = "text-message-queue",
-                DurableQueue = true,//to show customization
-            }
-       );
-
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
         var listeningMessagesMaps = listeningCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
 
         if (setupOptions.DeclareExchanges)
@@ -123,19 +105,6 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
             }
         }
 
-
-        //publishing messages
-        var publishingCollection = new ServiceCollection();
-        //publishingCollection.AddSingleton<MessageMap<TextMessage>>();
-        publishingCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
-            new MessageMap<TextMessage>()
-            {
-                QueueName = "text-message-queue",
-                DurableQueue = true//to show customization
-            }
-        );
-        publishingCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
-        publishingCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
 
         var publishingMessagesMaps = publishingCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
 
@@ -191,15 +160,15 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
         //look up for explicit setting
         //.ToRabbitQueue("textmessage.#")
         //    .ToRabbitQueue(queueName)
-        //.ToRabbitExchange(exchangeName)        //if (assemblies is not null)
-        //{
-        //    foreach (var assembly in assemblies)
-        //    {
-        //        opts.Discovery.IncludeAssembly(assembly);
-        //    }
-        //}
+        //.ToRabbitExchange(exchangeName)       
 
-        opts.Discovery.IncludeAssembly(typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly);
-        opts.Discovery.IncludeAssembly(typeof(Messaging.Library.Configuration.Anchor).Assembly);
+        if (assemblies is not null)
+        {
+            foreach (var assembly in assemblies)
+            {
+                opts.Discovery.IncludeAssembly(assembly);
+            }
+        }
+
     }
 }

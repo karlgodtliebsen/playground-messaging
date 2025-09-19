@@ -1,10 +1,13 @@
 ﻿using Messaging.Console.App.Services;
 using Messaging.Kafka.Library.Configuration;
+using Messaging.RabbitMq.Library;
 using Messaging.RabbitMq.Library.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
+using System.Reflection;
 
 using Wolverine;
 
@@ -72,7 +75,53 @@ public static class HostConfigurator
         RabbitMqOptions options = new RabbitMqOptions();
         RabbitMqSetupOptions setupOptions = new RabbitMqSetupOptions();
 
-        builder.UseWolverine((opt) => RabbitMqdDiagnosticsProducerConfigurator.BuildDiagnostics(opt, options, setupOptions));
+        var assemblies = new Assembly[]
+        {
+            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
+            typeof(Messaging.Library.Configuration.Anchor).Assembly
+        };
+
+
+        //listening to messages
+        var listeningCollection = new ServiceCollection();
+        //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
+
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
+            new MessageMap<TextMessage>()
+            {
+                QueueName = "text-message-queue",
+                DurableQueue = true,//to show customization
+            }
+        );
+
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+
+
+        //publishing messages
+        var publishingCollection = new ServiceCollection();
+        //publishingCollection.AddSingleton<MessageMap<TextMessage>>();
+        publishingCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
+            new MessageMap<TextMessage>()
+            {
+                QueueName = "text-message-queue",
+                DurableQueue = true//to show customization
+            }
+        );
+        publishingCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
+        publishingCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+
+        TypeToQueueMapper messageQueueNameRegistration = new TypeToQueueMapper();
+        messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
+        messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
+
+        //TODO: use some setup via DI. So the Current services needs build a provider and the provider used to get these objects
+
+        builder.UseWolverine((opt) => RabbitMqdDiagnosticsProducerConfigurator.BuildDiagnostics(opt, options, setupOptions,
+            listeningCollection,
+            publishingCollection,
+            messageQueueNameRegistration,
+            assemblies));
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
