@@ -1,11 +1,13 @@
 using Messaging.Library.Messages;
 using Messaging.Library.Orders;
 using Messaging.Library.Payments;
-using Messaging.RabbitMq.Library.Configuration;
 using Messaging.RabbitMq.WebApi.Configuration;
+
 using Scalar.AspNetCore;
+
 using Serilog;
 using Serilog.Events;
+
 using Wolverine;
 
 const string title = "Messaging Wolverine RabbitMq WebApi";
@@ -14,16 +16,18 @@ Console.WriteLine(title);
 
 var builder = WebApplication.CreateBuilder(args);
 
-//var rabbitMqConfig = builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>();
-//var rabbitMqConfig = builder.Configuration.GetSection("RabbitMq");
 
-builder.Host.UseWolverine(RabbitMqConfigurator.Build);
+//builder.Host.UseWolverine(RabbitMqConfigurator.BuildWolverine());
+
 builder.AddServiceDefaults();
 
 var services = builder.Services;
 var configuration = builder.Configuration;
 // Add services to the container.
-services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, configuration); });
+services
+    .AddProducerServices(configuration)
+    .AddConsumerServices(configuration)
+    .AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, configuration); });
 services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 services.AddOpenApi();

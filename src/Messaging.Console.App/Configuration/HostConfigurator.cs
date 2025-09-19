@@ -3,7 +3,9 @@ using Messaging.Kafka.Library.Configuration;
 using Messaging.RabbitMq.Library;
 using Messaging.RabbitMq.Library.Configuration;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -47,40 +49,15 @@ public static class HostConfigurator
         return host;
     }
 
-
-    public static IHost BuildRabbitMqProducerHost()
+    public static IServiceCollection AddProducerServices(this IServiceCollection service, IConfiguration configuration)
     {
-        var builder = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
-            });
-
-        RabbitMqOptions options = new RabbitMqOptions();
-        RabbitMqSetupOptions setupOptions = new RabbitMqSetupOptions();
+        service.AddRabbitMqServices(configuration);
 
         var assemblies = new Assembly[]
         {
             typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
             typeof(Messaging.Library.Configuration.Anchor).Assembly
         };
-
-
-        //listening to messages
-        var listeningCollection = new ServiceCollection();
-        //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
-
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
-            new MessageMap<TextMessage>()
-            {
-                QueueName = "text-message-queue",
-                DurableQueue = true,//to show customization
-            }
-        );
-
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
 
 
         //publishing messages
@@ -96,33 +73,28 @@ public static class HostConfigurator
         publishingCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
         publishingCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
 
-        TypeToQueueMapper messageQueueNameRegistration = new TypeToQueueMapper();
+        var messageQueueNameRegistration = new TypeToQueueMapper();
         messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
         messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
 
-        //TODO: use some setup via DI. So the Current services needs build a provider and the provider used to get these objects
+        service.TryAddKeyedSingleton<TypeToQueueMapper>("producer", messageQueueNameRegistration);
 
-        builder.UseWolverine((opt) => RabbitMqDiagnosticsConfigurator.BuildWolverine(opt, options, setupOptions,
-            listeningCollection,
-            publishingCollection,
-            messageQueueNameRegistration,
-            assemblies: assemblies));
-        var host = builder.Build();
-        host.Services.SetupSerilog();
-        return host;
+        LegacyTypeMapper mapper = new LegacyTypeMapper();
+        mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
+        mapper.Register<PingMessage>(typeof(PingMessage).FullName!);
+        mapper.Register<HeartbeatMessage>(typeof(HeartbeatMessage).FullName!);
+
+        service.TryAddSingleton<LegacyTypeMapper>(mapper);
+
+
+        service.TryAddKeyedSingleton<Assembly[]>("producer", assemblies);
+        service.TryAddKeyedSingleton<IServiceCollection>("producer", publishingCollection);
+        return service;
     }
 
-    public static IHost BuildRabbitMqConsumerHost()
+    public static IServiceCollection AddConsumerServices(this IServiceCollection service, IConfiguration configuration)
     {
-        var builder = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
-            });
-
-        RabbitMqOptions options = new RabbitMqOptions();
-        RabbitMqSetupOptions setupOptions = new RabbitMqSetupOptions();
+        service.AddRabbitMqServices(configuration);
 
         var assemblies = new Assembly[]
         {
@@ -130,11 +102,9 @@ public static class HostConfigurator
             typeof(Messaging.Library.Configuration.Anchor).Assembly
         };
 
-
         //listening to messages
         var listeningCollection = new ServiceCollection();
         //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
-
         listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
             new MessageMap<TextMessage>()
             {
@@ -146,26 +116,67 @@ public static class HostConfigurator
         listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
         listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
 
-
-        //publishing messages
-        var publishingCollection = new ServiceCollection();
-
-        TypeToQueueMapper messageQueueNameRegistration = new TypeToQueueMapper();
+        var messageQueueNameRegistration = new TypeToQueueMapper();
         messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
         messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
 
-        //TODO: use some setup via DI. So the Current services needs build a provider and the provider used to get these objects
+        LegacyTypeMapper mapper = new LegacyTypeMapper();
+        mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
+        mapper.Register<PingMessage>(typeof(PingMessage).FullName!);
+        mapper.Register<HeartbeatMessage>(typeof(HeartbeatMessage).FullName!);
 
-        builder.UseWolverine((opt) => RabbitMqDiagnosticsConfigurator.BuildWolverine(opt, options, setupOptions,
-            listeningCollection,
-            publishingCollection,
-            messageQueueNameRegistration,
-            assemblies: assemblies));
+        service.TryAddSingleton<LegacyTypeMapper>(mapper);
+        service.TryAddKeyedSingleton<TypeToQueueMapper>("consumer", messageQueueNameRegistration);
+        service.TryAddKeyedSingleton<Assembly[]>("consumer", assemblies);
+        service.TryAddKeyedSingleton<IServiceCollection>("consumer", listeningCollection);
+        return service;
+    }
+    public static IHost BuildRabbitMqProducerHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                services.AddProducerServices(context.Configuration);
+                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
+            });
+
+
+        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, opt.Services));
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
     }
 
+    public static IHost BuildRabbitMqConsumerHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                services.AddConsumerServices(context.Configuration);
+                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
+            });
+        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, opt.Services));
+        var host = builder.Build();
+        host.Services.SetupSerilog();
+        return host;
+    }
+    public static IHost BuildRabbitMqCombinedHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                services.AddProducerServices(context.Configuration);
+                services.AddConsumerServices(context.Configuration);
+                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
+            });
+        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, opt.Services));
+        var host = builder.Build();
+        host.Services.SetupSerilog();
+        return host;
+    }
 
     public static Task RunHostAsync(IHost host, string title, Microsoft.Extensions.Logging.ILogger logger, CancellationToken cancellationToken)
     {

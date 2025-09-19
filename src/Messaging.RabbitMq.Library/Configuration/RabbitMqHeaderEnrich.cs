@@ -7,13 +7,18 @@ using Wolverine.RabbitMQ.Internal;
 
 namespace Messaging.RabbitMq.Library.Configuration;
 
-public sealed class RabbitMqHeaderEnrich : IRabbitMqEnvelopeMapper
+/// <summary>
+/// LegacyTypeMapper
+/// We might inject more standard options to add to the header
+/// </summary>
+/// <param name="mapper"></param>
+public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnvelopeMapper
 {
     public void MapIncomingToEnvelope(Envelope envelope, IReadOnlyBasicProperties incoming)
     {
-        envelope.ContentType = "application/json";
+        envelope.ContentType = incoming.ContentType;
         envelope.CorrelationId = incoming.CorrelationId;
-
+        envelope.MessageType = incoming.Type;
         if (Guid.TryParse(incoming.MessageId, out var id))
             envelope.Id = id;
 
@@ -23,12 +28,14 @@ public sealed class RabbitMqHeaderEnrich : IRabbitMqEnvelopeMapper
 
         var typeFullName = ReadHeader(headers!, "TypeFullName");
         var assemblyBase = ReadHeader(headers!, "AssemblyBaseName");
-
-        // Drive Wolverine's type resolution from the legacy full name
+        if (typeFullName is null) return;
         if (!string.IsNullOrWhiteSpace(typeFullName))
-            envelope.MessageType = typeFullName;
+        {
+            var name = mapper.MapFrom(typeFullName);
+            envelope.MessageType = name;
+        }
 
-        // (Optional) stash legacy info as envelope headers for diagnostics
+        // stash legacy info as envelope headers for diagnostics
         envelope.Headers["legacy-assembly-name"] = assemblyBase ?? "";
         envelope.Headers["legacy-type-name"] = typeFullName ?? "";
     }
@@ -36,21 +43,21 @@ public sealed class RabbitMqHeaderEnrich : IRabbitMqEnvelopeMapper
     public void MapEnvelopeToOutgoing(Envelope envelope, IBasicProperties outgoing)
     {
         // Keep your existing interop for outbound messages to legacy
+        outgoing.Type = envelope.MessageType;
         outgoing.ContentType = "application/json";
         outgoing.MessageId = envelope.Id.ToString();
         outgoing.CorrelationId = envelope.CorrelationId;
-
         outgoing.Headers ??= new Dictionary<string, object?>();
+        var m = envelope.Message;
+        if (m is not null)
+        {
+            var type = m.GetType();
+            var (typeFullName, assemblyName) = type.AssemblyQualifiedName!.ShortSplitFqn();
+            outgoing.Headers["AssemblyBaseName"] = assemblyName;
+            outgoing.Headers["TypeFullName"] = mapper.MapFrom(typeFullName);
+        }
 
-        // If you tagged your new CLR type with a legacy identity (see next section),
-        // envelope.MessageType will already be the legacy full name:
-        var legacyType = envelope.MessageType ?? envelope.Message?.GetType().FullName!;
-
-        // Fill the legacy headers expected by the old consumers
-        outgoing.Headers["AssemblyBaseName"] = "AssemblyBaseName";
-        outgoing.Headers["TypeFullName"] = legacyType;
-
-        outgoing.Headers["SendBy"] = "TextMessage Producer Console App";
+        //outgoing.Headers["SendBy"] = "TextMessage Producer Console App";
         outgoing.Headers["Timestamp"] = DateTimeOffset.UtcNow.ToString("O");
         outgoing.Headers["CorrelationId"] = Guid.CreateVersion7(DateTimeOffset.UtcNow).ToString();
 

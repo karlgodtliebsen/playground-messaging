@@ -2,36 +2,40 @@ using System.Collections.Concurrent;
 
 namespace Messaging.RabbitMq.Library.Configuration;
 
+
+//Mapping { "FullName of the legacy type", FullName of the new type },
+// No assembly name in included a Wolverine does not seem to support it
+
 public class LegacyTypeMapper
 {
     private readonly IDictionary<string, string> map = new ConcurrentDictionary<string, string>();
 
-    public void Register(string typeName, string queueName)
+    public void Register(string fromTypeName, string toTypeName)
     {
-        map.TryAdd(typeName, queueName);
+        map.TryAdd(fromTypeName, toTypeName);
     }
-    public void Register(Type type, string queueName)
+    public void Register(Type fromType, string toTypeName)
     {
-        map.TryAdd(type.FullName!, queueName);
+        map.TryAdd(fromType.FullName!, toTypeName);
     }
-    public void Register<T>(string queueName)
+    public void Register<T>(string toTypeName)
     {
-        map.TryAdd(typeof(T).FullName!, queueName);
+        map.TryAdd(typeof(T).FullName!, toTypeName);
     }
 
-    public string TryLookup(string typeName)
+    public string MapFrom(string fromTypeName)
     {
-        map.TryGetValue(typeName, out var typeFullName);
-        return typeFullName??typeName;
+        map.TryGetValue(fromTypeName, out var typeFullName);
+        return typeFullName ?? fromTypeName;
     }
-    public string TryLookup(Type type)
+    public string MapFrom(Type fromType)
     {
-        map.TryGetValue(type.FullName!, out var typeFullName);
-        return typeFullName ?? type.FullName!;
+        map.TryGetValue(fromType.FullName!, out var typeFullName);
+        return typeFullName ?? fromType.FullName!;
     }
-    public string TryLookup<T>()
+    public string MapFrom<T>()
     {
         map.TryGetValue(typeof(T).FullName!, out var typeFullName);
-        return typeFullName?? typeof(T).FullName!;
+        return typeFullName ?? typeof(T).FullName!;
     }
 }
