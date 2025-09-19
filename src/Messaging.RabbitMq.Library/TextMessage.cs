@@ -3,9 +3,9 @@ namespace Messaging.RabbitMq.Library;
 public class TextMessage : IMessage
 {
 
-    public string ExchangeName { get; } = "textmessage";
-    public string RoutingKey { get; } = "textmessage.route";
-    public string BindingPattern { get; } = "textmessage.#";
+    public string ExchangeName { get; } = "text-message";
+    public string RoutingKey { get; } = "text-message.route";
+    public string BindingPattern { get; } = "text-message.#";
 
 
     public TextMessage(string hostName, string appName, string messageData, DateTimeOffset dateTime)

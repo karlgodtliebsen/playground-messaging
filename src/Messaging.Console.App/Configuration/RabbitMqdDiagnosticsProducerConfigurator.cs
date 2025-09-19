@@ -4,14 +4,9 @@ using Messaging.RabbitMq.Library.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using RabbitMQ.Client;
-
 using Wolverine;
 using Wolverine.RabbitMQ;
 using Wolverine.RabbitMQ.Internal;
-
-using ExchangeType = Wolverine.RabbitMQ.ExchangeType;
-using IMessage = Messaging.RabbitMq.Library.IMessage;
 
 namespace Messaging.Console.App.Configuration;
 
@@ -37,11 +32,12 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
         var services = opts.Services;
 
         services.AddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
-
-        rabbit
-            .ConfigureSenders(s => s.UseInterop(new RabbitMqHeaderEnrich()))   // all publishers
-            .ConfigureListeners(l => l.UseInterop(new RabbitMqHeaderEnrich())); // all consumers
-
+        if (setupOptions.UseLegacyMapping)
+        {
+            rabbit
+                .ConfigureSenders(s => s.UseInterop(new RabbitMqHeaderEnrich())) // all publishers
+                .ConfigureListeners(l => l.UseInterop(new RabbitMqHeaderEnrich())); // all consumers
+        }
         if (setupOptions.UseDebugLogging)
         {
             // Enable detailed logging
@@ -52,82 +48,148 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
             });
         }
 
-        //opts.PublishAllMessages()
-        //    //.ToRabbitExchange("textmessage")
-        //    .ToRabbitQueue("textmessage-queue")
-        //    .UseInterop(new LegacyRabbitMapper()); // <-- endpoint-level
+
+        TypeToQueueMapper messageQueueNameRegistration = new TypeToQueueMapper();
+
+        messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
+        messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
+
+        /*
+
+        //listening to messages
+        var listeningCollection = new ServiceCollection();
+        //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
+
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
+            new MessageMap<TextMessage>()
+            {
+                QueueName = "text-message-queue",
+                DurableQueue = true,//to show customization
+            }
+       );
+
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+        var listeningMessagesMaps = listeningCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
 
         if (setupOptions.DeclareExchanges)
         {
-            rabbit.DeclareExchange("diagnostics", exchange =>
+            var exchanges = listeningMessagesMaps.GroupBy(m => m.Exchange).Select(group => group.First()).ToList();
+            foreach (var messageMap in exchanges)
             {
-                exchange.ExchangeType = ExchangeType.Topic;
-                //exchange.IsDurable = true;
-            });
-
-            rabbit.DeclareExchange("textmessage", exchange =>
-            {
-                exchange.ExchangeType = ExchangeType.Topic;
-                //exchange.IsDurable = true;
-            });
+                ArgumentNullException.ThrowIfNull(messageMap);
+                var exchangeName = messageMap.Exchange;
+                rabbit.DeclareExchange(exchangeName, exchange =>
+              {
+                  exchange.ExchangeType = messageMap.ExchangeType;
+                  exchange.IsDurable = messageMap.DurableExchange;
+                  exchange.AutoDelete = messageMap.AutoDeleteExchange;
+              });
+            }
         }
 
-        var map = new ServiceCollection();
-        //message.AddSingleton<TextMessage>();
-        //message.AddSingleton<PingMessage>();
-        //message.AddSingleton<HeartbeatMessage>();
 
-        map.AddSingleton<MessageMap<TextMessage>>();
-        map.AddSingleton<MessageMap<PingMessage>>();
-        map.AddSingleton<MessageMap<HeartbeatMessage>>();
-
-        foreach (var messageType in map)
+        //setup the listening
+        foreach (var messageMap in listeningMessagesMaps)
         {
-            //var inst = messageType.ImplementationInstance;
-            //var m = inst as IMessageMap;
+            ArgumentNullException.ThrowIfNull(messageMap);
+            var exchangeName = messageMap.Exchange;
+            var queueName = messageMap.QueueName;
+            //look up for explicit setting
+            if (queueName is null)
+            {
+                queueName = messageQueueNameRegistration.TryLookup(messageMap.MessageType);
+                if (queueName is null)
+                {
+                    queueName = "default-queue";
+                }
 
-            var type = messageType.ImplementationType!;
-            //var queueName = messageQueueNameRegistration.TryLookup(type);
-            //if (queueName is null)
-            //{
-            //    queueName = "default-queue";
-            //}
+            }
+            if (!string.IsNullOrEmpty(queueName))
+            {
+                opts.ListenToRabbitQueue(queueName, queue =>
+                {
+                    queue.BindExchange(exchangeName, messageMap.BindingPattern);
+                    queue.IsDurable = messageMap.DurableQueue;
+                    queue.AutoDelete = messageMap.AutoDeleteQueue;
+                    queue.PurgeOnStartup = messageMap.PurgeOnStartup;
+                    queue.IsExclusive = messageMap.Exclusive;
+                    queue.QueueType = messageMap.QueueType;
+                    //queue.DeadLetterQueue = new DeadLetterQueue()
+                    //queue.TimeToLive(TimeSpan.FromSeconds(messageMap.TimeToLive));
+                });
+            }
+        }*/
 
-            var obj = Activator.CreateInstance(type) as IMessageMap;
-            ArgumentNullException.ThrowIfNull(obj);
-            // DomainException.ThrowIfNull(obj);
-            var exchangeName = $"{obj.Exchange}";
-            //rabbit.DeclareExchange(exchangeName, exchange =>
-            //{
-            //    exchange.ExchangeType = ExchangeType.Topic;
-            //    exchange.IsDurable = basicOptions.Durable;
-            //    exchange.AutoDelete = basicOptions.AutoDeleteExchange;
-            //});
 
-            //opts.ListenToRabbitQueue(queueName, queue =>
-            //{
-            //    queue.BindExchange(exchangeName, obj.BindingPattern);
-            //    queue.IsDurable = basicOptions.Durable;
-            //    queue.AutoDelete = basicOptions.AutoDeleteQueue;
-            //    queue.PurgeOnStartup = basicOptions.PurgeOnStartup;
-            //    queue.IsExclusive = basicOptions.Exclusive;
-            //    queue.QueueType = QueueType.classic; //new streaming available
-            //    //queue.DeadLetterQueue = new DeadLetterQueue()
-            //    queue.TimeToLive(TimeSpan.FromSeconds(basicOptions.TimeToLive));
-            //});
+        //publishing messages
+        var publishingCollection = new ServiceCollection();
+        //publishingCollection.AddSingleton<MessageMap<TextMessage>>();
+        publishingCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
+            new MessageMap<TextMessage>()
+            {
+                QueueName = "text-message-queue",
+                DurableQueue = true//to show customization
+            }
+        );
+        publishingCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
+        publishingCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+
+        var publishingMessagesMaps = publishingCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
+
+        if (setupOptions.DeclareExchanges)
+        {
+            var exchanges = publishingMessagesMaps.GroupBy(m => m.Exchange).Select(group => group.First()).ToList();
+            foreach (var messageMap in exchanges)
+            {
+                ArgumentNullException.ThrowIfNull(messageMap);
+                var exchangeName = messageMap.Exchange;
+                rabbit.DeclareExchange(exchangeName, exchange =>
+                {
+                    exchange.ExchangeType = messageMap.ExchangeType;
+                    exchange.IsDurable = messageMap.DurableExchange;
+                    exchange.AutoDelete = messageMap.AutoDeleteExchange;
+                });
+            }
         }
-        //opts.PublishMessage<TextMessage>()
-        //    //.ToRabbitExchange("textmessage")
-        //    .ToRabbitQueue("textmessage-queue")
-        //    //.ToRabbitQueue("textmessage.#")
-        //    ;
+        foreach (var messageMap in publishingMessagesMaps)
+        {
+            ArgumentNullException.ThrowIfNull(messageMap);
+            var exchangeName = messageMap.Exchange;
+            var queueName = messageMap.QueueName;
+            //look up for explicit setting
+            if (queueName is null)
+            {
+                queueName = messageQueueNameRegistration.TryLookup(messageMap.MessageType);
+                if (queueName is null)
+                {
+                    queueName = "default-queue";
+                }
+            }
+            if (!string.IsNullOrEmpty(queueName))
+            {
+                opts.Publish((c) =>
+                    {
+                        var pr = c.Message(messageMap.MessageType);
+                        pr.ToRabbitQueue(queueName);
+                    })
+                    ;
+            }
+            else
+            {
+                opts.Publish((c) =>
+                    {
+                        var pr = c.Message(messageMap.MessageType);
+                        pr.ToRabbitExchange(exchangeName);
+                    })
+                    ;
+            }
+        }
 
-        //opts.PublishMessage<PingMessage>()
-        //    .ToRabbitQueue("diagnostics-queue")
-        //    //.ToRabbitQueue("diagnostics.#")
-        //    ;
-
-        //if (assemblies is not null)
+        //look up for explicit setting
+        //.ToRabbitQueue("textmessage.#")
+        //    .ToRabbitQueue(queueName)
+        //.ToRabbitExchange(exchangeName)        //if (assemblies is not null)
         //{
         //    foreach (var assembly in assemblies)
         //    {
@@ -137,53 +199,4 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
 
         opts.Discovery.IncludeAssembly(typeof(Messaging.Library.Configuration.Anchor).Assembly);
     }
-}
-
-public interface IMessageMap
-{
-    Type MessageType { get; }
-    bool UseExchange { get; set; }
-    bool UseQueue { get; set; }
-    bool UseHeaderMapping { get; set; }
-    string Exchange { get; }
-    string BindingPattern { get; }
-    string RoutingKey { get; }
-    string? QueueName { get; }
-}
-
-public class MessageMap<T> : IMessageMap where T : IMessage, new()
-{
-    public Type MessageType => typeof(T);
-
-    public bool UseExchange { get; set; } = true;
-    public bool UseQueue { get; set; }
-    public bool UseHeaderMapping { get; set; } = true;
-
-
-    public string Exchange => new T().ExchangeName;
-    public string BindingPattern => new T().BindingPattern;
-    public string RoutingKey => new T().RoutingKey;
-    public string? QueueName => new T().QueueName;
-}
-
-
-public class RabbitMqSetupOptions
-{
-    public bool DeclareExchanges { get; set; }
-    public bool UseDebugLogging { get; set; } = true;
-
-}
-public class RabbitMqOptions
-{
-    public static string SectionName = "RabbitMqOptions";
-
-    public string HostName { get; set; } = "127.0.0.1";
-    public string VirtualHost { get; set; } = ConnectionFactory.DefaultVHost;
-    public string UserName { get; set; } = ConnectionFactory.DefaultUser;
-    public string Password { get; set; } = ConnectionFactory.DefaultPass;
-    public int Port { get; set; } = 5672;
-
-    public TimeSpan Heartbeat { get; set; } = ConnectionFactory.DefaultHeartbeat;
-    public TimeSpan DefaultConnectionTimeout { get; set; } = ConnectionFactory.DefaultConnectionTimeout;
-
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -7,7 +8,7 @@ namespace Messaging.RabbitMq.Library.Configuration;
 
 public static class RabbitMqDiagnosticsConfigurator
 {
-    
+
     public static void BuildDiagnostics(WolverineOptions opts)
     {
         // Basic RabbitMQ connection
@@ -34,22 +35,21 @@ public static class RabbitMqDiagnosticsConfigurator
         opts.Services.AddLogging(logging =>
         {
             logging.SetMinimumLevel(LogLevel.Debug);
-            ConsoleLoggerExtensions.AddConsole((ILoggingBuilder)logging);
+            logging.AddConsole();
         });
 
         opts.Discovery.IncludeAssembly(typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly);
 
-
         rabbit.DeclareExchange("diagnostics", exchange =>
         {
             exchange.ExchangeType = ExchangeType.Topic;
-            //exchange.IsDurable = true;
+            exchange.IsDurable = true;
         });
 
-        rabbit.DeclareExchange("textmessage", exchange =>
+        rabbit.DeclareExchange("text-message", exchange =>
         {
             exchange.ExchangeType = ExchangeType.Topic;
-            //exchange.IsDurable = true;
+            exchange.IsDurable = true;
         });
 
         // Specific queue configuration
@@ -60,9 +60,9 @@ public static class RabbitMqDiagnosticsConfigurator
             queue.PurgeOnStartup = false;
         });
 
-        opts.ListenToRabbitQueue("textmessage-queue", queue =>
+        opts.ListenToRabbitQueue("text-message-queue", queue =>
         {
-            queue.BindExchange("textmessage", "textmessage.#");
+            queue.BindExchange("text-message", "text-message.#");
             //queue.IsDurable = true; // Survives broker restart
             queue.PurgeOnStartup = false;
         });

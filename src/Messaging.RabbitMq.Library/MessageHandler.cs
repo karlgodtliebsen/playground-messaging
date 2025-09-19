@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Messaging.RabbitMq.Library;
 
-public class MessageHandler( /*IMessageBus messageBus,*/ ILogger<MessageHandler> logger)
+public class MessageHandler(ILogger<MessageHandler> logger)
 {
     public void Handle(TextMessage message)
     {
@@ -14,4 +14,11 @@ public class MessageHandler( /*IMessageBus messageBus,*/ ILogger<MessageHandler>
         // domain logic here
         logger.LogInformation("Received Ping Message: {@message}", message);
     }
+
+    public void Handle(HeartbeatMessage message)
+    {
+        // domain logic here
+        logger.LogInformation("Received Heartbeat Message: {@message}", message);
+    }
+
 }
