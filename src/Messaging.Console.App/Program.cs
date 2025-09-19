@@ -10,7 +10,7 @@ Console.Title = title;
 Console.WriteLine(title);
 CancellationTokenSource cancellationTokenSource = new();
 
-var rabbitMqDiagnosticsConsumerHost = HostConfigurator.BuildRabbitMqDiagnosticsConsumerHost();
+//var rabbitMqDiagnosticsConsumerHost = HostConfigurator.BuildRabbitMqDiagnosticsConsumerHost();
 var rabbitMqDiagnosticsProducerHost = HostConfigurator.BuildRabbitMqDiagnosticsProducerHost();
 
 //var kafkaProducerHost = HostConfigurator.BuildKafkaProducerHost();
@@ -28,5 +28,5 @@ logger.Information("Starting Multi Host {title}", title);
 await HostConfigurator.RunHostsAsync([
     /*kafkaProducerHost, kafkaConsumerHost, rabbitMqProducerHost, rabbitMqConsumerHost,*/
     rabbitMqDiagnosticsProducerHost,
-    rabbitMqDiagnosticsConsumerHost
+    //rabbitMqDiagnosticsConsumerHost
 ], title, mLogger, cancellationTokenSource.Token);

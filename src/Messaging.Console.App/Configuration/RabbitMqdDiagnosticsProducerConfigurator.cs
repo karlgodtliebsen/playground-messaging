@@ -28,7 +28,9 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
 
         rabbit
             .AutoProvision()
-            .AutoPurgeOnStartup();
+            .AutoPurgeOnStartup()
+            ;
+
         var services = opts.Services;
 
         services.AddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
@@ -54,7 +56,7 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
         messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
         messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
 
-        /*
+
 
         //listening to messages
         var listeningCollection = new ServiceCollection();
@@ -119,7 +121,7 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
                     //queue.TimeToLive(TimeSpan.FromSeconds(messageMap.TimeToLive));
                 });
             }
-        }*/
+        }
 
 
         //publishing messages
@@ -197,6 +199,7 @@ public static class RabbitMqdDiagnosticsProducerConfigurator
         //    }
         //}
 
+        opts.Discovery.IncludeAssembly(typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly);
         opts.Discovery.IncludeAssembly(typeof(Messaging.Library.Configuration.Anchor).Assembly);
     }
 }

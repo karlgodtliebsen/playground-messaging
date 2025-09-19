@@ -36,6 +36,14 @@ public sealed class MessagingDiagnosticsProducerServiceHost(IMessageBus messageB
 
                     });
 
+
+                await messageBus.PublishAsync(
+                    new HeartbeatMessage("the host", "the app", DateTimeOffset.UtcNow),
+                    new DeliveryOptions
+                    {
+
+                    });
+
                 await Task.Delay(10, ct);
             }
         }, cancellationToken);
