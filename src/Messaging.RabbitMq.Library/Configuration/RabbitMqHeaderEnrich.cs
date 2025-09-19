@@ -1,4 +1,6 @@
-﻿using RabbitMQ.Client;
+﻿using Messaging.Library;
+
+using RabbitMQ.Client;
 
 using System.Text;
 
@@ -8,8 +10,7 @@ using Wolverine.RabbitMQ.Internal;
 namespace Messaging.RabbitMq.Library.Configuration;
 
 /// <summary>
-/// LegacyTypeMapper
-/// We might inject more standard options to add to the header
+/// LegacyTypes Header - Mapper
 /// </summary>
 /// <param name="mapper"></param>
 public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnvelopeMapper
@@ -53,14 +54,19 @@ public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnv
         {
             var type = m.GetType();
             var (typeFullName, assemblyName) = mapper.MapToLegacy(type.FullName!);
-
             outgoing.Headers["AssemblyBaseName"] = assemblyName;
             outgoing.Headers["TypeFullName"] = typeFullName;
         }
 
-        //outgoing.Headers["SendBy"] = "TextMessage Producer Console App";
-        outgoing.Headers["Timestamp"] = DateTimeOffset.UtcNow.ToString("O");
-        outgoing.Headers["CorrelationId"] = Guid.CreateVersion7(DateTimeOffset.UtcNow).ToString();
+        if (envelope.Message is IBasicMessage message)
+        {
+            outgoing.Headers["SendBy"] = message.ApplicationName ?? "";
+            outgoing.Headers["MachineName"] = message.MachineName ?? "";
+            outgoing.Headers["Sent-Timestamp"] = DateTimeOffset.UtcNow.ToString("O");
+            outgoing.Headers["Timestamp"] = message.TimeStamp.ToString("O");
+            outgoing.Headers["Version"] = message.Version.ToString();
+            outgoing.Headers["CorrelationId"] = message.CorrelationId.ToString();
+        }
 
     }
 

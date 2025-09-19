@@ -1,24 +1,28 @@
+using Messaging.Library;
+
 namespace Messaging.RabbitMq.Library;
 
-public class PingMessage : IMessage
+public class PingMessage : IBasicMessage
 {
     public string ExchangeName { get; } = "diagnostics";
-    public string RoutingKey { get; } = "diagnostics.ping";// $"{ExchangeName}.ping.{ProgramName}.{HostName}";
+    public string RoutingKey { get; } = "diagnostics.ping";// $"{ExchangeName}.ping.{ApplicationName}.{MachineName}";
     public string BindingPattern { get; } = "diagnostics.ping.#";
 
-    public PingMessage(string hostName, string appName, DateTimeOffset dateTime)
+    public PingMessage(string machineName, string appName, DateTimeOffset dateTime)
     {
-        HostName = hostName;
-        ProgramName = appName;
-        InternalTimeStamp = dateTime;
+        MachineName = machineName;
+        ApplicationName = appName;
+        TimeStamp = dateTime;
     }
 
     public PingMessage()
     {
     }
-    public DateTimeOffset InternalTimeStamp { get; set; }
+    public DateTimeOffset TimeStamp { get; set; }
+    public Guid CorrelationId { get; set; } = Guid.CreateVersion7(DateTimeOffset.UtcNow);
     public string? QueueName { get; set; } = null;
-    public string? ProgramName { get; set; } = null;
+    public string? ApplicationName { get; set; } = null;
 
-    public string? HostName { get; set; } = null;
+    public string? MachineName { get; set; } = null;
+    public int Version { get; set; } = 1;
 }

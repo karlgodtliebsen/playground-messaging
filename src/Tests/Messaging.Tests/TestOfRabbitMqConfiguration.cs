@@ -3,7 +3,6 @@
 using Messaging.RabbitMq.Library;
 using Messaging.RabbitMq.Library.Configuration;
 
-using HeartbeatMessage = Org.BouncyCastle.Tls.HeartbeatMessage;
 
 namespace Messaging.Tests;
 
@@ -42,6 +41,12 @@ public class TestOfRabbitMqConfiguration
     [Fact]
     public void VerifyThatProducerIsBuild()
     {
+        //TBD
+    }
 
+    [Fact]
+    public void VerifyThatConsumerIsBuild()
+    {
+        //TBD
     }
 }

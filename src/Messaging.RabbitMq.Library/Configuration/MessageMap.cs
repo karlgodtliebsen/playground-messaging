@@ -1,9 +1,11 @@
-﻿using Wolverine.RabbitMQ;
+﻿using Messaging.Library;
+
+using Wolverine.RabbitMQ;
 using Wolverine.RabbitMQ.Internal;
 
 namespace Messaging.RabbitMq.Library.Configuration;
 
-public class MessageMap<T> : IMessageMap where T : IMessage, new()
+public class MessageMap<T> : IMessageMap where T : IBasicMessage, new()
 {
     public MessageMap()
     {
