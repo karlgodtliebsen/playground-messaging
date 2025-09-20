@@ -10,24 +10,24 @@ public class MessageHandler(ISignalChannel channel, ILogger<MessageHandler> logg
     {
         // domain logic here
         logger.LogInformation("Handler Received Text Message: {@message}", message);
-        await channel.Publish("TextMessage", message, cancellationToken);
-        await channel.Publish(message, cancellationToken);
+        await channel.Send("TextMessage", message, cancellationToken);
+        await channel.Send(message, cancellationToken);
         //await Task.Delay(1, cancellationToken);
     }
     public async Task Handle(PingMessage message, CancellationToken cancellationToken)
     {
         // domain logic here
         logger.LogInformation("Handler Received Ping Message: {@message}", message);
-        await channel.Publish("PingMessage", message, cancellationToken);
-        await channel.Publish(message, cancellationToken);
+        await channel.Send("PingMessage", message, cancellationToken);
+        await channel.Send(message, cancellationToken);
     }
 
     public async Task Handle(HeartbeatMessage message, CancellationToken cancellationToken)
     {
         // domain logic here
         logger.LogInformation("Handler Received Heartbeat Message: {@message}", message);
-        await channel.Publish("HeartbeatMessage", message, cancellationToken);
-        await channel.Publish(message, cancellationToken);
+        await channel.Send("HeartbeatMessage", message, cancellationToken);
+        await channel.Send(message, cancellationToken);
     }
 
 }

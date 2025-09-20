@@ -110,7 +110,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
         }
     }
 
-    public IDisposable Subscribe(string signalName, Func<CancellationToken, Task> handler)
+    public IDisposable Receive(string signalName, Func<CancellationToken, Task> handler)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signalName);
@@ -146,13 +146,13 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
     }
 
 
-    public IDisposable Subscribe<T>(Func<T, CancellationToken, Task> handler)
+    public IDisposable Receive<T>(Func<T, CancellationToken, Task> handler)
     {
         var signalName = nameof(T);
-        return Subscribe<T>(signalName, handler);
+        return Receive<T>(signalName, handler);
     }
 
-    public IDisposable Subscribe<T>(string signalName, Func<T, CancellationToken, Task> handler)
+    public IDisposable Receive<T>(string signalName, Func<T, CancellationToken, Task> handler)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signalName);
@@ -193,7 +193,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
         });
     }
 
-    public IDisposable SubscribeAll(Action<string> handler)
+    public IDisposable ReceiveAll(Action<string> handler)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(handler);
@@ -213,20 +213,20 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
     }
 
 
-    public Task Publish(string signal, CancellationToken cancellationToken = default)
+    public Task Send(string signal, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signal);
         return signalOnlyChannel.Writer.WriteAsync(signal, cancellationToken).AsTask();
     }
 
-    public async Task Publish<T>(T data, CancellationToken cancellationToken = default)
+    public async Task Send<T>(T data, CancellationToken cancellationToken = default)
     {
         var signal = nameof(T);
-        await Publish(signal, data, cancellationToken);
+        await Send(signal, data, cancellationToken);
     }
 
-    public async Task Publish<T>(string signal, T data, CancellationToken cancellationToken = default)
+    public async Task Send<T>(string signal, T data, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signal);

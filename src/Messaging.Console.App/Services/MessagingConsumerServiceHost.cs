@@ -16,7 +16,7 @@ public sealed class MessagingConsumerServiceHost(ISignalChannel channel, ILogger
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await channel.Publish("Alive", cancellationToken);
+                await channel.Send("Alive", cancellationToken);
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                 //await Task.Delay(Timeout.Infinite, cancellationToken);
             }
