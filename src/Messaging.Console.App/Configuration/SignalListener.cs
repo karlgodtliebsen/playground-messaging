@@ -38,9 +38,9 @@ public class SignalListener(IEventHub channel, ILogger<SignalListener> logger)
             return Task.CompletedTask;
         });
 
-        channel.SubscribeAll((ct) =>
+        channel.SubscribeToAll((eventName, ct) =>
         {
-            logger.LogInformation("Channel Received Message");
+            logger.LogInformation("Channel Received Event: {eventName}", eventName);
             return Task.CompletedTask;
         });
     }

@@ -47,7 +47,7 @@ public class TestOfSignal(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task VerifyUseOfSignalChannelForSendingSignalsOnly()
+    public async Task VerifyUseOfEventHubForSendingEventsOnly()
     {
         var consumer1 = 0;
         var consumer2 = 0;
@@ -83,7 +83,7 @@ public class TestOfSignal(ITestOutputHelper output)
             await Task.Delay(1, cancellationToken);
         }
 
-        await Task.Delay(1000, cancellationToken); //allows the channel to be processed completely
+        await Task.Delay(10, cancellationToken); //allows the channel to be processed completely
 
 
         consumer1.Should().Be(number);
@@ -97,17 +97,17 @@ public class TestOfSignal(ITestOutputHelper output)
         {
             await signalChannel.Publish(@event1, cancellationToken);
             await signalChannel.Publish(@event2, cancellationToken);
-            await Task.Delay(10, cancellationToken);
+            await Task.Delay(1, cancellationToken);
         }
 
-        await Task.Delay(1000, cancellationToken);
+        await Task.Delay(10, cancellationToken);
         consumer1.Should().Be(number);
         consumer2.Should().Be(number * 2);
         consumer3.Should().Be(number);
     }
 
     [Fact]
-    public async Task VerifyUseOfSignalChannelForSendingSignalsWithData()
+    public async Task VerifyUseOfEventHubForSendingEventsWithData()
     {
         var consumer1 = 0;
         var consumer2 = 0;
@@ -143,7 +143,7 @@ public class TestOfSignal(ITestOutputHelper output)
             await Task.Delay(1, cancellationToken);
         }
 
-        await Task.Delay(1000, cancellationToken); //allows the channel to be processed completely
+        await Task.Delay(10, cancellationToken); //allows the channel to be processed completely
 
         consumer1.Should().Be(number);
         consumer2.Should().Be(number);
@@ -156,10 +156,10 @@ public class TestOfSignal(ITestOutputHelper output)
         {
             await signalChannel.Publish(@event1, i, cancellationToken);
             await signalChannel.Publish(@event2, i, cancellationToken);
-            await Task.Delay(10, cancellationToken);
+            await Task.Delay(1, cancellationToken);
         }
 
-        await Task.Delay(1000, cancellationToken);
+        await Task.Delay(10, cancellationToken);
         consumer1.Should().Be(number);
         consumer2.Should().Be(number * 2);
         consumer3.Should().Be(number);

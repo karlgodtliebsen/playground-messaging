@@ -2,11 +2,11 @@ namespace Messaging.Library;
 
 public interface IEventHub : IDisposable
 {
-    IDisposable Subscribe(string signalName, Func<CancellationToken, Task> handler);
+    IDisposable Subscribe(string eventName, Func<CancellationToken, Task> handler);
     IDisposable Subscribe<T>(Func<T, CancellationToken, Task> handler);
-    IDisposable Subscribe<T>(string signalName, Func<T, CancellationToken, Task> handler);
-    IDisposable SubscribeAll(Func<CancellationToken, Task> handler);
-    Task Publish(string signal, CancellationToken cancellationToken = default);
+    IDisposable Subscribe<T>(string eventName, Func<T, CancellationToken, Task> handler);
+    IDisposable SubscribeToAll(Func<string, CancellationToken, Task> handler);
+    Task Publish(string eventName, CancellationToken cancellationToken = default);
     Task Publish<T>(T data, CancellationToken cancellationToken = default);
-    Task Publish<T>(string signal, T data, CancellationToken cancellationToken = default);
+    Task Publish<T>(string eventName, T data, CancellationToken cancellationToken = default);
 }
