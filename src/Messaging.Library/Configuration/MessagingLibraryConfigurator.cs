@@ -1,14 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Messaging.Library.Configuration;
 
 public static class MessagingLibraryConfigurator
 {
-    public static IServiceCollection AddLibraryServices(this IServiceCollection service, IConfiguration configuration)
+    public static IServiceCollection AddMessagingLibraryServices(this IServiceCollection service, IConfiguration configuration)
     {
-        service.TryAddSingleton<IEventHub, EventHub>();
         return service;
     }
 }

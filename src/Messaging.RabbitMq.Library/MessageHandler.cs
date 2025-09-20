@@ -1,4 +1,4 @@
-using Messaging.Library;
+using Messaging.Library.EventHubChannel;
 
 using Microsoft.Extensions.Logging;
 

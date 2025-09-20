@@ -35,7 +35,7 @@ public static class CustomizedRabbitMqConfigurator
         service.TryAddSingleton(Options.Create(setupOptions));
         service.TryAddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
         service.TryAddSingleton<TypeToQueueMapper>();
-        service.AddLibraryServices(configuration);
+        service.AddEventHubServices(configuration);
         return service;
     }
 

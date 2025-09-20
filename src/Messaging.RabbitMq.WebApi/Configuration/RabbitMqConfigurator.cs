@@ -14,7 +14,7 @@ public static class RabbitMqConfigurator
     public static IServiceCollection AddProducerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddCustomizedRabbitMqServices(configuration);
-        service.AddLibraryServices(configuration);
+        service.AddEventHubServices(configuration);
 
 
         var assemblies = new Assembly[]
@@ -49,7 +49,7 @@ public static class RabbitMqConfigurator
     public static IServiceCollection AddConsumerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddCustomizedRabbitMqServices(configuration);
-        service.AddLibraryServices(configuration);
+        service.AddEventHubServices(configuration);
 
         var assemblies = new Assembly[]
         {

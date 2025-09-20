@@ -109,7 +109,7 @@ public static class HostConfigurator
     public static IServiceCollection AddConsumerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddCustomizedRabbitMqServices(configuration);
-        service.AddLibraryServices(configuration);
+        service.AddEventHubServices(configuration);
 
         var assemblies = new Assembly[]
         {
@@ -152,7 +152,7 @@ public static class HostConfigurator
             {
                 services
                     .AddConsumerServices(context.Configuration)
-                    .AddLibraryServices(context.Configuration)
+                    .AddEventHubServices(context.Configuration)
                     .AddApplicationServices(context.Configuration)
                     ;
                 services.AddLogging(loggingBuilder =>
@@ -175,7 +175,7 @@ public static class HostConfigurator
                 services
                     .AddProducerServices(context.Configuration)
                     .AddConsumerServices(context.Configuration)
-                    .AddLibraryServices(context.Configuration)
+                    .AddEventHubServices(context.Configuration)
                     .AddApplicationServices(context.Configuration)
                     ;
                 services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });

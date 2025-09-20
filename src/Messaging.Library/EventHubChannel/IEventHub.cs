@@ -1,4 +1,4 @@
-namespace Messaging.Library;
+namespace Messaging.Library.EventHubChannel;
 
 public interface IEventHub : IDisposable
 {
