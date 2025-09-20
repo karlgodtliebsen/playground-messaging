@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Messaging.Library.Configuration;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -33,13 +35,14 @@ public static class RabbitMqConfigurator
         service.TryAddSingleton(Options.Create(setupOptions));
         service.TryAddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
         service.TryAddSingleton<TypeToQueueMapper>();
-
+        service.AddLibraryServices(configuration);
         return service;
     }
 
-    public static void BuildWolverine(WolverineOptions opts, IServiceCollection serviceCollection, Action<WolverineOptions>? extendAction = null)
+    public static void BuildWolverine(WolverineOptions opts, /*IServiceCollection serviceCollection,*/ Action<WolverineOptions>? extendAction = null)
     {
-        var sp = serviceCollection.BuildServiceProvider();
+        var services = opts.Services;
+        var sp = services.BuildServiceProvider();
         var listeningCollection = sp.GetKeyedService<IServiceCollection>(Consumer);
         var publishingCollection = sp.GetKeyedService<IServiceCollection>(Producer);
         var options = sp.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
@@ -61,7 +64,6 @@ public static class RabbitMqConfigurator
         if (setupOptions.AutoPurge) rabbit.AutoPurgeOnStartup();
 
         extendAction?.Invoke(opts);
-        var services = opts.Services;
         if (setupOptions.UseLegacyMapping)
         {
             var enrich = sp.GetRequiredService<IRabbitMqEnvelopeMapper>();

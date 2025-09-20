@@ -1,8 +1,7 @@
-﻿using Messaging.Library.Payments;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Wolverine;
 
-namespace Messaging.Library.Orders.Handlers;
+namespace Messaging.Domain.Library.Orders.Handlers;
 
 public class OrderCommandHandler(IMessageBus messageBus, ILogger<OrderCommandHandler> logger)
 {

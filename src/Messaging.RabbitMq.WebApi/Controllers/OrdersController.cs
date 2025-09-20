@@ -1,5 +1,7 @@
-using Messaging.Library.Orders;
+using Messaging.Domain.Library.Orders;
+
 using Microsoft.AspNetCore.Mvc;
+
 using Wolverine;
 
 namespace Messaging.RabbitMq.WebApi.Controllers;

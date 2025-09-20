@@ -1,5 +1,6 @@
-﻿using Messaging.Library.Orders;
-using Messaging.Library.Payments;
+﻿using Messaging.Domain.Library.Orders;
+using Messaging.Domain.Library.Payments;
+
 using Wolverine;
 using Wolverine.Kafka;
 
@@ -23,6 +24,6 @@ public static class KafkaProducerConfigurator
 
         // Discovery
 
-        opts.Discovery.IncludeAssembly(typeof(Messaging.Library.Configuration.Anchor).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly);
     }
 }

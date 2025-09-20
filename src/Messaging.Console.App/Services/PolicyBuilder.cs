@@ -5,7 +5,7 @@ using Polly.Wrap;
 
 namespace Messaging.Console.App.Services;
 
-public static class HostingPolicyBuilder
+public static class PolicyBuilder
 {
     public static AsyncPolicyWrap CreateCombinedRetryPolicy(string serviceName, TimeSpan continuousRetryTimeSpan, Microsoft.Extensions.Logging.ILogger logger)
     {

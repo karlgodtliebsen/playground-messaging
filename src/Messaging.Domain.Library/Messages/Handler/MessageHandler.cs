@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Messaging.Library.Messages.Handler;
+namespace Messaging.Domain.Library.Messages.Handler;
 public static class MessageHandler
 {
     public static void Handle(CreateMessage message, ILogger<CreateMessage> logger)

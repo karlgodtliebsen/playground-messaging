@@ -16,7 +16,7 @@ public sealed class MessagingDiagnosticsProducerServiceHost(IMessageBus messageB
     {
         var serviceName = nameof(MessagingDiagnosticsProducerServiceHost);
         logger.LogInformation("Background Service:{service} is running.", serviceName);
-        var combinedPolicy = HostingPolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
+        var combinedPolicy = PolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
 
         await combinedPolicy.ExecuteAsync(async (ct) =>
         {

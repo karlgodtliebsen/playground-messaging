@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Messaging.Library.Orders.Handlers;
+namespace Messaging.Domain.Library.Orders.Handlers;
 
 public class OrderEventHandler(ILogger<OrderEventHandler> logger)
 {

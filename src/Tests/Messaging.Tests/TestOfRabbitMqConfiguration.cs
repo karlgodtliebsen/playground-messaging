@@ -14,14 +14,14 @@ public class TestOfRabbitMqConfiguration
         LegacyTypeMapper mapper = new LegacyTypeMapper();
         mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
         mapper.Register<PingMessage>(typeof(PingMessage).FullName!);
-        mapper.Register<RabbitMq.Library.HeartbeatMessage>(typeof(RabbitMq.Library.HeartbeatMessage).FullName!);
+        mapper.Register<HeartbeatMessage>(typeof(HeartbeatMessage).FullName!);
 
         var (fullName, assemblyName) = mapper.MapToLegacy<TextMessage>();
-        fullName.Should().Be("Messaging.RabbitMq.Library.HeartbeatMessage");
+        fullName.Should().Be("Messaging.RabbitMq.Library.TextMessage");
         assemblyName.Should().Be("Messaging.RabbitMq.Library");
 
         var typeName = mapper.MapFromLegacy(fullName, assemblyName);
-        typeName.Should().Be("Messaging.RabbitMq.Library.HeartbeatMessage");
+        typeName.Should().Be("Messaging.RabbitMq.Library.TextMessage");
     }
 
     [Fact]

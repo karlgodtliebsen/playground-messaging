@@ -15,7 +15,7 @@ public sealed class MessagingMonitorServiceHost(ILogger<MessagingMonitorServiceH
         var serviceName = nameof(MessagingMonitorServiceHost);
         logger.LogInformation("Background Service:{service} is running.", serviceName);
 
-        var combinedPolicy = HostingPolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
+        var combinedPolicy = PolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
 
         runningTask = combinedPolicy.ExecuteAsync(async (ct) =>
         {

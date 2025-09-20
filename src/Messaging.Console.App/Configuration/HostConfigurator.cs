@@ -1,5 +1,6 @@
 ﻿using Messaging.Console.App.Services;
 using Messaging.Kafka.Library.Configuration;
+using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library;
 using Messaging.RabbitMq.Library.Configuration;
 
@@ -56,7 +57,7 @@ public static class HostConfigurator
         var assemblies = new Assembly[]
         {
             typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
-            typeof(Messaging.Library.Configuration.Anchor).Assembly
+            typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
 
 
@@ -89,15 +90,31 @@ public static class HostConfigurator
         service.TryAddKeyedSingleton<IServiceCollection>("producer", publishingCollection);
         return service;
     }
+    public static IHost BuildRabbitMqProducerHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                services.AddProducerServices(context.Configuration);
+                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
+            });
+
+        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
+        var host = builder.Build();
+        host.Services.SetupSerilog();
+        return host;
+    }
 
     public static IServiceCollection AddConsumerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddRabbitMqServices(configuration);
+        service.AddLibraryServices(configuration);
 
         var assemblies = new Assembly[]
         {
             typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
-            typeof(Messaging.Library.Configuration.Anchor).Assembly
+            typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
 
         //listening to messages
@@ -127,51 +144,43 @@ public static class HostConfigurator
         service.TryAddKeyedSingleton<IServiceCollection>("consumer", listeningCollection);
         return service;
     }
-    public static IHost BuildRabbitMqProducerHost()
-    {
-        var independentServices = new ServiceCollection();
-        var builder = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                independentServices.AddProducerServices(context.Configuration);
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
-            });
-
-        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, opt.Services));
-        var host = builder.Build();
-        host.Services.SetupSerilog();
-        return host;
-    }
 
     public static IHost BuildRabbitMqConsumerHost()
     {
-        var independentServices = new ServiceCollection();
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                independentServices.AddConsumerServices(context.Configuration);
+                services
+                    .AddConsumerServices(context.Configuration)
+                    .AddLibraryServices(context.Configuration)
+                    .AddApplicationServices(context.Configuration)
+                    ;
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
-        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, opt.Services));
+        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
         var host = builder.Build();
+        host.Services.SetupChannelListener();
         host.Services.SetupSerilog();
         return host;
     }
     public static IHost BuildRabbitMqCombinedHost()
     {
-        var independentServices = new ServiceCollection();
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                independentServices.AddProducerServices(context.Configuration);
-                independentServices.AddConsumerServices(context.Configuration);
+                services
+                    .AddProducerServices(context.Configuration)
+                    .AddConsumerServices(context.Configuration)
+                    .AddLibraryServices(context.Configuration)
+                    .AddApplicationServices(context.Configuration)
+                    ;
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
-        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt, independentServices));
+        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
         var host = builder.Build();
+        host.Services.SetupChannelListener();
         host.Services.SetupSerilog();
         return host;
     }

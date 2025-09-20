@@ -1,11 +1,14 @@
+using Messaging.Domain.Library.Messages;
+using Messaging.Domain.Library.Orders;
+using Messaging.Domain.Library.Payments;
 using Messaging.Kafka.Library.Configuration;
 using Messaging.Kafka.WebApi.Configuration;
-using Messaging.Library.Messages;
-using Messaging.Library.Orders;
-using Messaging.Library.Payments;
+
 using Scalar.AspNetCore;
+
 using Serilog;
 using Serilog.Events;
+
 using Wolverine;
 
 const string title = "Messaging Wolverine Kafka WebApi";

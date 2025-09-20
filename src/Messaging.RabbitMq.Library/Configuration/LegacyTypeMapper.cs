@@ -14,8 +14,8 @@ public class LegacyTypeMapper
     public void Register(string fromTypeName, string toTypeName)
     {
         var (typeName, assemblyName) = ShortSplitFqn(fromTypeName);
-        map.TryAdd((typeName, assemblyName), toTypeName);
-        reverseMap.TryAdd(toTypeName, (typeName, assemblyName));
+        map.TryAdd((typeName.Trim(), assemblyName.Trim()), toTypeName);
+        reverseMap.TryAdd(toTypeName, (typeName.Trim(), assemblyName.Trim()));
     }
     public void Register(Type fromType, string toTypeName)
     {
@@ -47,7 +47,6 @@ public class LegacyTypeMapper
     }
     public (string typeName, string assemblyName) MapToLegacy<T>()
     {
-
         return MapToLegacy(typeof(T));
     }
     private static (string typeName, string assemblyName) ShortSplitFqn(string typeFullName)

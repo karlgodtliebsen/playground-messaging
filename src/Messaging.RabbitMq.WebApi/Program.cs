@@ -1,6 +1,6 @@
-using Messaging.Library.Messages;
-using Messaging.Library.Orders;
-using Messaging.Library.Payments;
+using Messaging.Domain.Library.Messages;
+using Messaging.Domain.Library.Orders;
+using Messaging.Domain.Library.Payments;
 using Messaging.RabbitMq.WebApi.Configuration;
 
 using Scalar.AspNetCore;

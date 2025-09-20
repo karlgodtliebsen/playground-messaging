@@ -1,5 +1,5 @@
-﻿using Messaging.Library.Orders;
-using Messaging.Library.Payments;
+﻿using Messaging.Domain.Library.Orders;
+using Messaging.Domain.Library.Payments;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,7 +40,7 @@ public static class RabbitMqProducerConfigurator
             exchange.ExchangeType = ExchangeType.Topic;
             exchange.IsDurable = true;
         });
-        opts.Discovery.IncludeAssembly(typeof(Messaging.Library.Configuration.Anchor).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly);
 
         // Configure exchanges and queues
         opts.PublishAllMessages().ToRabbitExchange("orders-exchange");

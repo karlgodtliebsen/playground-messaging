@@ -1,4 +1,4 @@
-namespace Messaging.Library.Orders;
+namespace Messaging.Domain.Library.Orders;
 
 public record OrderPlaced(int OrderId, string Customer, decimal Amount);
 

@@ -1,4 +1,4 @@
-﻿namespace Messaging.Library.Orders;
+﻿namespace Messaging.Domain.Library.Orders;
 
 public record OrderCreated(Guid OrderId, string CustomerName, decimal Amount, DateTimeOffset CreatedAt);
 

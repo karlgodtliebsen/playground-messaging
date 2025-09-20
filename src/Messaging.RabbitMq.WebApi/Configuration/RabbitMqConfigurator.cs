@@ -1,4 +1,5 @@
-﻿using Messaging.RabbitMq.Library;
+﻿using Messaging.Library.Configuration;
+using Messaging.RabbitMq.Library;
 using Messaging.RabbitMq.Library.Configuration;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -13,12 +14,13 @@ public static class RabbitMqConfigurator
     public static IServiceCollection AddProducerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddRabbitMqServices(configuration);
+        service.AddLibraryServices(configuration);
 
 
         var assemblies = new Assembly[]
         {
             typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
-            typeof(Messaging.Library.Configuration.Anchor).Assembly
+            typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
 
 
@@ -47,11 +49,12 @@ public static class RabbitMqConfigurator
     public static IServiceCollection AddConsumerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddRabbitMqServices(configuration);
+        service.AddLibraryServices(configuration);
 
         var assemblies = new Assembly[]
         {
             typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
-            typeof(Messaging.Library.Configuration.Anchor).Assembly
+            typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
 
 

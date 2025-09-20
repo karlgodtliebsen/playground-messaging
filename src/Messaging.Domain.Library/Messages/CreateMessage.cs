@@ -1,4 +1,4 @@
-namespace Messaging.Library.Messages;
+namespace Messaging.Domain.Library.Messages;
 
 public class CreateMessage
 {
