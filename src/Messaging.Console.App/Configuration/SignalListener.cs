@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Messaging.Console.App.Configuration;
 
-public class SignalListener
+public class SignalListener(ISignalChannel channel, ILogger<SignalListener> logger)
 {
-    public SignalListener(ISignalChannel channel, ILogger<SignalListener> logger)
+    public void SetupSubscriptions()
     {
         logger.LogInformation("SignalListener Started");
 
@@ -40,4 +40,7 @@ public class SignalListener
             return Task.CompletedTask;
         });
     }
+
+
+
 }

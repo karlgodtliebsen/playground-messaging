@@ -23,7 +23,7 @@ public static class HostConfigurator
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingProducerServiceHost>();
             });
 
@@ -39,7 +39,7 @@ public static class HostConfigurator
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingConsumerServiceHost>();
             });
 
@@ -96,7 +96,7 @@ public static class HostConfigurator
             .ConfigureServices((context, services) =>
             {
                 services.AddProducerServices(context.Configuration);
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
 
@@ -155,13 +155,16 @@ public static class HostConfigurator
                     .AddLibraryServices(context.Configuration)
                     .AddApplicationServices(context.Configuration)
                     ;
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddLogging(loggingBuilder =>
+                {
+                    services.AddSerilogServices(loggingBuilder, context.Configuration);
+                });
                 services.AddHostedService<MessagingConsumerServiceHost>();
             });
         builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
         var host = builder.Build();
-        host.Services.SetupChannelListener();
         host.Services.SetupSerilog();
+        host.Services.SetupChannelListener();
         return host;
     }
     public static IHost BuildRabbitMqCombinedHost()
@@ -175,13 +178,13 @@ public static class HostConfigurator
                     .AddLibraryServices(context.Configuration)
                     .AddApplicationServices(context.Configuration)
                     ;
-                services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
+                services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
         builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
         var host = builder.Build();
-        host.Services.SetupChannelListener();
         host.Services.SetupSerilog();
+        host.Services.SetupChannelListener();
         return host;
     }
 

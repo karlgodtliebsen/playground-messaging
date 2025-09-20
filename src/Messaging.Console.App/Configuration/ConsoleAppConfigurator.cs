@@ -15,6 +15,7 @@ public static class ConsoleAppConfigurator
     public static IServiceProvider SetupChannelListener(this IServiceProvider serviceProvider)
     {
         var listener = serviceProvider.GetRequiredService<SignalListener>();
+        listener.SetupSubscriptions();
         return serviceProvider;
     }
 }

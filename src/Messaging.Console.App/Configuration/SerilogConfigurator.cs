@@ -6,18 +6,16 @@ using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
-using ILogger = Serilog.ILogger;
-
 namespace Messaging.Console.App.Configuration;
 
 public static class SerilogConfigurator
 {
-    public static void AddSerilog(this IServiceCollection services, ILoggingBuilder loggingBuilder, IConfiguration configuration, Action<IServiceCollection, ILoggingBuilder, IConfiguration>? optionsAction = null)
+    public static void AddSerilogServices(this IServiceCollection services, ILoggingBuilder loggingBuilder, IConfiguration configuration, Action<IServiceCollection, ILoggingBuilder, IConfiguration>? optionsAction = null)
     {
-        services.AddSerilog();
         loggingBuilder.ClearProviders();
         loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
         loggingBuilder.AddSerilog();
+        services.AddSerilog();
         optionsAction?.Invoke(services, loggingBuilder, configuration);
     }
 

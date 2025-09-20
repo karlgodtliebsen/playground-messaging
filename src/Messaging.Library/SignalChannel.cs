@@ -118,7 +118,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
 
         signalOnlySubscribers.AddOrUpdate(
             signalName,
-            _ => new List<Func<CancellationToken, Task>> { handler },
+            _ => [handler],
             (_, list) =>
             {
                 lock (list)
@@ -231,7 +231,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signal);
         ArgumentNullException.ThrowIfNull(data);
-        logger.LogInformation("Attempting to Publish signal {signal} with data type {Type}", signal, typeof(T).Name);
+        if (logger.IsEnabled(LogLevel.Trace)) logger.LogTrace("Attempting to Publish signal {signal} with data type {Type}", signal, typeof(T).Name);
 
         var key = KeyGenerator.GetGenericEventKey<T>(signal);
         if (channels.TryGetValue(key, out var existing))
