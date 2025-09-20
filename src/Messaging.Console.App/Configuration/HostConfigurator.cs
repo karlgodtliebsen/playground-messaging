@@ -156,7 +156,7 @@ public static class HostConfigurator
                     .AddApplicationServices(context.Configuration)
                     ;
                 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
+                services.AddHostedService<MessagingConsumerServiceHost>();
             });
         builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
         var host = builder.Build();

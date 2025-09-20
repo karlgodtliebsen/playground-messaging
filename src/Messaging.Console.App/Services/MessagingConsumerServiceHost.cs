@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Messaging.Library;
+
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Messaging.Console.App.Services;
 
-public sealed class MessagingConsumerServiceHost(ILogger<MessagingMonitorServiceHost> logger) : BackgroundService
+public sealed class MessagingConsumerServiceHost(ISignalChannel channel, ILogger<MessagingMonitorServiceHost> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -12,7 +14,12 @@ public sealed class MessagingConsumerServiceHost(ILogger<MessagingMonitorService
 
         try
         {
-            await Task.Delay(Timeout.Infinite, cancellationToken);
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await channel.Publish("Alive", cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                //await Task.Delay(Timeout.Infinite, cancellationToken);
+            }
         }
         catch (OperationCanceledException)
         {

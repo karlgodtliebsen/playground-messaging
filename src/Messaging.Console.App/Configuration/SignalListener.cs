@@ -9,6 +9,14 @@ public class SignalListener
 {
     public SignalListener(ISignalChannel channel, ILogger<SignalListener> logger)
     {
+        logger.LogInformation("SignalListener Started");
+
+        channel.Subscribe("Alive", (ct) =>
+        {
+            logger.LogInformation("Channel Received Alive Signal");
+            return Task.CompletedTask;
+        });
+
         channel.Subscribe<TextMessage>("TextMessage", (m, ct) =>
         {
             logger.LogInformation("Channel using 'TextMessage' Received TextMessage: {@message}", m);

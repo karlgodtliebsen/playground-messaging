@@ -231,6 +231,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signal);
         ArgumentNullException.ThrowIfNull(data);
+        logger.LogInformation("Attempting to Publish signal {signal} with data type {Type}", signal, typeof(T).Name);
 
         var key = KeyGenerator.GetGenericEventKey<T>(signal);
         if (channels.TryGetValue(key, out var existing))
@@ -243,7 +244,6 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
             logger.LogWarning("No subscribers for signal {signal} with data type {Type}", signal, typeof(T).Name);
         }
     }
-
 
     private void ThrowIfDisposed()
     {

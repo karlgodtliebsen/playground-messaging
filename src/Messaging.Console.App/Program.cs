@@ -12,11 +12,12 @@ CancellationTokenSource cancellationTokenSource = new();
 //var kafkaProducerHost = HostConfigurator.BuildKafkaProducerHost();
 //var kafkaConsumerHost = HostConfigurator.BuildKafkaConsumerHost();
 
-//var rabbitMqConsumerHost = HostConfigurator.BuildRabbitMqConsumerHost();
+var rabbitMqConsumerHost = HostConfigurator.BuildRabbitMqConsumerHost();
+var host = rabbitMqConsumerHost;
 //var rabbitMqProducerHost = HostConfigurator.BuildRabbitMqProducerHost();
 //var host = rabbitMqProducerHost;
 
-var host = HostConfigurator.BuildRabbitMqCombinedHost();
+//var host = HostConfigurator.BuildRabbitMqCombinedHost();
 
 var serviceProvider = host.Services;
 var logger = serviceProvider.SetupSerilog();

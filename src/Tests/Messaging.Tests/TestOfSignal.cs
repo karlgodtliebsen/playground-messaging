@@ -10,7 +10,7 @@ namespace Messaging.Tests;
 
 public class TestOfSignal(ITestOutputHelper output)
 {
-    private readonly ILogger<TestOfSignal> logger = NSubstitute.Substitute.For<ILogger<TestOfSignal>>();
+    private readonly ILogger<SignalChannel> logger = NSubstitute.Substitute.For<ILogger<SignalChannel>>();
     private readonly CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
     [Fact]

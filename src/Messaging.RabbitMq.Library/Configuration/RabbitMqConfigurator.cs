@@ -39,7 +39,7 @@ public static class RabbitMqConfigurator
         return service;
     }
 
-    public static void BuildWolverine(WolverineOptions opts, /*IServiceCollection serviceCollection,*/ Action<WolverineOptions>? extendAction = null)
+    public static void BuildWolverine(WolverineOptions opts, Action<WolverineOptions>? extendAction = null)
     {
         var services = opts.Services;
         var sp = services.BuildServiceProvider();
