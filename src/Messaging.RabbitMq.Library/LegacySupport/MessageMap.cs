@@ -3,7 +3,7 @@
 using Wolverine.RabbitMQ;
 using Wolverine.RabbitMQ.Internal;
 
-namespace Messaging.RabbitMq.Library.Configuration;
+namespace Messaging.RabbitMq.Library.LegacySupport;
 
 public class MessageMap<T> : IMessageMap where T : IBasicMessage, new()
 {

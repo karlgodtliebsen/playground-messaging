@@ -3,6 +3,7 @@ using Messaging.Kafka.Library.Configuration;
 using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library;
 using Messaging.RabbitMq.Library.Configuration;
+using Messaging.RabbitMq.Library.LegacySupport;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -90,22 +91,6 @@ public static class HostConfigurator
         service.TryAddKeyedSingleton<IServiceCollection>("producer", publishingCollection);
         return service;
     }
-    public static IHost BuildRabbitMqProducerHost()
-    {
-        var builder = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                services.AddProducerServices(context.Configuration);
-                services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
-            });
-
-        builder.UseWolverine((opt) => CustomizedRabbitMqConfigurator.CustomizedBuildRabbitMqWolverine(opt));
-        var host = builder.Build();
-        host.Services.SetupSerilog();
-        return host;
-    }
-
     public static IServiceCollection AddConsumerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddCustomizedRabbitMqServices(configuration);
@@ -145,6 +130,25 @@ public static class HostConfigurator
         return service;
     }
 
+    public static IHost BuildRabbitMqProducerHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                services
+                    .AddProducerServices(context.Configuration)
+                    .AddApplicationServices(context.Configuration)
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); })
+                    .AddHostedService<MessagingDiagnosticsProducerServiceHost>()
+                    .AddHostedService<QueueMonitoringService>();
+            });
+
+        builder.UseWolverine((opt) => CustomizedRabbitMqConfigurator.CustomizedBuildRabbitMqWolverine(opt));
+        var host = builder.Build();
+        host.Services.SetupSerilog();
+        return host;
+    }
+
     public static IHost BuildRabbitMqConsumerHost()
     {
         var builder = Host.CreateDefaultBuilder()
@@ -154,12 +158,9 @@ public static class HostConfigurator
                     .AddConsumerServices(context.Configuration)
                     .AddEventHubServices(context.Configuration)
                     .AddApplicationServices(context.Configuration)
-                    ;
-                services.AddLogging(loggingBuilder =>
-                {
-                    services.AddSerilogServices(loggingBuilder, context.Configuration);
-                });
-                services.AddHostedService<MessagingConsumerServiceHost>();
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); })
+                    .AddHostedService<MessagingConsumerServiceHost>()
+                    .AddHostedService<QueueMonitoringService>();
             });
         builder.UseWolverine((opt) => CustomizedRabbitMqConfigurator.CustomizedBuildRabbitMqWolverine(opt));
         var host = builder.Build();
@@ -177,9 +178,11 @@ public static class HostConfigurator
                     .AddConsumerServices(context.Configuration)
                     .AddEventHubServices(context.Configuration)
                     .AddApplicationServices(context.Configuration)
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); })
+                    .AddHostedService<MessagingConsumerServiceHost>()
+                    .AddHostedService<MessagingDiagnosticsProducerServiceHost>()
+                    .AddHostedService<QueueMonitoringService>()
                     ;
-                services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
-                services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
         builder.UseWolverine((opt) => CustomizedRabbitMqConfigurator.CustomizedBuildRabbitMqWolverine(opt));
         var host = builder.Build();
@@ -188,7 +191,7 @@ public static class HostConfigurator
         return host;
     }
 
-    public static Task RunHostAsync(IHost host, string title, Microsoft.Extensions.Logging.ILogger logger, CancellationToken cancellationToken)
+    public static Task RunHostAsync(IHost host, string title, ILogger logger, CancellationToken cancellationToken)
     {
         try
         {
@@ -200,7 +203,8 @@ public static class HostConfigurator
             throw;
         }
     }
-    public static Task RunHostsAsync(IEnumerable<IHost> hosts, string title, Microsoft.Extensions.Logging.ILogger logger, CancellationToken cancellationToken)
+
+    public static Task RunHostsAsync(IEnumerable<IHost> hosts, string title, ILogger logger, CancellationToken cancellationToken)
     {
         try
         {

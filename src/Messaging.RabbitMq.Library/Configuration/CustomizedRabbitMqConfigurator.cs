@@ -1,4 +1,5 @@
 ﻿using Messaging.Library.Configuration;
+using Messaging.RabbitMq.Library.LegacySupport;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,7 @@ public static class CustomizedRabbitMqConfigurator
 {
     private const string Consumer = "consumer";
     private const string Producer = "producer";
+    private const string Monitor = "monitor";
 
     public static IServiceCollection AddCustomizedRabbitMqServices(this IServiceCollection service, IConfiguration configuration)
     {
@@ -33,6 +35,7 @@ public static class CustomizedRabbitMqConfigurator
         }
         service.TryAddSingleton(Options.Create(options));
         service.TryAddSingleton(Options.Create(setupOptions));
+        service.TryAddKeyedSingleton(Monitor, Options.Create(Array.Empty<string>()));
         service.TryAddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
         service.TryAddSingleton<TypeToQueueMapper>();
         service.AddEventHubServices(configuration);
@@ -47,8 +50,9 @@ public static class CustomizedRabbitMqConfigurator
         var publishingCollection = sp.GetKeyedService<IServiceCollection>(Producer);
         var options = sp.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
         var setupOptions = sp.GetRequiredService<IOptions<RabbitMqSetupOptions>>().Value;
+        var queues = new List<string>();
 
-        // Basic RabbitMQ connection
+        // Setup RabbitMQ connection
         var rabbit = opts.UseRabbitMq(rabbit =>
         {
             rabbit.HostName = options.HostName;
@@ -61,9 +65,8 @@ public static class CustomizedRabbitMqConfigurator
         });
 
         rabbit.AutoProvision();
-        if (setupOptions.AutoPurge) rabbit.AutoPurgeOnStartup();
-
         extendAction?.Invoke(opts);
+
         if (setupOptions.UseLegacyMapping)
         {
             var enrich = sp.GetRequiredService<IRabbitMqEnvelopeMapper>();
@@ -72,6 +75,10 @@ public static class CustomizedRabbitMqConfigurator
                 .ConfigureListeners(l => l.UseInterop(enrich)); // all consumers
         }
 
+        if (setupOptions.AutoPurge)
+        {
+            rabbit.AutoPurgeOnStartup();
+        }
         if (setupOptions.UseDebugLogging)
         {
             // Enable detailed logging
@@ -124,6 +131,7 @@ public static class CustomizedRabbitMqConfigurator
 
                     if (!string.IsNullOrEmpty(queueName))
                     {
+                        queues.Add(queueName);
                         opts.ListenToRabbitQueue(queueName, queue =>
                         {
                             //Can we not bind to exchange??
@@ -147,6 +155,7 @@ public static class CustomizedRabbitMqConfigurator
                 }
             }
         }
+
         if (publishingCollection is not null)
         {
             var assemblies = sp.GetKeyedService<Assembly[]>(Producer);
@@ -190,6 +199,7 @@ public static class CustomizedRabbitMqConfigurator
 
                     if (!string.IsNullOrEmpty(queueName))
                     {
+                        queues.Add(queueName);
                         opts.Publish((c) =>
                         {
                             var pr = c.Message(messageMap.MessageType);
@@ -213,7 +223,7 @@ public static class CustomizedRabbitMqConfigurator
                         pr.ToRabbitQueue(messageMap.BindingPattern);
                     });
                 }
-            } //TODO: should we handle other options or is this enough to fulfill the simple goalthat we have
+            } //TODO: should we handle other options or is this enough to fulfill the simple goal that we have
             if (assemblies is not null)
             {
                 foreach (var assembly in assemblies)
@@ -222,8 +232,6 @@ public static class CustomizedRabbitMqConfigurator
                 }
             }
         }
-
-
-
+        services.AddKeyedSingleton(Monitor, Options.Create(queues.Distinct().ToArray()));
     }
 }

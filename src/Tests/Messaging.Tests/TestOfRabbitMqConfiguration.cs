@@ -2,6 +2,7 @@
 
 using Messaging.RabbitMq.Library;
 using Messaging.RabbitMq.Library.Configuration;
+using Messaging.RabbitMq.Library.LegacySupport;
 
 
 namespace Messaging.Tests;

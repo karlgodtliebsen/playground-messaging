@@ -7,7 +7,7 @@ using System.Text;
 using Wolverine;
 using Wolverine.RabbitMQ.Internal;
 
-namespace Messaging.RabbitMq.Library.Configuration;
+namespace Messaging.RabbitMq.Library.LegacySupport;
 
 /// <summary>
 /// LegacyTypes Header - Mapper

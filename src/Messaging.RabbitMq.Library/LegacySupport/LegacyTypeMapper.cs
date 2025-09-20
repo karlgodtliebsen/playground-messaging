@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Messaging.RabbitMq.Library.Configuration;
+namespace Messaging.RabbitMq.Library.LegacySupport;
 
 
 //Mapping { "FullName, AssemblyName of the legacy type" to and from FullName of the serialization type that WolverineFx uses},

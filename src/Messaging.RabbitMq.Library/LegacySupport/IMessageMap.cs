@@ -1,7 +1,7 @@
 ﻿using Wolverine.RabbitMQ;
 using Wolverine.RabbitMQ.Internal;
 
-namespace Messaging.RabbitMq.Library.Configuration;
+namespace Messaging.RabbitMq.Library.LegacySupport;
 
 public interface IMessageMap
 {
