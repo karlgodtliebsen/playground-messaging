@@ -2,9 +2,6 @@ using System.Diagnostics.Metrics;
 
 namespace Messaging.Library.EventHubChannel;
 
-/// <summary>
-/// Metrics for monitoring EventHub performance
-/// </summary>
 public sealed class EventHubMetrics : IDisposable
 {
     private readonly Meter meter;
@@ -34,12 +31,20 @@ public sealed class EventHubMetrics : IDisposable
         eventProcessingTime = meter.CreateHistogram<double>("event_processing_duration", "ms", "Event processing duration in milliseconds");
     }
 
-    public void IncrementEventsPublished(string eventName) => eventsPublished.Add(1, new KeyValuePair<string, object?>("event_name", eventName));
-    public void IncrementEventsProcessed(string eventName) => eventsProcessed.Add(1, new KeyValuePair<string, object?>("event_name", eventName));
-    public void IncrementHandlerErrors(string eventName) => handlerErrors.Add(1, new KeyValuePair<string, object?>("event_name", eventName));
-    public void RecordProcessingTime(double milliseconds, string eventName) => eventProcessingTime.Record(milliseconds, new KeyValuePair<string, object?>("event_name", eventName));
+    public void IncrementEventsPublished(string eventName) =>
+        eventsPublished.Add(1, new KeyValuePair<string, object?>("event_name", eventName));
+
+    public void IncrementEventsProcessed(string eventName) =>
+        eventsProcessed.Add(1, new KeyValuePair<string, object?>("event_name", eventName));
+
+    public void IncrementHandlerErrors(string eventName) =>
+        handlerErrors.Add(1, new KeyValuePair<string, object?>("event_name", eventName));
+
+    public void RecordProcessingTime(double milliseconds, string eventName) =>
+        eventProcessingTime.Record(milliseconds, new KeyValuePair<string, object?>("event_name", eventName));
 
     public void SetSubscriberCount(int count) => totalSubscribers = count;
     public void SetChannelCount(int count) => totalChannels = count;
+
     public void Dispose() => meter.Dispose();
 }

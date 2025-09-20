@@ -1,6 +1,6 @@
 namespace Messaging.Library.EventHubChannel;
 
-public interface IEventHub : IDisposable
+public interface IEventHub : IDisposable, IAsyncDisposable
 {
     IDisposable Subscribe(string eventName, Func<CancellationToken, Task> handler);
     IDisposable Subscribe<T>(Func<T, CancellationToken, Task> handler);
