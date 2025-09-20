@@ -11,11 +11,10 @@
 
 ### Kafka
 You now have a solid setup with (Claude):
-
-Kafka with KRaft (no Zookeeper dependency)
-WolverineFx publishing and consuming messages
-Auto-topic creation working properly
-Redpanda Console for easy management at http://localhost:8080
+- Kafka with KRaft (no Zookeeper dependency)
+- WolverineFx publishing and consuming messages
+- Auto-topic creation working properly
+- Redpanda Console for easy management at http://localhost:8080
 
 This gives you a great foundation for exploring more advanced messaging patterns with WolverineFx and Kafka. You can now experiment with:
 
@@ -27,8 +26,16 @@ This gives you a great foundation for exploring more advanced messaging patterns
 
 ### RabbitMq
 
-- A solid setup using RabbitMQ
-
+- A solid setup using WolverineFx and RabbitMQ
+- An extended setup building included: 
+  - a legacy type mapper that supports holding typeinfo in headers
+  - a mapping from type to queues to enable smoother setup building
+  - a separation of Consumer and Producer setup building
+  - Extension of the Message base type to include relevant data for header population
+  - A Monitoring Service as a .Net hosted Background Service
+  - Multiple Hosts for Consumer and Producer and setup, using the Console App
+  - An resilient EventHub based on .Net Channels, to abstract away the WolverineFx MessageBus
+  - Tests of EventHub and some RabbitMq settings
 
 
 ### Docker commands to run RabbitMq with Management UI
