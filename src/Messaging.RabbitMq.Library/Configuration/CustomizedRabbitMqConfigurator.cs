@@ -14,12 +14,12 @@ using Wolverine.RabbitMQ.Internal;
 
 namespace Messaging.RabbitMq.Library.Configuration;
 
-public static class RabbitMqConfigurator
+public static class CustomizedRabbitMqConfigurator
 {
     private const string Consumer = "consumer";
     private const string Producer = "producer";
 
-    public static IServiceCollection AddRabbitMqServices(this IServiceCollection service, IConfiguration configuration)
+    public static IServiceCollection AddCustomizedRabbitMqServices(this IServiceCollection service, IConfiguration configuration)
     {
         var options = configuration.GetSection(RabbitMqOptions.SectionName).Get<RabbitMqOptions>();
         var setupOptions = configuration.GetSection(RabbitMqSetupOptions.SectionName).Get<RabbitMqSetupOptions>();
@@ -39,7 +39,7 @@ public static class RabbitMqConfigurator
         return service;
     }
 
-    public static void BuildWolverine(WolverineOptions opts, Action<WolverineOptions>? extendAction = null)
+    public static void CustomizedBuildRabbitMqWolverine(WolverineOptions opts, Action<WolverineOptions>? extendAction = null)
     {
         var services = opts.Services;
         var sp = services.BuildServiceProvider();
@@ -213,7 +213,7 @@ public static class RabbitMqConfigurator
                         pr.ToRabbitQueue(messageMap.BindingPattern);
                     });
                 }
-            } //TODO: should we handle other options or is this enough to fulfill the simple goal
+            } //TODO: should we handle other options or is this enough to fulfill the simple goalthat we have
             if (assemblies is not null)
             {
                 foreach (var assembly in assemblies)

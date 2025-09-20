@@ -52,7 +52,7 @@ public static class HostConfigurator
 
     public static IServiceCollection AddProducerServices(this IServiceCollection service, IConfiguration configuration)
     {
-        service.AddRabbitMqServices(configuration);
+        service.AddCustomizedRabbitMqServices(configuration);
 
         var assemblies = new Assembly[]
         {
@@ -100,7 +100,7 @@ public static class HostConfigurator
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
 
-        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
+        builder.UseWolverine((opt) => CustomizedRabbitMqConfigurator.CustomizedBuildRabbitMqWolverine(opt));
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
@@ -108,7 +108,7 @@ public static class HostConfigurator
 
     public static IServiceCollection AddConsumerServices(this IServiceCollection service, IConfiguration configuration)
     {
-        service.AddRabbitMqServices(configuration);
+        service.AddCustomizedRabbitMqServices(configuration);
         service.AddLibraryServices(configuration);
 
         var assemblies = new Assembly[]
@@ -161,7 +161,7 @@ public static class HostConfigurator
                 });
                 services.AddHostedService<MessagingConsumerServiceHost>();
             });
-        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
+        builder.UseWolverine((opt) => CustomizedRabbitMqConfigurator.CustomizedBuildRabbitMqWolverine(opt));
         var host = builder.Build();
         host.Services.SetupSerilog();
         host.Services.SetupChannelListener();
@@ -181,7 +181,7 @@ public static class HostConfigurator
                 services.AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
                 services.AddHostedService<MessagingDiagnosticsProducerServiceHost>();
             });
-        builder.UseWolverine((opt) => RabbitMqConfigurator.BuildWolverine(opt));
+        builder.UseWolverine((opt) => CustomizedRabbitMqConfigurator.CustomizedBuildRabbitMqWolverine(opt));
         var host = builder.Build();
         host.Services.SetupSerilog();
         host.Services.SetupChannelListener();

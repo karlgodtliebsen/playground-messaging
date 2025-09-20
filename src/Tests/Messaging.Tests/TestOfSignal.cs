@@ -10,7 +10,7 @@ namespace Messaging.Tests;
 
 public class TestOfSignal(ITestOutputHelper output)
 {
-    private readonly ILogger<SignalChannel> logger = NSubstitute.Substitute.For<ILogger<SignalChannel>>();
+    private readonly ILogger<EventHub> logger = NSubstitute.Substitute.For<ILogger<EventHub>>();
     private readonly CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
     [Fact]
@@ -55,20 +55,20 @@ public class TestOfSignal(ITestOutputHelper output)
 
         var @event1 = "TestEvent1";
         var @event2 = "TestEvent2";
-        var signalChannel = new SignalChannel(logger);
-        var subscription1 = signalChannel.Receive(@event1, async (ct) =>
+        var signalChannel = new EventHub(logger);
+        var subscription1 = signalChannel.Subscribe(@event1, async (ct) =>
         {
             output.WriteLine($"Consumed 1: {@event1}");
             consumer1++;
             await Task.Delay(1, ct);
         });
-        var subscription2 = signalChannel.Receive(@event1, async (ct) =>
+        var subscription2 = signalChannel.Subscribe(@event1, async (ct) =>
         {
             output.WriteLine($"Consumed 2: {@event1}");
             consumer2++;
             await Task.Delay(1, ct);
         });
-        var subscription3 = signalChannel.Receive(@event2, async (ct) =>
+        var subscription3 = signalChannel.Subscribe(@event2, async (ct) =>
         {
             output.WriteLine($"Consumed 3: {@event2}");
             consumer3++;
@@ -79,7 +79,7 @@ public class TestOfSignal(ITestOutputHelper output)
 
         for (var i = 0; i < number; i++)
         {
-            await signalChannel.Send(@event1, CancellationToken.None);
+            await signalChannel.Publish(@event1, CancellationToken.None);
             await Task.Delay(1, cancellationToken);
         }
 
@@ -95,8 +95,8 @@ public class TestOfSignal(ITestOutputHelper output)
 
         for (var i = 0; i < number; i++)
         {
-            await signalChannel.Send(@event1, cancellationToken);
-            await signalChannel.Send(@event2, cancellationToken);
+            await signalChannel.Publish(@event1, cancellationToken);
+            await signalChannel.Publish(@event2, cancellationToken);
             await Task.Delay(10, cancellationToken);
         }
 
@@ -114,21 +114,21 @@ public class TestOfSignal(ITestOutputHelper output)
         var consumer3 = 0;
         var @event1 = "TestEvent1";
         var @event2 = "TestEvent2";
-        var signalChannel = new SignalChannel(logger);
-        var subscription1 = signalChannel.Receive(@event1, async (int i, CancellationToken ct) =>
+        var signalChannel = new EventHub(logger);
+        var subscription1 = signalChannel.Subscribe(@event1, async (int i, CancellationToken ct) =>
         {
             output.WriteLine($"Consumed 1: {@event1} value: {i}");
             consumer1++;
             await Task.Delay(1, ct);
         });
 
-        var subscription2 = signalChannel.Receive(@event1, async (int i, CancellationToken ct) =>
+        var subscription2 = signalChannel.Subscribe(@event1, async (int i, CancellationToken ct) =>
         {
             output.WriteLine($"Consumed 2: {@event1} value: {i}");
             consumer2++;
             await Task.Delay(1, ct);
         });
-        var subscription3 = signalChannel.Receive(@event2, async (int i, CancellationToken ct) =>
+        var subscription3 = signalChannel.Subscribe(@event2, async (int i, CancellationToken ct) =>
         {
             output.WriteLine($"Consumed 3: {@event2} value: {i}");
             consumer3++;
@@ -139,7 +139,7 @@ public class TestOfSignal(ITestOutputHelper output)
 
         for (var i = 0; i < number; i++)
         {
-            await signalChannel.Send(@event1, i, cancellationToken);
+            await signalChannel.Publish(@event1, i, cancellationToken);
             await Task.Delay(1, cancellationToken);
         }
 
@@ -154,8 +154,8 @@ public class TestOfSignal(ITestOutputHelper output)
 
         for (var i = 0; i < number; i++)
         {
-            await signalChannel.Send(@event1, i, cancellationToken);
-            await signalChannel.Send(@event2, i, cancellationToken);
+            await signalChannel.Publish(@event1, i, cancellationToken);
+            await signalChannel.Publish(@event2, i, cancellationToken);
             await Task.Delay(10, cancellationToken);
         }
 

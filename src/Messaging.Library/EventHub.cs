@@ -10,19 +10,19 @@ namespace Messaging.Library;
 /// and uses a dedicated channel per event name / generic data type for signal/events with data.
 /// Supports asynchronous handlers, generic data events, and "subscribe all" functionality.
 /// </summary>
-public sealed class SignalChannel : IDisposable, ISignalChannel
+public sealed class EventHub : IDisposable, IEventHub
 {
     private readonly ILogger logger;
     private readonly Channel<string> signalOnlyChannel;
     private readonly ConcurrentDictionary<string, object> channels = new();
     private readonly ConcurrentDictionary<string, List<Func<CancellationToken, Task>>> signalOnlySubscribers = new();
-    private readonly List<Action<string>> allSignalSubscribers = new();
+    private readonly List<Func<CancellationToken, Task>> allSignalSubscribers = new();
     private readonly Lock allSubscribersLock = new();
     private readonly CancellationTokenSource cts = new();
     private readonly Task signalProcessingTask;
     private bool disposed;
 
-    public SignalChannel(ILogger<SignalChannel> logger)
+    public EventHub(ILogger<EventHub> logger)
     {
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -86,17 +86,17 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
             }
 
             // Process "subscribe all" handlers
-            List<Action<string>> allSnapshot;
+            List<Func<CancellationToken, Task>> allSnapshot;
             lock (allSubscribersLock)
             {
                 allSnapshot = allSignalSubscribers.ToList();
             }
 
-            foreach (var action in allSnapshot)
+            foreach (var func in allSnapshot)
             {
                 try
                 {
-                    action(eventName);
+                    await func(ct);
                 }
                 catch (Exception ex)
                 {
@@ -110,7 +110,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
         }
     }
 
-    public IDisposable Receive(string signalName, Func<CancellationToken, Task> handler)
+    public IDisposable Subscribe(string signalName, Func<CancellationToken, Task> handler)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signalName);
@@ -146,13 +146,13 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
     }
 
 
-    public IDisposable Receive<T>(Func<T, CancellationToken, Task> handler)
+    public IDisposable Subscribe<T>(Func<T, CancellationToken, Task> handler)
     {
         var signalName = nameof(T);
-        return Receive<T>(signalName, handler);
+        return Subscribe<T>(signalName, handler);
     }
 
-    public IDisposable Receive<T>(string signalName, Func<T, CancellationToken, Task> handler)
+    public IDisposable Subscribe<T>(string signalName, Func<T, CancellationToken, Task> handler)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signalName);
@@ -193,7 +193,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
         });
     }
 
-    public IDisposable ReceiveAll(Action<string> handler)
+    public IDisposable SubscribeAll(Func<CancellationToken, Task> handler)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(handler);
@@ -213,20 +213,20 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
     }
 
 
-    public Task Send(string signal, CancellationToken cancellationToken = default)
+    public Task Publish(string signal, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signal);
         return signalOnlyChannel.Writer.WriteAsync(signal, cancellationToken).AsTask();
     }
 
-    public async Task Send<T>(T data, CancellationToken cancellationToken = default)
+    public async Task Publish<T>(T data, CancellationToken cancellationToken = default)
     {
         var signal = nameof(T);
-        await Send(signal, data, cancellationToken);
+        await Publish(signal, data, cancellationToken);
     }
 
-    public async Task Send<T>(string signal, T data, CancellationToken cancellationToken = default)
+    public async Task Publish<T>(string signal, T data, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(signal);
@@ -249,7 +249,7 @@ public sealed class SignalChannel : IDisposable, ISignalChannel
     {
         if (disposed)
         {
-            throw new ObjectDisposedException(nameof(SignalChannel));
+            throw new ObjectDisposedException(nameof(EventHub));
         }
     }
 

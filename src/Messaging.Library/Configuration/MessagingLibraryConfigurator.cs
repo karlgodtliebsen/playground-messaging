@@ -8,7 +8,7 @@ public static class MessagingLibraryConfigurator
 {
     public static IServiceCollection AddLibraryServices(this IServiceCollection service, IConfiguration configuration)
     {
-        service.TryAddSingleton<ISignalChannel, SignalChannel>();
+        service.TryAddSingleton<IEventHub, EventHub>();
         return service;
     }
 }
