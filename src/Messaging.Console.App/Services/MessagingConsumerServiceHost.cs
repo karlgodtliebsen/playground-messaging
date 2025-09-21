@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Messaging.Console.App.Services;
 
-public sealed class MessagingConsumerServiceHost(IEventHub channel, ILogger<MessagingConsumerServiceHost> logger) : BackgroundService
+public sealed class MessagingConsumerServiceHost(IEventHub eventHub, ILogger<MessagingConsumerServiceHost> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -16,7 +16,7 @@ public sealed class MessagingConsumerServiceHost(IEventHub channel, ILogger<Mess
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await channel.Publish("Alive", cancellationToken);
+                await eventHub.Publish("Alive", cancellationToken);
                 logger.LogInformation("ServiceHost Published Alive: {service}", serviceName);
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                 //await Task.Delay(Timeout.Infinite, cancellationToken);

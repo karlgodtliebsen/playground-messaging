@@ -1,34 +1,36 @@
-﻿using Messaging.Library;
-
-using Wolverine.RabbitMQ;
+﻿using Wolverine.RabbitMQ;
 using Wolverine.RabbitMQ.Internal;
 
 namespace Messaging.RabbitMq.Library.LegacySupport;
 
-public class MessageMap<T> : IMessageMap where T : IBasicMessage, new()
+public class MessageMap : IMessageMap
 {
     public MessageMap()
     {
-        var t = new T();
-        Exchange = t.ExchangeName;
-        BindingPattern = t.BindingPattern;
-        RoutingKey = t.RoutingKey;
-        QueueName = t.QueueName;
+    }
+    public MessageMap(Type messageType, string exchangeName, string routingKey, string bindingPattern, string? queueName = null)
+    {
+        MessageType = messageType;
+        ExchangeName = exchangeName;
+        RoutingKey = routingKey;
+        BindingPattern = bindingPattern;
+        QueueName = queueName;
     }
 
+    public string ExchangeName { get; set; } = null!;
+    public string RoutingKey { get; set; } = null!;
+    public string BindingPattern { get; set; } = null!;
+    public string? QueueName { get; set; }
     public QueueType QueueType { get; set; } = QueueType.classic;
 
     public ExchangeType ExchangeType { get; set; } = ExchangeType.Topic;
-    public Type MessageType => typeof(T);
+    public Type MessageType { get; init; } = null!;
     public bool UseExchange { get; set; } = true;
     public bool DurableExchange { get; set; } = true;
     public bool DurableQueue { get; set; } = true;
     public bool UseQueue { get; set; } = true;
     public bool UseHeaderMapping { get; set; } = true;
-    public string Exchange { get; set; }
-    public string BindingPattern { get; set; }
-    public string RoutingKey { get; set; }
-    public string? QueueName { get; set; }
+
     public bool Exclusive { get; set; } = false;
     public bool NoWait { get; set; } = false;
     public bool AutoDeleteQueue { get; set; } = false;
@@ -45,4 +47,21 @@ public class MessageMap<T> : IMessageMap where T : IBasicMessage, new()
 
     public bool PurgeOnStartup { get; set; } = false;
 
+}
+
+
+public class MessageMap<T> : MessageMap
+{
+    public MessageMap()
+    {
+        MessageType = typeof(T);
+    }
+    public MessageMap(string exchangeName, string routingKey, string bindingPattern, string? queueName = null)
+    {
+        MessageType = typeof(T);
+        ExchangeName = exchangeName;
+        RoutingKey = routingKey;
+        BindingPattern = bindingPattern;
+        QueueName = queueName;
+    }
 }

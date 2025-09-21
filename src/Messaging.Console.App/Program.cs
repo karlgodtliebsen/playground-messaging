@@ -9,15 +9,15 @@ const string title = "Messaging Demo";
 Console.Title = title;
 Console.WriteLine(title);
 CancellationTokenSource cancellationTokenSource = new();
-//var kafkaProducerHost = HostConfigurator.BuildKafkaProducerHost();
-//var kafkaConsumerHost = HostConfigurator.BuildKafkaConsumerHost();
+//var kafkaProducerHost = HostBuilder.BuildKafkaProducerHost();
+//var kafkaConsumerHost = HostBuilder.BuildKafkaConsumerHost();
 
-//var rabbitMqConsumerHost = HostConfigurator.BuildRabbitMqConsumerHost();
+//var rabbitMqConsumerHost = HostBuilder.BuildRabbitMqConsumerHost();
 //var host = rabbitMqConsumerHost;
-//var rabbitMqProducerHost = HostConfigurator.BuildRabbitMqProducerHost();
+//var rabbitMqProducerHost = HostBuilder.BuildRabbitMqProducerHost();
 //var host = rabbitMqProducerHost;
 
-var host = HostConfigurator.BuildRabbitMqCombinedHost();
+var host = HostBuilder.BuildRabbitMqCombinedHost();
 
 var serviceProvider = host.Services;
 var logger = serviceProvider.SetupSerilog();
@@ -25,7 +25,7 @@ var mLogger = serviceProvider.GetRequiredService<ILogger<Program>>();
 
 logger.Information("Starting Multi Host {title}", title);
 //start multiple hosts
-await HostConfigurator.RunHostsAsync([
+await HostBuilder.RunHostsAsync([
     /*kafkaProducerHost,
      kafkaConsumerHost, */
     //rabbitMqProducerHost,

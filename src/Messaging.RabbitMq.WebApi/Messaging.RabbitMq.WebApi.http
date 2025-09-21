@@ -12,6 +12,17 @@ Content-Type: application/json
 
 ###
 
+POST {{Messaging.WebApi_HostAddress}}/messages/create/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "SenderId" : "b3109a48-ec5d-4292-b985-4aa9d5dbf994",
+  "Content": "Hello World"
+}
+
+###
+
 POST {{Messaging.WebApi_HostAddress}}/orders/
 Accept: application/json
 Content-Type: application/json

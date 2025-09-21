@@ -14,7 +14,7 @@ public interface IMessageMap
     bool DurableQueue { get; set; }
     bool UseQueue { get; set; }
     bool UseHeaderMapping { get; set; }
-    string Exchange { get; set; }
+    string ExchangeName { get; set; }
     string BindingPattern { get; set; }
     string RoutingKey { get; set; }
     string? QueueName { get; set; }

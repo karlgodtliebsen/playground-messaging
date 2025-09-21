@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Messaging.Console.App.Configuration;
 
-public class EventListener(IEventHub eventHub, ILogger<EventListener> logger)
+public class EventHubListener(IEventHub eventHub, ILogger<EventHubListener> logger)
 {
     public void SetupSubscriptions()
     {

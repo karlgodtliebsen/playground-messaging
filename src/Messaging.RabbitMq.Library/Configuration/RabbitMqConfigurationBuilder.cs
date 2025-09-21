@@ -1,9 +1,6 @@
-﻿using Messaging.Library.Configuration;
-using Messaging.RabbitMq.Library.LegacySupport;
+﻿using Messaging.RabbitMq.Library.LegacySupport;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,34 +12,13 @@ using Wolverine.RabbitMQ.Internal;
 
 namespace Messaging.RabbitMq.Library.Configuration;
 
-public static class CustomizedRabbitMqConfigurator
+public static class RabbitMqConfigurationBuilder
 {
     private const string Consumer = "consumer";
     private const string Producer = "producer";
     private const string Monitor = "monitor";
 
-    public static IServiceCollection AddCustomizedRabbitMqServices(this IServiceCollection service, IConfiguration configuration)
-    {
-        var options = configuration.GetSection(RabbitMqOptions.SectionName).Get<RabbitMqOptions>();
-        var setupOptions = configuration.GetSection(RabbitMqSetupOptions.SectionName).Get<RabbitMqSetupOptions>();
-        if (options is null)
-        {
-            options = new RabbitMqOptions();
-        }
-        if (setupOptions is null)
-        {
-            setupOptions = new RabbitMqSetupOptions();
-        }
-        service.TryAddSingleton(Options.Create(options));
-        service.TryAddSingleton(Options.Create(setupOptions));
-        service.TryAddKeyedSingleton(Monitor, Options.Create(Array.Empty<string>()));
-        service.TryAddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
-        service.TryAddSingleton<TypeToQueueMapper>();
-        service.AddEventHubServices(configuration);
-        return service;
-    }
-
-    public static void CustomizedBuildRabbitMqWolverine(WolverineOptions opts, Action<WolverineOptions>? extendAction = null)
+    public static void BuildRabbitMqSetupUsingWolverine(WolverineOptions opts, Action<WolverineOptions>? extendAction = null)
     {
         var services = opts.Services;
         var sp = services.BuildServiceProvider();
@@ -69,10 +45,13 @@ public static class CustomizedRabbitMqConfigurator
 
         if (setupOptions.UseLegacyMapping)
         {
-            var enrich = sp.GetRequiredService<IRabbitMqEnvelopeMapper>();
-            rabbit
-                .ConfigureSenders(s => s.UseInterop(enrich)) // all publishers
-                .ConfigureListeners(l => l.UseInterop(enrich)); // all consumers
+            var enrich = sp.GetService<IRabbitMqEnvelopeMapper>();
+            if (enrich is not null)
+            {
+                rabbit
+                    .ConfigureSenders(s => s.UseInterop(enrich)) // all publishers
+                    .ConfigureListeners(l => l.UseInterop(enrich)); // all consumers
+            }
         }
 
         if (setupOptions.AutoPurge)
@@ -88,20 +67,19 @@ public static class CustomizedRabbitMqConfigurator
                 logging.AddConsole();
             });
         }
-        if (listeningCollection is not null)
+        var messageQueueNameRegistration = sp.GetKeyedService<TypeToQueueMapper>(Consumer);
+        if (listeningCollection is not null && messageQueueNameRegistration is not null)
         {
-            var messageQueueNameRegistration = sp.GetRequiredKeyedService<TypeToQueueMapper>(Consumer);
-            var assemblies = sp.GetKeyedService<Assembly[]>(Consumer);
 
             var listeningMessagesMaps = listeningCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
 
             if (setupOptions.DeclareExchanges)
             {
-                var exchanges = listeningMessagesMaps.GroupBy(m => m.Exchange).Select(group => group.First()).ToList();
+                var exchanges = listeningMessagesMaps.GroupBy(m => m.ExchangeName).Select(group => group.First()).ToList();
                 foreach (var messageMap in exchanges)
                 {
                     ArgumentNullException.ThrowIfNull(messageMap);
-                    var exchangeName = messageMap.Exchange;
+                    var exchangeName = messageMap.ExchangeName;
                     rabbit.DeclareExchange(exchangeName, exchange =>
                     {
                         exchange.ExchangeType = messageMap.ExchangeType;
@@ -115,7 +93,7 @@ public static class CustomizedRabbitMqConfigurator
             foreach (var messageMap in listeningMessagesMaps)
             {
                 ArgumentNullException.ThrowIfNull(messageMap);
-                var exchangeName = messageMap.Exchange;
+                var exchangeName = messageMap.ExchangeName;
                 var queueName = messageMap.QueueName;
                 if (messageMap.UseQueue)
                 {
@@ -147,6 +125,7 @@ public static class CustomizedRabbitMqConfigurator
                     }
                 } //TODO: should we handle other options or is this enough to fulfill the simple goal
             }
+            var assemblies = sp.GetKeyedService<Assembly[]>(Consumer);
             if (assemblies is not null)
             {
                 foreach (var assembly in assemblies)
@@ -155,23 +134,20 @@ public static class CustomizedRabbitMqConfigurator
                 }
             }
         }
+        messageQueueNameRegistration = sp.GetKeyedService<TypeToQueueMapper>(Producer);
 
-        if (publishingCollection is not null)
+        if (publishingCollection is not null && messageQueueNameRegistration is not null)
         {
-            var assemblies = sp.GetKeyedService<Assembly[]>(Producer);
-
-            var messageQueueNameRegistration = sp.GetRequiredKeyedService<TypeToQueueMapper>(Producer);
-
             var publishingMessagesMaps =
                 publishingCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
 
             if (setupOptions.DeclareExchanges)
             {
-                var exchanges = publishingMessagesMaps.GroupBy(m => m.Exchange).Select(group => group.First()).ToList();
+                var exchanges = publishingMessagesMaps.GroupBy(m => m.ExchangeName).Select(group => group.First()).ToList();
                 foreach (var messageMap in exchanges)
                 {
                     ArgumentNullException.ThrowIfNull(messageMap);
-                    var exchangeName = messageMap.Exchange;
+                    var exchangeName = messageMap.ExchangeName;
                     rabbit.DeclareExchange(exchangeName, exchange =>
                     {
                         exchange.ExchangeType = messageMap.ExchangeType;
@@ -184,7 +160,7 @@ public static class CustomizedRabbitMqConfigurator
             foreach (var messageMap in publishingMessagesMaps)
             {
                 ArgumentNullException.ThrowIfNull(messageMap);
-                var exchangeName = messageMap.Exchange;
+                var exchangeName = messageMap.ExchangeName;
                 var queueName = messageMap.QueueName;
                 if (messageMap.UseQueue)
                 {
@@ -224,6 +200,8 @@ public static class CustomizedRabbitMqConfigurator
                     });
                 }
             } //TODO: should we handle other options or is this enough to fulfill the simple goal that we have
+
+            var assemblies = sp.GetKeyedService<Assembly[]>(Producer);
             if (assemblies is not null)
             {
                 foreach (var assembly in assemblies)

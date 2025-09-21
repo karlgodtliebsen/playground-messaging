@@ -12,19 +12,23 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Messaging.WebApi/Messaging.WebApi.csproj", "Messaging.WebApi/"]
-RUN dotnet restore "./Messaging.WebApi/Messaging.WebApi.csproj"
+COPY ["Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj", "Messaging.RabbitMq.WebApi/"]
+COPY ["Messaging.Domain.Library/Messaging.Domain.Library.csproj", "Messaging.Domain.Library/"]
+COPY ["Messaging.Library/Messaging.Library.csproj", "Messaging.Library/"]
+COPY ["Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj", "Messaging.RabbitMq.Library/"]
+COPY ["Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj", "Messaging.ServiceDefaults/"]
+RUN dotnet restore "./Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj"
 COPY . .
-WORKDIR "/src/Messaging.WebApi"
-RUN dotnet build "./Messaging.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Messaging.RabbitMq.WebApi"
+RUN dotnet build "./Messaging.RabbitMq.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Messaging.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Messaging.RabbitMq.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Messaging.WebApi.dll"]
+ENTRYPOINT ["dotnet", "Messaging.RabbitMq.WebApi.dll"]

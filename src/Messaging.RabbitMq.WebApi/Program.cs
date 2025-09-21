@@ -1,7 +1,10 @@
 using Messaging.Domain.Library.Messages;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
+using Messaging.Library.Configuration;
+using Messaging.RabbitMq.Library.Configuration;
 using Messaging.RabbitMq.WebApi.Configuration;
+using Messaging.RabbitMq.WebApi.Controllers;
 
 using Scalar.AspNetCore;
 
@@ -15,26 +18,32 @@ Console.Title = title;
 Console.WriteLine(title);
 
 var builder = WebApplication.CreateBuilder(args);
-
-
-//builder.Host.UseWolverine(RabbitMqConfigurator.BuildWolverine());
+var services = builder.Services;
+var configuration = builder.Configuration;
 
 builder.AddServiceDefaults();
 
-var services = builder.Services;
-var configuration = builder.Configuration;
+
 // Add services to the container.
 services
+    .AddSingleton<EventHubListener>()
     .AddProducerServices(configuration)
+    //.AddLegacyProducerServices(configuration)
     .AddConsumerServices(configuration)
+    //.AddLegacyConsumerServices(configuration)
+    .AddOptions(configuration)
+    .AddEventHubServices(configuration)
     .AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, configuration); });
+
+
 services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 services.AddOpenApi();
+
+builder.Host.UseWolverine((opts) => RabbitMqConfigurationBuilder.BuildRabbitMqSetupUsingWolverine(opts));
 
 var app = builder.Build();
 app.Services.SetupSerilog(LogEventLevel.Verbose);
-
+app.Services.SetupEventListener();
 app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
@@ -60,9 +69,14 @@ app.MapControllers();
 //    opts.RouteFor<CreateOrderCommand>("orders/create");
 //});
 
+//app.MapPost("/messages/create", (CreateMessage msg, IEventHub bus) => bus.Publish("create-message", msg));
+//app.MapPost("/messages/create", (CreateMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
+app.MapPost("/messages/create", async (CreateMessage msg, IMessageBus bus) => await bus.PublishAsync(msg, new DeliveryOptions { }));
 
-app.MapPost("/messages/create", (CreateMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
+
 app.MapPost("/messages/information", (InformationMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
+
+
 
 
 app.MapPost("/orders", async (CreateOrderRequest request, IMessageBus messageBus) =>

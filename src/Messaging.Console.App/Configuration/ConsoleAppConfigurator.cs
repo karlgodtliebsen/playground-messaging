@@ -8,13 +8,13 @@ public static class ConsoleAppConfigurator
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection service, IConfiguration configuration)
     {
-        service.TryAddSingleton<EventListener>();
+        service.TryAddSingleton<EventHubListener>();
         return service;
     }
 
-    public static IServiceProvider SetupChannelListener(this IServiceProvider serviceProvider)
+    public static IServiceProvider SetupEventListener(this IServiceProvider serviceProvider)
     {
-        var listener = serviceProvider.GetRequiredService<EventListener>();
+        var listener = serviceProvider.GetRequiredService<EventHubListener>();
         listener.SetupSubscriptions();
         return serviceProvider;
     }
