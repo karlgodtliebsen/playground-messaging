@@ -57,7 +57,7 @@ public class MessageMap<T> : MessageMap where T : new()
     {
         MessageType = typeof(T);
         var msg = new T();
-        if (msg is IBaseMessage m)
+        if (msg is IMessageBase m)
         {
             ExchangeName = m.ExchangeName;
             RoutingKey = m.RoutingKey;
@@ -69,7 +69,7 @@ public class MessageMap<T> : MessageMap where T : new()
     {
         MessageType = typeof(T);
         var msg = new T();
-        if (msg is IBaseMessage m)
+        if (msg is IMessageBase m)
         {
             ExchangeName = m.ExchangeName;
             RoutingKey = m.RoutingKey;

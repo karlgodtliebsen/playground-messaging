@@ -2,11 +2,12 @@ using Messaging.Library;
 
 namespace Messaging.Domain.Library.DemoMessages;
 
-public class PingMessage : IBasicMessage
+public class PingMessage : MessageBase
 {
-    public string ExchangeName { get; } = "diagnostics";
-    public string RoutingKey { get; } = "diagnostics.ping";// $"{ExchangeName}.ping.{ApplicationName}.{MachineName}";
-    public string BindingPattern { get; } = "diagnostics.ping.#";
+    public override string ExchangeName { get; set; } = "diagnostics";
+    public override string RoutingKey { get; set; } = "diagnostics.ping";// $"{ExchangeName}.ping.{ApplicationName}.{MachineName}";
+    public override string BindingPattern { get; set; } = "diagnostics.ping.#";
+    public override string? QueueName { get; set; } = null;
 
     public PingMessage(string machineName, string appName, DateTimeOffset dateTime)
     {
@@ -18,11 +19,4 @@ public class PingMessage : IBasicMessage
     public PingMessage()
     {
     }
-    public DateTimeOffset TimeStamp { get; set; }
-    public Guid CorrelationId { get; set; } = Guid.CreateVersion7(DateTimeOffset.UtcNow);
-    public string? QueueName { get; set; } = null;
-    public string? ApplicationName { get; set; } = null;
-
-    public string? MachineName { get; set; } = null;
-    public int Version { get; set; } = 1;
 }

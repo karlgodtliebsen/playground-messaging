@@ -2,14 +2,12 @@ using Messaging.Library;
 
 namespace Messaging.Domain.Library.DemoMessages;
 
-public class TextMessage : IBasicMessage
+public class TextMessage : MessageBase
 {
-
-    public string ExchangeName { get; } = "text-message";
-    public string RoutingKey { get; } = "text-message.route";
-    public string BindingPattern { get; } = "text-message.#";
-    public string? QueueName { get; set; } = null;
-
+    public override string ExchangeName { get; set; } = "text-message";
+    public override string RoutingKey { get; set; } = "text-message.route";
+    public override string BindingPattern { get; set; } = "text-message.#";
+    public override string? QueueName { get; set; } = null;
 
     public TextMessage(string machineName, string applicationName, string messageData, DateTimeOffset dateTime)
     {
@@ -18,15 +16,9 @@ public class TextMessage : IBasicMessage
         TimeStamp = dateTime;
         MessageData = messageData;
     }
-
     public TextMessage()
     {
     }
-    public string? MachineName { get; set; }
-    public string? ApplicationName { get; set; }
-    public DateTimeOffset TimeStamp { get; set; }
-    public Guid CorrelationId { get; set; } = Guid.CreateVersion7(DateTimeOffset.UtcNow);
 
     public string MessageData { get; set; } = "";
-    public int Version { get; set; } = 1;
 }

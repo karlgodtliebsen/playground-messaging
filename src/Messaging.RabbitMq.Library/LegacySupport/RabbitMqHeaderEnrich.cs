@@ -58,7 +58,7 @@ public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnv
             outgoing.Headers["TypeFullName"] = typeFullName;
         }
 
-        if (envelope.Message is IBasicMessage message)
+        if (envelope.Message is IMessageBase message)
         {
             outgoing.Headers["SendBy"] = message.ApplicationName ?? "";
             outgoing.Headers["MachineName"] = message.MachineName ?? "";
@@ -74,8 +74,6 @@ public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnv
     {
         yield break;
         // Let Wolverine know which headers we care about
-        //yield return "AssemblyBaseName";
-        //yield return "TypeFullName";
     }
 
     private static string? ReadHeader(IDictionary<string, object> headers, string key)

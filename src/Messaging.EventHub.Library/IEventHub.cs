@@ -8,6 +8,9 @@ public interface IEventHub : IDisposable, IAsyncDisposable
     IDisposable SubscribeToAll(Func<string, CancellationToken, Task> handler);
     Task Publish(string eventName, CancellationToken cancellationToken = default);
     Task Publish<T>(T data, CancellationToken cancellationToken = default);
+
+    Task Publish(object data, CancellationToken cancellationToken = default);
+
     Task Publish<T>(string eventName, T data, CancellationToken cancellationToken = default);
     bool TryPublish(string eventName);
 }

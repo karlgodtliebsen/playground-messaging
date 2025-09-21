@@ -1,8 +1,9 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Channels;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Messaging.EventHub.Library;
 
@@ -75,8 +76,7 @@ public sealed class EventHub : IEventHub
     }
 
     // Subscribe to data events (default event name: typeof(T).FullName)
-    public IDisposable Subscribe<T>(Func<T, CancellationToken, Task> handler)
-        => Subscribe(typeof(T).FullName!, handler);
+    public IDisposable Subscribe<T>(Func<T, CancellationToken, Task> handler) => Subscribe(typeof(T).FullName!, handler);
 
     // Subscribe to data events with custom event name
     public IDisposable Subscribe<T>(string eventName, Func<T, CancellationToken, Task> handler)
@@ -86,6 +86,13 @@ public sealed class EventHub : IEventHub
         ArgumentNullException.ThrowIfNull(handler);
 
         var key = GetEventKey<T>(eventName);
+        //var key = GetEventKey(eventName, data);
+
+        if (logger.IsEnabled(LogLevel.Trace))
+        {
+            logger.LogTrace("Created Subscriber for event '{EventName}' with data type {DataType} and Key: {Key}", eventName, typeof(T).FullName, key);
+        }
+
         var wrapper = GetOrCreateDataChannelWrapper<T>(key, eventName);
 
         var unSubscriber = wrapper.AddSubscriber(handler);
@@ -153,20 +160,12 @@ public sealed class EventHub : IEventHub
         }
     }
 
-    // Non-blocking best-effort publish for signal-only events
-    public bool TryPublish(string eventName)
-    {
-        ThrowIfDisposed();
-        ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
-
-        var ok = eventChannel.Writer.TryWrite(eventName);
-        if (ok) metrics?.IncrementEventsPublished(eventName);
-        return ok;
-    }
-
     // Publish data event (default event name: typeof(T).FullName)
     public Task Publish<T>(T data, CancellationToken cancellationToken = default)
         => Publish(typeof(T).FullName!, data, cancellationToken);
+
+    public Task Publish(object data, CancellationToken cancellationToken = default)
+        => Publish(data.GetType().FullName!, data, cancellationToken);
 
     // Publish data event with custom event name
     public async Task Publish<T>(string eventName, T data, CancellationToken cancellationToken = default)
@@ -175,12 +174,13 @@ public sealed class EventHub : IEventHub
         ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
         ArgumentNullException.ThrowIfNull(data);
 
+        //var key = GetEventKey<T>(eventName);
+        var key = GetEventKey(eventName, data);
+        var typeName = data.GetType().FullName!;
         if (logger.IsEnabled(LogLevel.Trace))
         {
-            logger.LogTrace("Publishing event '{EventName}' with data type {DataType}", eventName, typeof(T).FullName);
+            logger.LogTrace("Publishing event '{EventName}' with data type {DataType} and Key: {Key}", eventName, typeName, key);
         }
-
-        var key = GetEventKey<T>(eventName);
         if (dataChannels.TryGetValue(key, out var wrapper))
         {
             try
@@ -191,15 +191,27 @@ public sealed class EventHub : IEventHub
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
-                logger.LogWarning("Backpressure timeout exceeded for data event '{EventName}' with type {DataType}",
-                    eventName, typeof(T).FullName);
+                logger.LogWarning("Backpressure timeout exceeded for data event '{EventName}' with type {DataType} and Key: {Key}", eventName, typeName, key);
                 throw new TimeoutException($"Failed to publish data event '{eventName}' within timeout period");
             }
         }
-        else if (logger.IsEnabled(LogLevel.Debug))
+        else
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("No subscribers for event '{EventName}' with data type {DataType}", eventName, typeof(T).FullName);
+            logger.LogDebug("No subscribers for event: '{EventName}' with data type {DataType} and Key: {Key}", eventName, typeName, key);
         }
+    }
+
+
+    // Non-blocking best-effort publish for signal-only events
+    public bool TryPublish(string eventName)
+    {
+        ThrowIfDisposed();
+        ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
+
+        var ok = eventChannel.Writer.TryWrite(eventName);
+        if (ok) metrics?.IncrementEventsPublished(eventName);
+        return ok;
     }
 
     private async Task ProcessSignalsAsync(CancellationToken cancellationToken)
@@ -289,7 +301,7 @@ public sealed class EventHub : IEventHub
         try { await run().ConfigureAwait(false); }
         catch (OperationCanceledException) when (shutdownTokenSource.IsCancellationRequested)
         {
-            logger.LogDebug("Handler canceled for {Event}", eventName);
+            if (logger.IsEnabled(LogLevel.Debug)) logger.LogDebug("Handler canceled for {Event}", eventName);
         }
         catch (Exception ex)
         {
@@ -359,6 +371,7 @@ public sealed class EventHub : IEventHub
         }
     }
 
+    private static string GetEventKey(string eventName, object data) => $"{eventName}:{data.GetType().FullName}";
     private static string GetEventKey<T>(string eventName) => $"{eventName}:{typeof(T).FullName}";
 
     private void ThrowIfDisposed()
@@ -494,11 +507,6 @@ public sealed class EventHub : IEventHub
             await channel.Writer.WriteAsync(data, timeoutCts?.Token ?? cancellationToken).ConfigureAwait(false);
         }
 
-        public bool TryPublish(T data)
-        {
-            if (isDisposed) return false;
-            return channel.Writer.TryWrite(data);
-        }
 
         private async Task ProcessDataAsync(CancellationToken cancellationToken)
         {
