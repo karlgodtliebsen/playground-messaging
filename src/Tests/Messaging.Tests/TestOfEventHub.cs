@@ -182,7 +182,6 @@ public class TestOfEventHub(ITestOutputHelper output)
         var consumer1 = 0;
         var consumer2 = 0;
         var @event1 = "TestEvent1";
-        var @event2 = "TestEvent2";
         var options = new EventHubOptions();
         var eventHub = new EventHub(logger, Options.Create(options));
         eventHub.Subscribe(@event1, async (int i, CancellationToken ct) =>
@@ -194,7 +193,7 @@ public class TestOfEventHub(ITestOutputHelper output)
 
         eventHub.SubscribeToAll(async (eventName, ct) =>
         {
-            output.WriteLine($"Consumed 2: {@event1} value: {eventName}");
+            output.WriteLine($"Consumed All: {@event1} value: {eventName}");
             consumer2++;
             await Task.Delay(1, ct);
         });
@@ -211,13 +210,14 @@ public class TestOfEventHub(ITestOutputHelper output)
         for (var i = 0; i < number; i++)
         {
             await eventHub.Publish(@event1, i, cancellationToken);
+            await eventHub.Publish(@event1, cancellationToken);
             await Task.Delay(1, cancellationToken);
         }
 
         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken); //allows the channel to be processed completely
 
         consumer1.Should().Be(number);
-        consumer2.Should().Be(number);
+        consumer2.Should().Be(number * 2);
     }
 
 }
