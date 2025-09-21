@@ -14,10 +14,13 @@ public sealed class EventHubMetrics : IDisposable
 
     private volatile int totalSubscribers;
     private volatile int totalChannels;
+    private readonly bool ownsMeter;
 
-    public EventHubMetrics(string meterName = "EventHub")
+    public EventHubMetrics(IMeterFactory meterFactory, string meterName = "EventHub")
     {
-        meter = new Meter(meterName);
+        if (meterFactory is null) throw new ArgumentNullException(nameof(meterFactory));
+        meter = meterFactory.Create(meterName); // owned by the provider; don't dispose it
+        ownsMeter = false;
 
         eventsPublished = meter.CreateCounter<long>("events_published_total", "count", "Total number of events published");
         eventsProcessed = meter.CreateCounter<long>("events_processed_total", "count", "Total number of events processed");
@@ -30,6 +33,8 @@ public sealed class EventHubMetrics : IDisposable
 
         eventProcessingTime = meter.CreateHistogram<double>("event_processing_duration", "ms", "Event processing duration in milliseconds");
     }
+
+
 
     public void IncrementEventsPublished(string eventName) =>
         eventsPublished.Add(1, new KeyValuePair<string, object?>("event_name", eventName));
@@ -46,5 +51,9 @@ public sealed class EventHubMetrics : IDisposable
     public void SetSubscriberCount(int count) => totalSubscribers = count;
     public void SetChannelCount(int count) => totalChannels = count;
 
-    public void Dispose() => meter.Dispose();
+    public void Dispose()
+    {
+        // If you ever support a 'new Meter(...)' path, only dispose when you own it.
+        if (ownsMeter) meter.Dispose();
+    }
 }

@@ -33,20 +33,17 @@ public sealed class EventHub : IEventHub
     private readonly CancellationTokenSource shutdownTokenSource = new();
     private readonly Task signalProcessingTask;
     private volatile bool isDisposed;
-
-    public EventHub(ILogger<EventHub> logger, IOptions<EventHubOptions> options)
+    public EventHub(IOptions<EventHubOptions> options, ILogger<EventHub> logger)
     {
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        this.options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-
-        if (this.options.EnableMetrics)
-        {
-            metrics = new EventHubMetrics();
-        }
-
+        this.logger = logger;
+        this.options = options.Value;
         eventChannel = CreateChannel<string>();
-        // Process signal-only events (Publish(string ...))
         signalProcessingTask = Task.Run(() => ProcessSignalsAsync(shutdownTokenSource.Token));
+    }
+
+    public EventHub(EventHubMetrics metrics, IOptions<EventHubOptions> options, ILogger<EventHub> logger) : this(options, logger)
+    {
+        this.metrics = metrics;
     }
 
     // Subscribe to signal-only events
@@ -86,7 +83,6 @@ public sealed class EventHub : IEventHub
         ArgumentNullException.ThrowIfNull(handler);
 
         var key = GetEventKey<T>(eventName);
-        //var key = GetEventKey(eventName, data);
 
         if (logger.IsEnabled(LogLevel.Trace))
         {
@@ -153,28 +149,24 @@ public sealed class EventHub : IEventHub
 
             metrics?.IncrementEventsPublished(eventName);
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
-            logger.LogWarning("Backpressure timeout exceeded for signal event '{EventName}'", eventName);
+            logger.LogWarning(ex, "Backpressure timeout exceeded for signal event '{EventName}'", eventName);
             throw new TimeoutException($"Failed to publish signal event '{eventName}' within timeout period");
         }
     }
 
-    // Publish data event (default event name: typeof(T).FullName)
     public Task Publish<T>(T data, CancellationToken cancellationToken = default)
         => Publish(typeof(T).FullName!, data, cancellationToken);
 
     public Task Publish(object data, CancellationToken cancellationToken = default)
         => Publish(data.GetType().FullName!, data, cancellationToken);
 
-    // Publish data event with custom event name
     public async Task Publish<T>(string eventName, T data, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
         ArgumentNullException.ThrowIfNull(data);
-
-        //var key = GetEventKey<T>(eventName);
         var key = GetEventKey(eventName, data);
         var typeName = data.GetType().FullName!;
         if (logger.IsEnabled(LogLevel.Trace))
@@ -186,16 +178,16 @@ public sealed class EventHub : IEventHub
             try
             {
                 await ((DataChannelWrapper<T>)wrapper).Publish(data, cancellationToken).ConfigureAwait(false);
-                metrics?.IncrementEventsPublished($"{eventName}:{typeof(T).FullName}");
+                metrics?.IncrementEventsPublished($"{eventName}:{typeName}");
                 // NOTE: subscribe-to-all for DATA events is triggered in the wrapper after handler fan-out
             }
-            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
             {
-                logger.LogWarning("Backpressure timeout exceeded for data event '{EventName}' with type {DataType} and Key: {Key}", eventName, typeName, key);
+                logger.LogWarning(ex, "Backpressure timeout exceeded for data event '{EventName}' with type {DataType} and Key: {Key}", eventName, typeName, key);
                 throw new TimeoutException($"Failed to publish data event '{eventName}' within timeout period");
             }
+            return;
         }
-        else
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug("No subscribers for event: '{EventName}' with data type {DataType} and Key: {Key}", eventName, typeName, key);
@@ -434,7 +426,7 @@ public sealed class EventHub : IEventHub
         private readonly ConcurrentDictionary<Func<T, CancellationToken, Task>, byte> subscribers = new();
         private readonly CancellationTokenSource wrapperTokenSource;
         private readonly Task processingTask;
-        private readonly Func<string, CancellationToken, Task> notifyAllAsync; // <--
+        private readonly Func<string, CancellationToken, Task> notifyAllAsync;
 
         private volatile bool isDisposed;
 
@@ -530,7 +522,9 @@ public sealed class EventHub : IEventHub
         private async Task ProcessSingleDataAsync(T data, CancellationToken cancellationToken)
         {
             var stopwatch = Stopwatch.StartNew();
-            var label = $"{eventName}:{typeof(T).FullName}";
+            var typeName = "";
+            typeName = data is not null ? data.GetType().FullName : typeof(T).FullName;
+            var label = $"{eventName}:{typeName}";
             try
             {
                 var subs = subscribers.Keys.ToArray();
@@ -539,7 +533,7 @@ public sealed class EventHub : IEventHub
                 for (int i = 0; i < subs.Length; i++)
                 {
                     var handler = subs[i];
-                    tasks[i] = SafeInvokeHandlerAsync(handler, data, cancellationToken, label);
+                    tasks[i] = SafeInvokeHandlerAsync(handler, data, label, cancellationToken);
                 }
 
                 if (tasks.Length > 0) await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -555,11 +549,7 @@ public sealed class EventHub : IEventHub
             await notifyAllAsync(eventName, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task SafeInvokeHandlerAsync(
-            Func<T, CancellationToken, Task> handler,
-            T data,
-            CancellationToken cancellationToken,
-            string label)
+        private async Task SafeInvokeHandlerAsync(Func<T, CancellationToken, Task> handler, T data, string label, CancellationToken cancellationToken)
         {
             try
             {
@@ -567,7 +557,7 @@ public sealed class EventHub : IEventHub
             }
             catch (OperationCanceledException) when (wrapperTokenSource.IsCancellationRequested)
             {
-                logger.LogDebug("Data handler canceled for {Label}", label);
+                //No Operation needed
             }
             catch (Exception ex)
             {
@@ -591,7 +581,7 @@ public sealed class EventHub : IEventHub
             }
             catch (OperationCanceledException)
             {
-                /* expected */
+                //No Operation needed
             }
             catch (Exception ex) when (ex is AggregateException or TimeoutException)
             {

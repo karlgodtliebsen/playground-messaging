@@ -61,7 +61,7 @@ public class TestOfEventHub(ITestOutputHelper output)
         var @event1 = "TestEvent1";
         var @event2 = "TestEvent2";
         var options = new EventHubOptions();
-        var eventHub = new EventHub.Library.EventHub(logger, Options.Create(options));
+        var eventHub = new EventHub.Library.EventHub(Options.Create(options), logger);
 
 
         var subscription1 = eventHub.Subscribe(@event1, async (ct) =>
@@ -125,7 +125,7 @@ public class TestOfEventHub(ITestOutputHelper output)
         var @event1 = "TestEvent1";
         var @event2 = "TestEvent2";
         var options = new EventHubOptions();
-        var eventHub = new EventHub.Library.EventHub(logger, Options.Create(options));
+        var eventHub = new EventHub.Library.EventHub(Options.Create(options), logger);
         var subscription1 = eventHub.Subscribe(@event1, async (int i, CancellationToken ct) =>
         {
             output.WriteLine($"Consumed 1: {@event1} value: {i}");
@@ -183,7 +183,7 @@ public class TestOfEventHub(ITestOutputHelper output)
         var consumer2 = 0;
         var @event1 = "TestEvent1";
         var options = new EventHubOptions();
-        var eventHub = new EventHub.Library.EventHub(logger, Options.Create(options));
+        var eventHub = new EventHub.Library.EventHub(Options.Create(options), logger);
         eventHub.Subscribe(@event1, async (int i, CancellationToken ct) =>
         {
             output.WriteLine($"Consumed 1: {@event1} value: {i}");

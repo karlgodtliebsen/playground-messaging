@@ -27,5 +27,10 @@ public sealed class EventHubOptions
     /// <summary>
     /// Whether to enable metrics collection
     /// </summary>
-    public bool EnableMetrics { get; set; } = true;
+    public bool EnableMetrics { get; set; } = false;
+    /// <summary>
+    /// 
+    /// </summary>
+    public string MetricsName { get; set; } = "EventHub";
+
 }
