@@ -1,7 +1,9 @@
-﻿using Wolverine.RabbitMQ;
+﻿using Messaging.Library;
+
+using Wolverine.RabbitMQ;
 using Wolverine.RabbitMQ.Internal;
 
-namespace Messaging.RabbitMq.Library.LegacySupport;
+namespace Messaging.RabbitMq.Library.MessageSupport;
 
 public class MessageMap : IMessageMap
 {
@@ -49,13 +51,33 @@ public class MessageMap : IMessageMap
 
 }
 
-
-public class MessageMap<T> : MessageMap
+public class MessageMap<T> : MessageMap where T : new()
 {
     public MessageMap()
     {
         MessageType = typeof(T);
+        var msg = new T();
+        if (msg is IBaseMessage m)
+        {
+            ExchangeName = m.ExchangeName;
+            RoutingKey = m.RoutingKey;
+            BindingPattern = m.BindingPattern;
+            QueueName = m.QueueName;
+        }
     }
+    public MessageMap(string queueName)
+    {
+        MessageType = typeof(T);
+        var msg = new T();
+        if (msg is IBaseMessage m)
+        {
+            ExchangeName = m.ExchangeName;
+            RoutingKey = m.RoutingKey;
+            BindingPattern = m.BindingPattern;
+        }
+        QueueName = queueName;
+    }
+
     public MessageMap(string exchangeName, string routingKey, string bindingPattern, string? queueName = null)
     {
         MessageType = typeof(T);

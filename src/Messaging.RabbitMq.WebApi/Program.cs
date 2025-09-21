@@ -3,6 +3,7 @@ using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
 using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
+using Messaging.RabbitMq.Library.DemoMessages;
 using Messaging.RabbitMq.WebApi.Configuration;
 using Messaging.RabbitMq.WebApi.Controllers;
 
@@ -72,6 +73,9 @@ app.MapControllers();
 //app.MapPost("/messages/create", (CreateMessage msg, IEventHub bus) => bus.Publish("create-message", msg));
 //app.MapPost("/messages/create", (CreateMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
 app.MapPost("/messages/create", async (CreateMessage msg, IMessageBus bus) => await bus.PublishAsync(msg, new DeliveryOptions { }));
+
+app.MapPost("/text-message", async (TextMessage msg, IMessageBus bus) => await bus.PublishAsync(msg, new DeliveryOptions { }));
+
 
 app.MapPost("/messages/information", (InformationMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
 

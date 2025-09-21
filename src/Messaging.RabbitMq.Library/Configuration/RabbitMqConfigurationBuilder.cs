@@ -1,4 +1,4 @@
-﻿using Messaging.RabbitMq.Library.LegacySupport;
+﻿using Messaging.RabbitMq.Library.MessageSupport;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,6 +42,8 @@ public static class RabbitMqConfigurationBuilder
 
         rabbit.AutoProvision();
         extendAction?.Invoke(opts);
+
+        opts.Policies.Add<EventHubForwardingPolicy>();
 
         if (setupOptions.UseLegacyMapping)
         {

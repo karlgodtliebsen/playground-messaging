@@ -23,6 +23,20 @@ Content-Type: application/json
 
 ###
 
+POST {{Messaging.WebApi_HostAddress}}/text-message/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "MachineName" : "b3109a48-ec5d-4292-b985-4aa9d5dbf994",
+  "ApplicationName" : "b3109a48-ec5d-4292-b985-4aa9d5dbf994",
+
+  "MessageData": "Hello World"
+}
+
+###
+
+
 POST {{Messaging.WebApi_HostAddress}}/orders/
 Accept: application/json
 Content-Type: application/json

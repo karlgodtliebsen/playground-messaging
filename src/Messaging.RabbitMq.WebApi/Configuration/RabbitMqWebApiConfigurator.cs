@@ -1,7 +1,9 @@
 ﻿using Messaging.Domain.Library.Messages;
 using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
+using Messaging.RabbitMq.Library.DemoMessages;
 using Messaging.RabbitMq.Library.LegacySupport;
+using Messaging.RabbitMq.Library.MessageSupport;
 using Messaging.RabbitMq.WebApi.Controllers;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -50,6 +52,7 @@ public static class RabbitMqWebApiConfigurator
 
         //publishing messages
         var publishingCollection = new ServiceCollection();
+        publishingCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>();
         publishingCollection.AddSingleton<IMessageMap, MessageMap>((sp) =>
             new MessageMap<CreateMessage>()
             {
@@ -119,7 +122,10 @@ public static class RabbitMqWebApiConfigurator
 
         //listening to messages
         var listeningCollection = new ServiceCollection();
-        //listeningCollection.AddSingleton<MessageMap<TextMessage>>();
+        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>();
+        //listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
+        //listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+
         listeningCollection.AddSingleton<IMessageMap, MessageMap>((sp) =>
             new MessageMap<CreateMessage>()
             {
@@ -129,9 +135,6 @@ public static class RabbitMqWebApiConfigurator
                 QueueName = "create-message-queue",
             }
         );
-
-        //listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
-        //listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
 
         // var messageQueueNameRegistration = new TypeToQueueMapper();
         //messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");

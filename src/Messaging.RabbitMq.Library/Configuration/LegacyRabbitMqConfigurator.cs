@@ -1,5 +1,6 @@
 ﻿using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
+using Messaging.RabbitMq.Library.MessageSupport;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

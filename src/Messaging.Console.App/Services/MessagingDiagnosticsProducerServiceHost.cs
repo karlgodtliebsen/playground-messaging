@@ -1,4 +1,4 @@
-﻿using Messaging.RabbitMq.Library;
+﻿using Messaging.RabbitMq.Library.DemoMessages;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

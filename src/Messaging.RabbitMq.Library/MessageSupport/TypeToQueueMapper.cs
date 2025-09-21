@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Messaging.RabbitMq.Library.LegacySupport;
+namespace Messaging.RabbitMq.Library.MessageSupport;
 
 public class TypeToQueueMapper
 {

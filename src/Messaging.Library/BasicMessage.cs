@@ -1,13 +1,18 @@
 namespace Messaging.Library;
 
-public interface IBaseMessage
+public interface IMessage
+{
+
+}
+
+public interface IBaseMessage : IMessage
 {
     string ExchangeName { get; }
     string RoutingKey { get; }
     string BindingPattern { get; }
     string? QueueName { get; }
-
 }
+
 public class BaseMessage : IBaseMessage
 {
     protected BaseMessage() { }

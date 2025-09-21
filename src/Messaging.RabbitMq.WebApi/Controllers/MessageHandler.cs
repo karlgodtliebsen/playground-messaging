@@ -10,7 +10,6 @@ public static class MessageHandler
         logger.LogInformation("RabbitMq.MessageHandler Received Create Message: {@message}", message);
         eventHub.Publish("create-message", message);
         eventHub.Publish(message);
-
     }
 
     public static void Handle(InformationMessage message, ILogger<InformationMessage> logger)

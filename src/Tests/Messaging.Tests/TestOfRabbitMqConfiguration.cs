@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 
-using Messaging.RabbitMq.Library;
-using Messaging.RabbitMq.Library.Configuration;
+using Messaging.RabbitMq.Library.DemoMessages;
 using Messaging.RabbitMq.Library.LegacySupport;
+using Messaging.RabbitMq.Library.MessageSupport;
 
 
 namespace Messaging.Tests;

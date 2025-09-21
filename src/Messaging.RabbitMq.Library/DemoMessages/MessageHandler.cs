@@ -2,7 +2,7 @@ using Messaging.Library.EventHubChannel;
 
 using Microsoft.Extensions.Logging;
 
-namespace Messaging.RabbitMq.Library;
+namespace Messaging.RabbitMq.Library.DemoMessages;
 
 public class MessageHandler(IEventHub channel, ILogger<MessageHandler> logger)
 {
@@ -29,5 +29,5 @@ public class MessageHandler(IEventHub channel, ILogger<MessageHandler> logger)
         await channel.Publish("HeartbeatMessage", message, cancellationToken);
         await channel.Publish(message, cancellationToken);
     }
-
 }
+
