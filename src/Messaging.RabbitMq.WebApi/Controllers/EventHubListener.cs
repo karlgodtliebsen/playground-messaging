@@ -1,4 +1,5 @@
-﻿using Messaging.Domain.Library.Messages;
+﻿using Messaging.Domain.Library.DemoMessages;
+using Messaging.Domain.Library.SimpleMessages;
 using Messaging.Library.EventHubChannel;
 
 namespace Messaging.RabbitMq.WebApi.Controllers;
@@ -15,6 +16,11 @@ public class EventHubListener(IEventHub eventHub, ILogger<EventHubListener> logg
         eventHub.Subscribe<CreateMessage>((createMessage, ct) =>
         {
             logger.LogInformation("EventListener Received CreateMessage: {@message}", createMessage);
+            return Task.CompletedTask;
+        });
+        eventHub.Subscribe<TextMessage>((createMessage, ct) =>
+        {
+            logger.LogInformation("EventListener Received TextMessage: {@message}", createMessage);
             return Task.CompletedTask;
         });
         eventHub.SubscribeToAll((eventName, ct) =>

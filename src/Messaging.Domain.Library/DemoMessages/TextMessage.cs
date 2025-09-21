@@ -1,6 +1,6 @@
 using Messaging.Library;
 
-namespace Messaging.RabbitMq.Library.DemoMessages;
+namespace Messaging.Domain.Library.DemoMessages;
 
 public class TextMessage : IBasicMessage
 {

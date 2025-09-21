@@ -1,4 +1,4 @@
-using Messaging.Domain.Library.Messages;
+using Messaging.Domain.Library.SimpleMessages;
 using Messaging.Library.EventHubChannel;
 
 namespace Messaging.RabbitMq.WebApi.Controllers;

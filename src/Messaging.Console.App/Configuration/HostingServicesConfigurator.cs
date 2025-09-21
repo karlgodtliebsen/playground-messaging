@@ -1,6 +1,6 @@
-﻿using Messaging.Library.Configuration;
+﻿using Messaging.Domain.Library.DemoMessages;
+using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
-using Messaging.RabbitMq.Library.DemoMessages;
 using Messaging.RabbitMq.Library.LegacySupport;
 using Messaging.RabbitMq.Library.MessageSupport;
 
@@ -20,7 +20,6 @@ public static class HostingServicesConfigurator
 
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
             typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
 
@@ -61,7 +60,6 @@ public static class HostingServicesConfigurator
 
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
             typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
 

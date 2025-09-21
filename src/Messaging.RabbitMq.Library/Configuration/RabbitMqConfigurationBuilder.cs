@@ -43,7 +43,10 @@ public static class RabbitMqConfigurationBuilder
         rabbit.AutoProvision();
         extendAction?.Invoke(opts);
 
-        opts.Policies.Add<EventHubForwardingPolicy>();
+        if (setupOptions.UseEventPublishing)
+        {
+            opts.Policies.AddMiddleware<EventHubForwardingMiddleware>();
+        }
 
         if (setupOptions.UseLegacyMapping)
         {

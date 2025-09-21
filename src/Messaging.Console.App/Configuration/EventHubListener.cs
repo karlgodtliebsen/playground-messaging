@@ -1,6 +1,5 @@
-﻿using Messaging.Library.EventHubChannel;
-using Messaging.RabbitMq.Library.DemoMessages;
-
+﻿using Messaging.Domain.Library.DemoMessages;
+using Messaging.Library.EventHubChannel;
 using Microsoft.Extensions.Logging;
 
 namespace Messaging.Console.App.Configuration;

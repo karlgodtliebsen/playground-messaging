@@ -1,9 +1,8 @@
 ﻿using FluentAssertions;
 
-using Messaging.RabbitMq.Library.DemoMessages;
+using Messaging.Domain.Library.DemoMessages;
 using Messaging.RabbitMq.Library.LegacySupport;
 using Messaging.RabbitMq.Library.MessageSupport;
-
 
 namespace Messaging.Tests;
 
@@ -18,11 +17,11 @@ public class TestOfRabbitMqConfiguration
         mapper.Register<HeartbeatMessage>(typeof(HeartbeatMessage).FullName!);
 
         var (fullName, assemblyName) = mapper.MapToLegacy<TextMessage>();
-        fullName.Should().Be("Messaging.RabbitMq.Library.TextMessage");
-        assemblyName.Should().Be("Messaging.RabbitMq.Library");
+        fullName.Should().Be("Messaging.Domain.Library.DemoMessages.TextMessage");
+        assemblyName.Should().Be("Messaging.Domain.Library");
 
         var typeName = mapper.MapFromLegacy(fullName, assemblyName);
-        typeName.Should().Be("Messaging.RabbitMq.Library.TextMessage");
+        typeName.Should().Be("Messaging.Domain.Library.DemoMessages.TextMessage");
     }
 
     [Fact]

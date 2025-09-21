@@ -1,6 +1,6 @@
 using Messaging.Library;
 
-namespace Messaging.Domain.Library.Messages;
+namespace Messaging.Domain.Library.SimpleMessages;
 
 public class CreateMessage : IMessage
 {

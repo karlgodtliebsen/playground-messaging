@@ -1,5 +1,4 @@
-using Messaging.Domain.Library.Messages;
-
+using Messaging.Domain.Library.SimpleMessages;
 using Microsoft.Extensions.Logging;
 
 namespace Messaging.Kafka.Library.Services;

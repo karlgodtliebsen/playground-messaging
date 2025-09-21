@@ -1,6 +1,6 @@
-using Messaging.Domain.Library.Messages;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
+using Messaging.Domain.Library.SimpleMessages;
 using Messaging.Kafka.Library.Configuration;
 using Messaging.Kafka.WebApi.Configuration;
 

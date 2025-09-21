@@ -1,7 +1,7 @@
-﻿using Messaging.Domain.Library.Messages;
+﻿using Messaging.Domain.Library.DemoMessages;
+using Messaging.Domain.Library.SimpleMessages;
 using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
-using Messaging.RabbitMq.Library.DemoMessages;
 using Messaging.RabbitMq.Library.LegacySupport;
 using Messaging.RabbitMq.Library.MessageSupport;
 using Messaging.RabbitMq.WebApi.Controllers;
@@ -45,7 +45,6 @@ public static class RabbitMqWebApiConfigurator
         service.AddOptions(configuration);
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
             typeof(Messaging.RabbitMq.WebApi.Configuration.Anchor).Assembly,
             typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
@@ -73,7 +72,6 @@ public static class RabbitMqWebApiConfigurator
         service.AddEventHubServices(configuration);
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
             typeof(Messaging.RabbitMq.WebApi.Configuration.Anchor).Assembly,
             typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
@@ -114,7 +112,6 @@ public static class RabbitMqWebApiConfigurator
         service.AddEventHubServices(configuration);
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
             typeof(Messaging.RabbitMq.WebApi.Configuration.Anchor).Assembly,
             typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
@@ -153,7 +150,6 @@ public static class RabbitMqWebApiConfigurator
 
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.RabbitMq.Library.Configuration.Anchor).Assembly,
             typeof(Messaging.RabbitMq.WebApi.Configuration.Anchor).Assembly,
             typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
         };
