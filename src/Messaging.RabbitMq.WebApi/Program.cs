@@ -73,11 +73,7 @@ app.MapControllers();
 //app.MapPost("/messages/create", (CreateMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
 app.MapPost("/messages/create", async (CreateMessage msg, IMessageBus bus) => await bus.PublishAsync(msg, new DeliveryOptions { }));
 
-
 app.MapPost("/messages/information", (InformationMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
-
-
-
 
 app.MapPost("/orders", async (CreateOrderRequest request, IMessageBus messageBus) =>
 {

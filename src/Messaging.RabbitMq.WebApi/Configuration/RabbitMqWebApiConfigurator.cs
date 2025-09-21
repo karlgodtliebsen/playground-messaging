@@ -129,13 +129,6 @@ public static class RabbitMqWebApiConfigurator
                 QueueName = "create-message-queue",
             }
         );
-        //listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
-        //    new MessageMap<TextMessage>()
-        //    {
-        //        QueueName = "text-message-queue",
-        //        DurableQueue = true,//to show customization
-        //    }
-        //);
 
         //listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
         //listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();

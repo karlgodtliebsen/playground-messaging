@@ -176,4 +176,48 @@ public class TestOfEventHub(ITestOutputHelper output)
         consumer3.Should().Be(number);
     }
 
+    [Fact]
+    public async Task VerifyUseOfEventHubForSendingEventsToAllSubscribers()
+    {
+        var consumer1 = 0;
+        var consumer2 = 0;
+        var @event1 = "TestEvent1";
+        var @event2 = "TestEvent2";
+        var options = new EventHubOptions();
+        var eventHub = new EventHub(logger, Options.Create(options));
+        eventHub.Subscribe(@event1, async (int i, CancellationToken ct) =>
+        {
+            output.WriteLine($"Consumed 1: {@event1} value: {i}");
+            consumer1++;
+            await Task.Delay(1, ct);
+        });
+
+        eventHub.SubscribeToAll(async (eventName, ct) =>
+        {
+            output.WriteLine($"Consumed 2: {@event1} value: {eventName}");
+            consumer2++;
+            await Task.Delay(1, ct);
+        });
+
+        eventHub.SubscribeToAll((eventName, ct) =>
+        {
+            logger.LogInformation("EventListener Received Event: {eventName}", eventName);
+            return Task.CompletedTask;
+        });
+
+
+        var number = 5;
+
+        for (var i = 0; i < number; i++)
+        {
+            await eventHub.Publish(@event1, i, cancellationToken);
+            await Task.Delay(1, cancellationToken);
+        }
+
+        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken); //allows the channel to be processed completely
+
+        consumer1.Should().Be(number);
+        consumer2.Should().Be(number);
+    }
+
 }
