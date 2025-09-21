@@ -9,8 +9,6 @@ using RabbitMQ.Client;
 
 namespace Messaging.Console.App.Services;
 
-//var queueNames = new[] { "your-queue-1", "your-queue-2" };
-
 public class QueueMonitoringService(
 
     [FromKeyedServices("monitor")] IOptions<string[]> queueNamesOptions,

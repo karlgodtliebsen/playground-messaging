@@ -59,6 +59,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
+    <ProjectReference Include="..\..\Messaging.EventHub.Library\Messaging.EventHub.Library.csproj" />
     <ProjectReference Include="..\..\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
   </ItemGroup>
 

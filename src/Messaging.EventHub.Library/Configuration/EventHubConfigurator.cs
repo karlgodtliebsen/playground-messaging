@@ -1,10 +1,9 @@
-﻿using Messaging.Library.EventHubChannel;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace Messaging.Library.Configuration;
+namespace Messaging.EventHub.Library.Configuration;
 
 public static class EventHubConfigurator
 {

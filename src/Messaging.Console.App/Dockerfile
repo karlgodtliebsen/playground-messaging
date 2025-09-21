@@ -12,8 +12,9 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Messaging.Console.App/Messaging.Console.App.csproj", "Messaging.Console.App/"]
 COPY ["Messaging.Domain.Library/Messaging.Domain.Library.csproj", "Messaging.Domain.Library/"]
-COPY ["Messaging.Kafka.Library/Messaging.Kafka.Library.csproj", "Messaging.Kafka.Library/"]
+COPY ["Messaging.EventHub.Library/Messaging.EventHub.Library.csproj", "Messaging.EventHub.Library/"]
 COPY ["Messaging.Library/Messaging.Library.csproj", "Messaging.Library/"]
+COPY ["Messaging.Kafka.Library/Messaging.Kafka.Library.csproj", "Messaging.Kafka.Library/"]
 COPY ["Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj", "Messaging.RabbitMq.Library/"]
 COPY ["Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj", "Messaging.ServiceDefaults/"]
 RUN dotnet restore "./Messaging.Console.App/Messaging.Console.App.csproj"

@@ -1,4 +1,5 @@
-using Messaging.Library.EventHubChannel;
+
+using Messaging.EventHub.Library;
 
 using Wolverine;
 

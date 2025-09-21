@@ -1,6 +1,6 @@
 ﻿using Messaging.Domain.Library.DemoMessages;
 using Messaging.Domain.Library.SimpleMessages;
-using Messaging.Library.Configuration;
+using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
 using Messaging.RabbitMq.Library.MessageSupport;

@@ -1,5 +1,5 @@
 using Messaging.Domain.Library.SimpleMessages;
-using Messaging.Library.EventHubChannel;
+using Messaging.EventHub.Library;
 
 namespace Messaging.RabbitMq.WebApi.Controllers;
 public static class MessageHandler

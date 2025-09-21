@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messaging.Kafka.Library", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messaging.Domain.Library", "Messaging.Domain.Library\Messaging.Domain.Library.csproj", "{BC1AA9F7-4DB8-3C5F-465B-738FA0E46683}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messaging.EventHub.Library", "Messaging.EventHub.Library\Messaging.EventHub.Library.csproj", "{4FE40022-34D9-4E69-C49A-D4A50D8752F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{BC1AA9F7-4DB8-3C5F-465B-738FA0E46683}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC1AA9F7-4DB8-3C5F-465B-738FA0E46683}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC1AA9F7-4DB8-3C5F-465B-738FA0E46683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FE40022-34D9-4E69-C49A-D4A50D8752F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FE40022-34D9-4E69-C49A-D4A50D8752F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FE40022-34D9-4E69-C49A-D4A50D8752F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FE40022-34D9-4E69-C49A-D4A50D8752F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +98,7 @@ Global
 		{14CD85B8-AEA6-5D5C-9E3E-84EEC027B08C} = {4A654D52-56CD-4532-B81A-8593117515BA}
 		{4376E51D-DD90-3BDC-4EDF-1B1541860301} = {4A654D52-56CD-4532-B81A-8593117515BA}
 		{BC1AA9F7-4DB8-3C5F-465B-738FA0E46683} = {4A654D52-56CD-4532-B81A-8593117515BA}
+		{4FE40022-34D9-4E69-C49A-D4A50D8752F3} = {4A654D52-56CD-4532-B81A-8593117515BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9B159EEC-F23D-4D42-BA3B-BE096CC2C460}

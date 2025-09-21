@@ -1,10 +1,12 @@
 ﻿using Messaging.Console.App.Services;
+using Messaging.EventHub.Library.Configuration;
 using Messaging.Kafka.Library.Configuration;
-using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Wolverine;
 
 namespace Messaging.Console.App.Configuration;

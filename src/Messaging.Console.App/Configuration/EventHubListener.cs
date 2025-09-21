@@ -1,5 +1,6 @@
 ﻿using Messaging.Domain.Library.DemoMessages;
-using Messaging.Library.EventHubChannel;
+using Messaging.EventHub.Library;
+
 using Microsoft.Extensions.Logging;
 
 namespace Messaging.Console.App.Configuration;

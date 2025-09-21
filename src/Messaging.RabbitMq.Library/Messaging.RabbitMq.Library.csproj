@@ -27,6 +27,7 @@
     <PackageReference Include="WolverineFx.SqlServer" Version="4.12.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Messaging.EventHub.Library\Messaging.EventHub.Library.csproj" />
     <ProjectReference Include="..\Messaging.Library\Messaging.Library.csproj" />
   </ItemGroup>
 </Project>

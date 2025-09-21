@@ -1,15 +1,11 @@
-namespace Messaging.Library.EventHubChannel;
-
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Channels;
-using System.Threading.Tasks;
+namespace Messaging.EventHub.Library;
+
 /// <summary>
 /// An event hub that uses channels for both signal-only events and data-carrying events.
 /// Supports asynchronous handlers, generic data events, backpressure handling, and metrics.

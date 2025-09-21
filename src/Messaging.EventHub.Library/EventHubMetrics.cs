@@ -1,6 +1,6 @@
 using System.Diagnostics.Metrics;
 
-namespace Messaging.Library.EventHubChannel;
+namespace Messaging.EventHub.Library;
 
 public sealed class EventHubMetrics : IDisposable
 {

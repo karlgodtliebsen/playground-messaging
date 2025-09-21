@@ -1,4 +1,4 @@
-﻿using Messaging.Library.Configuration;
+﻿using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
 using Messaging.RabbitMq.Library.MessageSupport;
 

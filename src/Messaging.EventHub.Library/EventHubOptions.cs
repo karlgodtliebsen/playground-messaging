@@ -1,6 +1,6 @@
 using System.Threading.Channels;
 
-namespace Messaging.Library.EventHubChannel;
+namespace Messaging.EventHub.Library;
 
 /// <summary>
 /// Configuration options for the EventHub

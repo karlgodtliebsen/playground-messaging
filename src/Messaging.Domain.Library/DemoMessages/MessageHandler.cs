@@ -1,4 +1,5 @@
-using Messaging.Library.EventHubChannel;
+using Messaging.EventHub.Library;
+
 using Microsoft.Extensions.Logging;
 
 namespace Messaging.Domain.Library.DemoMessages;

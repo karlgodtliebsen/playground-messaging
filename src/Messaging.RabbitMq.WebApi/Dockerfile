@@ -14,6 +14,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj", "Messaging.RabbitMq.WebApi/"]
 COPY ["Messaging.Domain.Library/Messaging.Domain.Library.csproj", "Messaging.Domain.Library/"]
+COPY ["Messaging.EventHub.Library/Messaging.EventHub.Library.csproj", "Messaging.EventHub.Library/"]
 COPY ["Messaging.Library/Messaging.Library.csproj", "Messaging.Library/"]
 COPY ["Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj", "Messaging.RabbitMq.Library/"]
 COPY ["Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj", "Messaging.ServiceDefaults/"]

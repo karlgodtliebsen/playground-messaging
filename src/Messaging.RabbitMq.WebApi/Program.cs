@@ -2,7 +2,7 @@ using Messaging.Domain.Library.DemoMessages;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
 using Messaging.Domain.Library.SimpleMessages;
-using Messaging.Library.Configuration;
+using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
 using Messaging.RabbitMq.WebApi.Configuration;
 using Messaging.RabbitMq.WebApi.Controllers;
