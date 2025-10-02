@@ -5,35 +5,48 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Channels;
 
-namespace Messaging.EventHub.Library;
+namespace Messaging.EventHub.Library.EventHubs;
 
 /// <summary>
 /// An event hub that uses channels for both signal-only events and data-carrying events.
 /// Supports asynchronous handlers, generic data events, backpressure handling, and metrics.
+/// Features:
+///  - Multiple registrations of the same handler (using Guid keys)
+///  - Multiple data subscribers per event, including base/interface subscribers via IsAssignableFrom
+///  - Optional "fire-and-collect" mode to avoid blocking channel drains on slow handlers (signals + data)
 /// </summary>
-public sealed class EventHub : IEventHub
+public sealed class EventHubChannel : IEventHub
 {
-    private readonly ILogger<EventHub> logger;
+    private readonly ILogger<EventHubChannel> logger;
     private readonly EventHubOptions options;
     private readonly EventHubMetrics? metrics;
+
+    // --- Optional improvement toggle ---
+    // When true, per-message handler invocations are fired and collected in the background
+    // so the channel can continue draining under load.
+    // Keep false to preserve strict per-message completion semantics.
+    private readonly bool fireAndCollectHandlers = false;
 
     // Signal-only channel (string event names)
     private readonly Channel<string> eventChannel;
 
-    // Per-(eventName,type) data channels
-    private readonly ConcurrentDictionary<string, IChannelWrapper> dataChannels = new();
+    // Data channels organized by event name -> subscriber type (T)
+    // Each (eventName, T) holds a channel wrapper that fans out to N handlers of T.
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<Type, IChannelWrapper>> dataChannelsByEvent =
+        new(StringComparer.Ordinal);
 
-    // Signal-only subscribers: eventName -> set of handlers
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<Func<CancellationToken, Task>, byte>>
+    // Signal-only subscribers: eventName -> map(Guid -> handler)
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, Func<CancellationToken, Task>>>
         eventSubscribers = new();
 
-    // "Subscribe to all" (signal notifications across all events)
-    private readonly ConcurrentDictionary<Func<string, CancellationToken, Task>, byte> allEventsSubscribers = new();
+    // "Subscribe to all" (signal notifications across all events): map(Guid -> handler)
+    private readonly ConcurrentDictionary<Guid, Func<string, CancellationToken, Task>> allEventsSubscribers = new();
 
     private readonly CancellationTokenSource shutdownTokenSource = new();
     private readonly Task signalProcessingTask;
     private volatile bool isDisposed;
-    public EventHub(IOptions<EventHubOptions> options, ILogger<EventHub> logger)
+
+    public EventHubChannel(IOptions<EventHubOptions> options, ILogger<EventHubChannel> logger)
     {
         this.logger = logger;
         this.options = options.Value;
@@ -41,7 +54,7 @@ public sealed class EventHub : IEventHub
         signalProcessingTask = Task.Run(() => ProcessSignalsAsync(shutdownTokenSource.Token));
     }
 
-    public EventHub(EventHubMetrics metrics, IOptions<EventHubOptions> options, ILogger<EventHub> logger) : this(options, logger)
+    public EventHubChannel(EventHubMetrics metrics, IOptions<EventHubOptions> options, ILogger<EventHubChannel> logger) : this(options, logger)
     {
         this.metrics = metrics;
     }
@@ -53,16 +66,18 @@ public sealed class EventHub : IEventHub
         ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
         ArgumentNullException.ThrowIfNull(handler);
 
-        var subscribers = eventSubscribers.GetOrAdd(eventName, _ => new ConcurrentDictionary<Func<CancellationToken, Task>, byte>());
+        var subscribers = eventSubscribers.GetOrAdd(eventName,
+            _ => new ConcurrentDictionary<Guid, Func<CancellationToken, Task>>());
 
-        subscribers.TryAdd(handler, 0);
+        var id = Guid.NewGuid();
+        subscribers.TryAdd(id, handler);
         UpdateSubscriberMetrics();
 
         return new UnSubscriber(() =>
         {
             if (eventSubscribers.TryGetValue(eventName, out var subs))
             {
-                subs.TryRemove(handler, out _);
+                subs.TryRemove(id, out _);
                 if (subs.IsEmpty)
                 {
                     eventSubscribers.TryRemove(eventName, out _);
@@ -82,29 +97,44 @@ public sealed class EventHub : IEventHub
         ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
         ArgumentNullException.ThrowIfNull(handler);
 
-        var key = GetEventKey<T>(eventName);
-
         if (logger.IsEnabled(LogLevel.Trace))
         {
-            logger.LogTrace("Created Subscriber for event '{EventName}' with data type {DataType} and Key: {Key}", eventName, typeof(T).FullName, key);
+            logger.LogTrace("Created Subscriber for event '{EventName}' with data type {DataType}", eventName, typeof(T).FullName);
+
+
         }
 
-        var wrapper = GetOrCreateDataChannelWrapper<T>(key, eventName);
+        var wrappersForEvent = dataChannelsByEvent.GetOrAdd(
+            eventName,
+            static _ => new ConcurrentDictionary<Type, IChannelWrapper>());
+
+        var wrapper = (DataChannelWrapper<T>)wrappersForEvent.GetOrAdd(
+            typeof(T),
+            static (_, state) =>
+            {
+                var (evt, logger, options, metrics, cts, notifyAll, fireAndCollect) = state;
+                return new DataChannelWrapper<T>(evt, logger, options, metrics, cts.Token, notifyAll, fireAndCollect);
+            },
+            (eventName, logger, options, metrics, shutdownTokenSource, (Func<string, CancellationToken, Task>)NotifyAllSubscribersAsync, fireAndCollectHandlers));
 
         var unSubscriber = wrapper.AddSubscriber(handler);
         UpdateSubscriberMetrics();
+        UpdateChannelMetrics();
 
         return new UnSubscriber(() =>
         {
             unSubscriber.Dispose();
             UpdateSubscriberMetrics();
 
-            // Clean up empty channels
+            // Clean up empty wrapper
             if (wrapper.SubscriberCount == 0)
             {
-                if (dataChannels.TryRemove(key, out var removedWrapper))
+                if (wrappersForEvent.TryRemove(typeof(T), out var removed))
                 {
-                    removedWrapper.Dispose();
+                    removed.Dispose();
+                    if (wrappersForEvent.IsEmpty)
+                        dataChannelsByEvent.TryRemove(eventName, out _);
+
                     UpdateChannelMetrics();
                 }
             }
@@ -117,12 +147,13 @@ public sealed class EventHub : IEventHub
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(handler);
 
-        allEventsSubscribers.TryAdd(handler, 0);
+        var id = Guid.NewGuid();
+        allEventsSubscribers.TryAdd(id, handler);
         UpdateSubscriberMetrics();
 
         return new UnSubscriber(() =>
         {
-            allEventsSubscribers.TryRemove(handler, out _);
+            allEventsSubscribers.TryRemove(id, out _);
             UpdateSubscriberMetrics();
         });
     }
@@ -162,49 +193,66 @@ public sealed class EventHub : IEventHub
     public Task Publish(object data, CancellationToken cancellationToken = default)
         => Publish(data.GetType().FullName!, data, cancellationToken);
 
+    // Publish data with fan-out to all compatible subscriber types (IsAssignableFrom)
     public async Task Publish<T>(string eventName, T data, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
         ArgumentNullException.ThrowIfNull(data);
-        var key = GetEventKey(eventName, data);
-        var typeName = data.GetType().FullName!;
+
+        var runtimeType = data.GetType();
+
         if (logger.IsEnabled(LogLevel.Trace))
         {
-            logger.LogTrace("Publishing event '{EventName}' with data type {DataType} and Key: {Key}", eventName, typeName, key);
+            logger.LogTrace("Publishing event '{EventName}' with data type {DataType}", eventName, runtimeType.FullName);
         }
-        if (dataChannels.TryGetValue(key, out var wrapper))
+
+        if (!dataChannelsByEvent.TryGetValue(eventName, out var wrappersForEvent) || wrappersForEvent.IsEmpty)
         {
-            try
+            if (logger.IsEnabled(LogLevel.Debug))
             {
-                await ((DataChannelWrapper<T>)wrapper).Publish(data, cancellationToken).ConfigureAwait(false);
-                metrics?.IncrementEventsPublished($"{eventName}:{typeName}");
-                // NOTE: subscribe-to-all for DATA events is triggered in the wrapper after handler fan-out
-            }
-            catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
-            {
-                logger.LogWarning(ex, "Backpressure timeout exceeded for data event '{EventName}' with type {DataType} and Key: {Key}", eventName, typeName, key);
-                throw new TimeoutException($"Failed to publish data event '{eventName}' within timeout period");
+                logger.LogDebug("No subscribers for event: '{EventName}'", eventName);
             }
             return;
         }
-        if (logger.IsEnabled(LogLevel.Debug))
+
+        // Select all wrappers where TSubscriber.IsAssignableFrom(runtimeType)
+        var targets = wrappersForEvent
+            .Where(kvp => kvp.Key.IsAssignableFrom(runtimeType))
+            .Select(kvp => kvp.Value)
+            .ToArray();
+
+        if (targets.Length == 0)
         {
-            logger.LogDebug("No subscribers for event: '{EventName}' with data type {DataType} and Key: {Key}", eventName, typeName, key);
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug("No compatible subscribers for event: '{EventName}' and type {Type}", eventName, runtimeType.FullName);
+            }
+            return;
         }
+
+        var publishTasks = new List<Task>(targets.Length);
+
+        foreach (var wrapper in targets)
+        {
+            try
+            {
+                publishTasks.Add(((IDataPublisher)wrapper).PublishObject(data!, cancellationToken));
+            }
+            catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                logger.LogWarning(ex, "Backpressure timeout exceeded for data event '{EventName}' with runtime type {Type}", eventName, runtimeType.FullName);
+                throw new TimeoutException($"Failed to publish data event '{eventName}' within timeout period");
+            }
+        }
+
+        // Complete the publish only after all wrappers accepted the message (preserves backpressure semantics)
+        await Task.WhenAll(publishTasks).ConfigureAwait(false);
+
+        metrics?.IncrementEventsPublished($"{eventName}:{runtimeType.FullName}");
+        // NOTE: subscribe-to-all for DATA events is triggered in the wrapper after handler fan-out
     }
 
-
-    // Non-blocking best-effort publish for signal-only events
-    public bool TryPublish(string eventName)
-    {
-        ThrowIfDisposed();
-        ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
-
-        var ok = eventChannel.Writer.TryWrite(eventName);
-        if (ok) metrics?.IncrementEventsPublished(eventName);
-        return ok;
-    }
 
     private async Task ProcessSignalsAsync(CancellationToken cancellationToken)
     {
@@ -230,9 +278,11 @@ public sealed class EventHub : IEventHub
         var sw = Stopwatch.StartNew();
         try
         {
-            var subs = eventSubscribers.TryGetValue(eventName, out var d) ? d.Keys.ToArray() : [];
+            var subs = eventSubscribers.TryGetValue(eventName, out var d)
+                ? d.Values.ToArray()
+                : [];
 
-            var all = allEventsSubscribers.Keys.ToArray();
+            var all = allEventsSubscribers.Values.ToArray();
 
             var tasks = new Task[subs.Length + all.Length];
             var idx = 0;
@@ -246,7 +296,18 @@ public sealed class EventHub : IEventHub
                 tasks[idx++] = SafeInvokeAsync(eventName, () => h(eventName, ct));
             }
 
-            if (tasks.Length > 0) await Task.WhenAll(tasks).ConfigureAwait(false);
+            if (tasks.Length > 0)
+            {
+                if (fireAndCollectHandlers)
+                {
+                    _ = Task.WhenAll(tasks).ContinueWith(_ => { /* collected */ }, TaskScheduler.Default);
+                }
+                else
+                {
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                }
+            }
+
             metrics?.IncrementEventsProcessed(eventName);
         }
         finally
@@ -262,7 +323,7 @@ public sealed class EventHub : IEventHub
         var sw = Stopwatch.StartNew();
         try
         {
-            var all = allEventsSubscribers.Keys.ToArray();
+            var all = allEventsSubscribers.Values.ToArray();
             if (all.Length == 0) return;
 
             var tasks = new Task[all.Length];
@@ -272,7 +333,15 @@ public sealed class EventHub : IEventHub
                 tasks[i] = SafeInvokeAsync(eventName, () => h(eventName, ct));
             }
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            if (fireAndCollectHandlers)
+            {
+                _ = Task.WhenAll(tasks).ContinueWith(_ => { /* collected */ }, TaskScheduler.Default);
+            }
+            else
+            {
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+
             metrics?.IncrementEventsProcessed(eventName);
         }
         finally
@@ -302,40 +371,21 @@ public sealed class EventHub : IEventHub
         }
     }
 
-    private DataChannelWrapper<T> GetOrCreateDataChannelWrapper<T>(string key, string eventName)
-    {
-        if (dataChannels.TryGetValue(key, out var existing))
-        {
-            return (DataChannelWrapper<T>)existing;
-        }
-
-        var wrapper = new DataChannelWrapper<T>(eventName, logger, options, metrics, shutdownTokenSource.Token, NotifyAllSubscribersAsync);
-
-        if (dataChannels.TryAdd(key, wrapper))
-        {
-            UpdateChannelMetrics();
-            return wrapper;
-        }
-
-        // Another thread added it first
-        wrapper.Dispose();
-        return (DataChannelWrapper<T>)dataChannels[key];
-    }
-
     private void UpdateSubscriberMetrics()
     {
         if (metrics == null) return;
 
-        var count = eventSubscribers.Values.Sum(dict => dict.Count) +
-                    allEventsSubscribers.Count +
-                    dataChannels.Values.Sum(wrapper => wrapper.SubscriberCount);
-
-        metrics.SetSubscriberCount(count);
+        var signalSubs = eventSubscribers.Values.Sum(dict => dict.Count) + allEventsSubscribers.Count;
+        var dataSubs = dataChannelsByEvent.Values.Sum(inner => inner.Values.Sum(w => w.SubscriberCount));
+        metrics.SetSubscriberCount(signalSubs + dataSubs);
     }
 
     private void UpdateChannelMetrics()
     {
-        metrics?.SetChannelCount(dataChannels.Count);
+        if (metrics == null) return;
+
+        var channelCount = dataChannelsByEvent.Values.Sum(inner => inner.Count);
+        metrics.SetChannelCount(channelCount);
     }
 
     private Channel<T> CreateChannel<T>()
@@ -363,14 +413,11 @@ public sealed class EventHub : IEventHub
         }
     }
 
-    private static string GetEventKey(string eventName, object data) => $"{eventName}:{data.GetType().FullName}";
-    private static string GetEventKey<T>(string eventName) => $"{eventName}:{typeof(T).FullName}";
-
     private void ThrowIfDisposed()
     {
         if (isDisposed)
         {
-            throw new ObjectDisposedException(nameof(EventHub));
+            throw new ObjectDisposedException(nameof(EventHubChannel));
         }
     }
 
@@ -398,17 +445,23 @@ public sealed class EventHub : IEventHub
             logger.LogWarning(ex, "Error during signal channel disposal");
         }
 
-        foreach (var wrapper in dataChannels.Values)
+        // Dispose all data wrappers
+        foreach (var inner in dataChannelsByEvent.Values)
         {
-            await wrapper.DisposeAsync().ConfigureAwait(false);
+            foreach (var wrapper in inner.Values)
+            {
+                await wrapper.DisposeAsync().ConfigureAwait(false);
+            }
         }
 
-        dataChannels.Clear();
+        dataChannelsByEvent.Clear();
         eventSubscribers.Clear();
         allEventsSubscribers.Clear();
         shutdownTokenSource.Dispose();
         metrics?.Dispose();
     }
+
+    // ---------- Internal plumbing ----------
 
     // Internal interface for type-erased channel wrappers
     private interface IChannelWrapper : IDisposable, IAsyncDisposable
@@ -416,17 +469,27 @@ public sealed class EventHub : IEventHub
         int SubscriberCount { get; }
     }
 
-    private sealed class DataChannelWrapper<T> : IChannelWrapper
+    // Used to allow PublishObject without knowing T at compile time
+    private interface IDataPublisher
+    {
+        Task PublishObject(object data, CancellationToken ct);
+    }
+
+    private sealed class DataChannelWrapper<T> : IChannelWrapper, IDataPublisher
     {
         private readonly string eventName;
         private readonly ILogger logger;
         private readonly EventHubOptions options;
         private readonly EventHubMetrics? metrics;
         private readonly Channel<T> channel;
-        private readonly ConcurrentDictionary<Func<T, CancellationToken, Task>, byte> subscribers = new();
+
+        // Use Guid -> handler to allow duplicate handler instances
+        private readonly ConcurrentDictionary<Guid, Func<T, CancellationToken, Task>> subscribers = new();
+
         private readonly CancellationTokenSource wrapperTokenSource;
         private readonly Task processingTask;
         private readonly Func<string, CancellationToken, Task> notifyAllAsync;
+        private readonly bool fireAndCollect;
 
         private volatile bool isDisposed;
 
@@ -438,13 +501,15 @@ public sealed class EventHub : IEventHub
             EventHubOptions options,
             EventHubMetrics? metrics,
             CancellationToken parentToken,
-            Func<string, CancellationToken, Task> notifyAllAsync)
+            Func<string, CancellationToken, Task> notifyAllAsync,
+            bool fireAndCollect)
         {
             this.eventName = eventName ?? throw new ArgumentNullException(nameof(eventName));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.options = options ?? throw new ArgumentNullException(nameof(options));
             this.metrics = metrics;
             this.notifyAllAsync = notifyAllAsync ?? throw new ArgumentNullException(nameof(notifyAllAsync));
+            this.fireAndCollect = fireAndCollect;
 
             wrapperTokenSource = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
             channel = CreateChannel();
@@ -479,8 +544,9 @@ public sealed class EventHub : IEventHub
         public IDisposable AddSubscriber(Func<T, CancellationToken, Task> handler)
         {
             ArgumentNullException.ThrowIfNull(handler);
-            subscribers.TryAdd(handler, 0);
-            return new UnSubscriber(() => subscribers.TryRemove(handler, out _));
+            var id = Guid.NewGuid();
+            subscribers.TryAdd(id, handler);
+            return new UnSubscriber(() => subscribers.TryRemove(id, out _));
         }
 
         public async Task Publish(T data, CancellationToken cancellationToken)
@@ -499,6 +565,12 @@ public sealed class EventHub : IEventHub
             await channel.Writer.WriteAsync(data, timeoutCts?.Token ?? cancellationToken).ConfigureAwait(false);
         }
 
+        // IDataPublisher: publish without compile-time T
+        public Task PublishObject(object data, CancellationToken ct)
+        {
+            // This cast is safe by construction: caller only invokes when typeof(T).IsAssignableFrom(data.GetType())
+            return Publish((T)data, ct);
+        }
 
         private async Task ProcessDataAsync(CancellationToken cancellationToken)
         {
@@ -522,21 +594,30 @@ public sealed class EventHub : IEventHub
         private async Task ProcessSingleDataAsync(T data, CancellationToken cancellationToken)
         {
             var stopwatch = Stopwatch.StartNew();
-            var typeName = "";
-            typeName = data is not null ? data.GetType().FullName : typeof(T).FullName;
+            var typeName = data is not null ? data.GetType().FullName : typeof(T).FullName;
             var label = $"{eventName}:{typeName}";
             try
             {
-                var subs = subscribers.Keys.ToArray();
-                var tasks = new Task[subs.Length];
-
-                for (int i = 0; i < subs.Length; i++)
+                var subs = subscribers.Values.ToArray();
+                if (subs.Length > 0)
                 {
-                    var handler = subs[i];
-                    tasks[i] = SafeInvokeHandlerAsync(handler, data, label, cancellationToken);
+                    var tasks = new Task[subs.Length];
+                    for (int i = 0; i < subs.Length; i++)
+                    {
+                        var handler = subs[i];
+                        tasks[i] = SafeInvokeHandlerAsync(handler, data, label, cancellationToken);
+                    }
+
+                    if (fireAndCollect)
+                    {
+                        _ = Task.WhenAll(tasks).ContinueWith(_ => { /* collected */ }, TaskScheduler.Default);
+                    }
+                    else
+                    {
+                        await Task.WhenAll(tasks).ConfigureAwait(false);
+                    }
                 }
 
-                if (tasks.Length > 0) await Task.WhenAll(tasks).ConfigureAwait(false);
                 metrics?.IncrementEventsProcessed(label);
             }
             finally
@@ -557,7 +638,7 @@ public sealed class EventHub : IEventHub
             }
             catch (OperationCanceledException) when (wrapperTokenSource.IsCancellationRequested)
             {
-                //No Operation needed
+                // No Operation needed
             }
             catch (Exception ex)
             {
@@ -581,7 +662,7 @@ public sealed class EventHub : IEventHub
             }
             catch (OperationCanceledException)
             {
-                //No Operation needed
+                // No Operation needed
             }
             catch (Exception ex) when (ex is AggregateException or TimeoutException)
             {

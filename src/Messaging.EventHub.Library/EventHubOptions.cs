@@ -24,6 +24,9 @@ public sealed class EventHubOptions
     /// </summary>
     public TimeSpan BackpressureTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
+    public bool EnableUseChannel { get; set; } = false;
+
+
     /// <summary>
     /// Whether to enable metrics collection
     /// </summary>

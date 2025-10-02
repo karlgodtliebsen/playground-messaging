@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/Aspire/">
+    <Project Path="Messaging.AppHost/Messaging.AppHost.csproj" />
+    <Project Path="Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Libraries/">
+    <Project Path="Messaging.Domain.Library/Messaging.Domain.Library.csproj" />
+    <Project Path="Messaging.EventHub.Library/Messaging.EventHub.Library.csproj" />
+    <Project Path="Messaging.Kafka.Library/Messaging.Kafka.Library.csproj" />
+    <Project Path="Messaging.Library/Messaging.Library.csproj" />
+    <Project Path="Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="../README.md" />
+    <File Path=".editorconfig" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Messaging.EventHub.Benchmark/Messaging.EventHub.Benchmark.csproj" />
+    <Project Path="Tests/Messaging.EventHub.Tests/Messaging.EventHub.Tests.csproj" />
+    <Project Path="Tests/Messaging.Tests/Messaging.Tests.csproj" />
+  </Folder>
+  <Project Path="Messaging.Console.App/Messaging.Console.App.csproj" />
+  <Project Path="Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj" />
+  <Project Path="Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj" />
+</Solution>
