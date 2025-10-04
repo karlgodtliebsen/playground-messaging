@@ -84,6 +84,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
+    <ProjectReference Include="..\Messaging.Hosting.Library\Messaging.Hosting.Library.csproj" />
     <ProjectReference Include="..\Messaging.Kafka.Library\Messaging.Kafka.Library.csproj" />
     <ProjectReference Include="..\Messaging.Library\Messaging.Library.csproj" />
     <ProjectReference Include="..\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />

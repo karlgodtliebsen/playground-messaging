@@ -1,3 +1,4 @@
+using Messaging.Domain.Library.DemoMessages;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
 using Messaging.Domain.Library.SimpleMessages;
@@ -16,16 +17,15 @@ Console.Title = title;
 Console.WriteLine(title);
 
 var builder = WebApplication.CreateBuilder(args);
-
 //var kafkaConfig = builder.Configuration.GetSection("Kafka").Get<KafkaConfig>();
 //var kafkaConfig = builder.Configuration.GetSection("Kafka");
-builder.Host.UseWolverine(KafkaConfigurator.Build);
-
+builder.Host.UseWolverine(KafkaConfigurator.BuildCombined);
 
 builder.AddServiceDefaults();
 
 var services = builder.Services;
 var configuration = builder.Configuration;
+services.AddKafkaApplicationServices(configuration);
 
 services.AddLogging(loggingBuilder => { services.AddSerilog(loggingBuilder, configuration); });
 services.AddControllers();
@@ -33,6 +33,7 @@ services.AddOpenApi();
 
 var app = builder.Build();
 app.Services.SetupSerilog(LogEventLevel.Verbose);
+app.Services.UseEventListener();
 
 app.MapDefaultEndpoints();
 
@@ -50,6 +51,8 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.MapPost("/messages/create", (CreateMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
+app.MapPost("/text-message", async (TextMessage msg, IMessageBus bus) => await bus.PublishAsync(msg, new DeliveryOptions { }));
+
 app.MapPost("/messages/information", (InformationMessage msg, IMessageBus bus) => bus.InvokeAsync(msg));
 
 
@@ -103,5 +106,5 @@ app.MapPost("/payments", async (ProcessPaymentRequest request, IMessageBus messa
 Console.WriteLine("Use this Url for Scalar {0}", "http://localhost:5178/scalar/v1");
 Log.Logger.Information("Starting {title} Web API", title);
 
-app.Run();
+await app.RunAsync();
 

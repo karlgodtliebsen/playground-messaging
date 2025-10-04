@@ -148,5 +148,5 @@ app.MapPost("/payments", async (ProcessPaymentRequest request, IMessageBus messa
 Console.WriteLine("Use this Url for Scalar {0}", "http://localhost:5179/scalar/v1");
 Log.Logger.Information("Starting {title} Web API", title);
 
-app.Run();
+await app.RunAsync();
 

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Wolverine;
 using Wolverine.RabbitMQ;
 
-namespace Messaging.Console.App.Configuration;
+namespace Messaging.Console.App.Configuration.RabbitMqSupport;
 
 public static class RabbitMqProducerConfigurator
 {
@@ -40,7 +40,7 @@ public static class RabbitMqProducerConfigurator
             exchange.ExchangeType = ExchangeType.Topic;
             exchange.IsDurable = true;
         });
-        opts.Discovery.IncludeAssembly(typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(Domain.Library.Configuration.Anchor).Assembly);
 
         // Configure exchanges and queues
         opts.PublishAllMessages().ToRabbitExchange("orders-exchange");

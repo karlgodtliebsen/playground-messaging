@@ -6,6 +6,7 @@
   <Folder Name="/Libraries/">
     <Project Path="Messaging.Domain.Library/Messaging.Domain.Library.csproj" />
     <Project Path="Messaging.EventHub.Library/Messaging.EventHub.Library.csproj" />
+    <Project Path="Messaging.Hosting.Library/Messaging.Hosting.Library.csproj" />
     <Project Path="Messaging.Kafka.Library/Messaging.Kafka.Library.csproj" />
     <Project Path="Messaging.Library/Messaging.Library.csproj" />
     <Project Path="Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj" />

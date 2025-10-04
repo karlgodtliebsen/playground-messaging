@@ -1,9 +1,10 @@
 ﻿using Messaging.Domain.Library.DemoMessages;
+using Messaging.Domain.Library.SimpleMessages;
 using Messaging.EventHub.Library;
 
 using Microsoft.Extensions.Logging;
 
-namespace Messaging.Console.App.Configuration;
+namespace Messaging.Domain.Library.Services;
 
 public class EventHubListener(IEventHub eventHub, ILogger<EventHubListener> logger)
 {
@@ -32,6 +33,19 @@ public class EventHubListener(IEventHub eventHub, ILogger<EventHubListener> logg
             logger.LogInformation("EventListener Received PingMessage: {@message}", m);
             return Task.CompletedTask;
         });
+
+        eventHub.Subscribe<CreateMessage>((m, ct) =>
+        {
+            logger.LogInformation("EventListener Received CreateMessage: {@message}", m);
+            return Task.CompletedTask;
+        });
+
+        eventHub.Subscribe<InformationMessage>((m, ct) =>
+        {
+            logger.LogInformation("EventListener Received InformationMessage: {@message}", m);
+            return Task.CompletedTask;
+        });
+
         eventHub.Subscribe<HeartbeatMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received HeartbeatMessage: {@message}", m);

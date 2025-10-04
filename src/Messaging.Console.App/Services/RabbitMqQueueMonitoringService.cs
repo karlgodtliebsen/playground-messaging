@@ -1,4 +1,5 @@
-﻿using Messaging.RabbitMq.Library.Configuration;
+﻿using Messaging.Hosting.Library;
+using Messaging.RabbitMq.Library.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,10 +10,10 @@ using RabbitMQ.Client;
 
 namespace Messaging.Console.App.Services;
 
-public class QueueMonitoringService(
+public class RabbitMqQueueMonitoringService(
 
     [FromKeyedServices("monitor")] IOptions<string[]> queueNamesOptions,
-    IOptions<RabbitMqOptions> options, ILogger<QueueMonitoringService> logger)
+    IOptions<RabbitMqOptions> options, ILogger<RabbitMqQueueMonitoringService> logger)
     : BackgroundService
 {
     private readonly TimeSpan checkInterval = TimeSpan.FromMinutes(1);
@@ -25,7 +26,7 @@ public class QueueMonitoringService(
     {
         connectionString = BuildConnectionString();
 
-        var serviceName = nameof(QueueMonitoringService);
+        var serviceName = nameof(RabbitMqQueueMonitoringService);
         logger.LogInformation("Background Service:{service} is running.", serviceName);
         var combinedPolicy = PolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
         await combinedPolicy.ExecuteAsync(async (ct) =>

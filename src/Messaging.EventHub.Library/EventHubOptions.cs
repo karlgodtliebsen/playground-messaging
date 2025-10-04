@@ -24,8 +24,12 @@ public sealed class EventHubOptions
     /// </summary>
     public TimeSpan BackpressureTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
-    public bool EnableUseChannel { get; set; } = false;
+    // Toggle: when true, handlers are fired and collected; channel keeps draining under load.
+    // Keep false for strict per-message completion semantics (better for tests).
 
+    public bool FireAndCollectHandlers { get; set; } = false;
+
+    public bool EnableUseChannel { get; set; } = false;
 
     /// <summary>
     /// Whether to enable metrics collection

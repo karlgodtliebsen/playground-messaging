@@ -10,17 +10,19 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using System.Reflection;
 
-namespace Messaging.Console.App.Configuration;
+namespace Messaging.Console.App.Configuration.RabbitMqSupport;
 
-public static class HostingServicesConfigurator
+public static class RabbitMqServicesConfigurator
 {
+
+    //At the moment this is geared towards rabbitmq message registration, but use the message part as general registration configuration, then it can be used from other platforms as well
     public static IServiceCollection AddProducerServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddLegacyRabbitMqServices(configuration);
 
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
+            typeof(Domain.Library.Configuration.Anchor).Assembly
         };
 
 
@@ -39,17 +41,17 @@ public static class HostingServicesConfigurator
         messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
         messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
 
-        service.TryAddKeyedSingleton<TypeToQueueMapper>("producer", messageQueueNameRegistration);
+        service.TryAddKeyedSingleton("producer", messageQueueNameRegistration);
 
         LegacyTypeMapper mapper = new LegacyTypeMapper();
         mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
         mapper.Register<PingMessage>(typeof(PingMessage).FullName!);
         mapper.Register<HeartbeatMessage>(typeof(HeartbeatMessage).FullName!);
 
-        service.TryAddSingleton<LegacyTypeMapper>(mapper);
+        service.TryAddSingleton(mapper);
 
 
-        service.TryAddKeyedSingleton<Assembly[]>("producer", assemblies);
+        service.TryAddKeyedSingleton("producer", assemblies);
         service.TryAddKeyedSingleton<IServiceCollection>("producer", publishingCollection);
         return service;
     }
@@ -60,7 +62,7 @@ public static class HostingServicesConfigurator
 
         var assemblies = new Assembly[]
         {
-            typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly
+            typeof(Domain.Library.Configuration.Anchor).Assembly
         };
 
         //listening to messages
@@ -84,9 +86,9 @@ public static class HostingServicesConfigurator
         mapper.Register<PingMessage>(typeof(PingMessage).FullName!);
         mapper.Register<HeartbeatMessage>(typeof(HeartbeatMessage).FullName!);
 
-        service.TryAddSingleton<LegacyTypeMapper>(mapper);
-        service.TryAddKeyedSingleton<TypeToQueueMapper>("consumer", messageQueueNameRegistration);
-        service.TryAddKeyedSingleton<Assembly[]>("consumer", assemblies);
+        service.TryAddSingleton(mapper);
+        service.TryAddKeyedSingleton("consumer", messageQueueNameRegistration);
+        service.TryAddKeyedSingleton("consumer", assemblies);
         service.TryAddKeyedSingleton<IServiceCollection>("consumer", listeningCollection);
         return service;
     }

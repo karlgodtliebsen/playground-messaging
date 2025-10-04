@@ -283,7 +283,7 @@ public sealed class EventHubCollection : IEventHub
             }
         }
 
-        BroadCastEvent(eventName);
+        await BroadCastEvent(eventName, cancellationToken);
     }
 
 

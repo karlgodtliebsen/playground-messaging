@@ -3,7 +3,7 @@
 using Polly;
 using Polly.Wrap;
 
-namespace Messaging.Console.App.Services;
+namespace Messaging.Hosting.Library;
 
 public static class PolicyBuilder
 {
@@ -31,27 +31,27 @@ public static class PolicyBuilder
         return Policy.WrapAsync(continuousRetryPolicy, initialRetryPolicy);
     }
 
-    public static AsyncPolicyWrap CreateCombinedRetryPolicy(string serviceName, TimeSpan continuousRetryTimeSpan, Serilog.ILogger logger)
-    {
-        // Initial retry policy: 3 attempts with exponential backoff
-        var initialRetryPolicy = Policy
-            .Handle<Exception>()
-            .WaitAndRetryAsync(3,
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                (exception, timeSpan, retryCount, context) =>
-                    logger.Warning(exception, "{serviceName} - Initial retry {retryCount} after {timeSpan}",
-                        serviceName, retryCount, timeSpan));
+    //public static AsyncPolicyWrap CreateCombinedRetryPolicy(string serviceName, TimeSpan continuousRetryTimeSpan, ILogger logger)
+    //{
+    //    // Initial retry policy: 3 attempts with exponential backoff
+    //    var initialRetryPolicy = Policy
+    //        .Handle<Exception>()
+    //        .WaitAndRetryAsync(3,
+    //            retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+    //            (exception, timeSpan, retryCount, context) =>
+    //                logger.LogWarning(exception, "{serviceName} - Initial retry {retryCount} after {timeSpan}",
+    //                    serviceName, retryCount, timeSpan));
 
-        // Continuous retry policy: retry every minute indefinitely
-        var continuousRetryPolicy = Policy
-            .Handle<Exception>()
-            .WaitAndRetryForeverAsync(
-                retryAttempt => continuousRetryTimeSpan,
-                (exception, retryCount, timeSpan) =>
-                    logger.Warning(exception, "{serviceName} - Continuous retry {retryCount} after {timeSpan}",
-                        serviceName, retryCount, timeSpan));
+    //    // Continuous retry policy: retry every minute indefinitely
+    //    var continuousRetryPolicy = Policy
+    //        .Handle<Exception>()
+    //        .WaitAndRetryForeverAsync(
+    //            retryAttempt => continuousRetryTimeSpan,
+    //            (exception, retryCount, timeSpan) =>
+    //                logger.LogWarning(exception, "{serviceName} - Continuous retry {retryCount} after {timeSpan}",
+    //                    serviceName, retryCount, timeSpan));
 
-        // Combine the policies: initial retries first, then continuous retries
-        return Policy.WrapAsync(continuousRetryPolicy, initialRetryPolicy);
-    }
+    //    // Combine the policies: initial retries first, then continuous retries
+    //    return Policy.WrapAsync(continuousRetryPolicy, initialRetryPolicy);
+    //}
 }

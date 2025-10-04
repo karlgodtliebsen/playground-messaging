@@ -10,6 +10,9 @@ docker-compose up -d
 ```
 
 # docker-compose.yml using kafak--ui
+
+Needs updating to use:    "image: apache/kafka:latest"
+
 ```shell
 services:
   kafka:
@@ -64,40 +67,32 @@ volumes:
 # docker-compose.yml using redpanda
 
 ```shell
-version: "3.9"
-
 services:
   kafka:
-    image: bitnami/kafka:3.8   # KRaft-enabled; no ZooKeeper needed
+    image: apache/kafka:latest
     container_name: kafka
     ports:
-      - "9094:9094"           # external client access from your host
+      - "9094:9094"
     environment:
-      # --- KRaft single-node ---
-      KAFKA_ENABLE_KRAFT: "yes"
-      KAFKA_CFG_NODE_ID: "1"
-      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
-
-      # --- Listeners / advertised listeners ---
-      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:29093,EXTERNAL://:9094"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094"
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
-      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
-
-      # --- Quality-of-life defaults ---
-      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
-      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: "1"
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_CFG_NUM_PARTITIONS: "3"
-
-      # --- Misc ---
-      ALLOW_PLAINTEXT_LISTENER: "yes"
-
+      # KRaft settings
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9094'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      # Cluster ID (required for KRaft)
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      # Quality-of-life settings
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_NUM_PARTITIONS: 3
     volumes:
-      - kafka-data:/bitnami/kafka
+      - kafka-data:/var/lib/kafka/data
 
   redpanda-console:
     image: redpandadata/console:latest
@@ -111,6 +106,9 @@ services:
 
 volumes:
   kafka-data:
+  
+  
+##redpanda console at: http://localhost:8080  
 
 ```
 

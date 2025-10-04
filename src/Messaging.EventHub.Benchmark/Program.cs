@@ -16,6 +16,11 @@ public class EventHubBenchmarks
     private BenchmarkTests benchmarkTest = null!;
     private EventHubOptions optionsChannel = null!;
     private EventHubOptions optionsCollection = null!;
+
+    private readonly ILogger<EventHubCollection> eventHubCollectionLogger = NSubstitute.Substitute.For<ILogger<EventHubCollection>>();
+    private readonly ILogger<EventHubChannel> eventHubChannelLogger = NSubstitute.Substitute.For<ILogger<EventHubChannel>>();
+    private readonly ILogger<EventHubChannelHighPerf> eventHubChannelHighPerfLogger = NSubstitute.Substitute.For<ILogger<EventHubChannelHighPerf>>();
+
     [GlobalSetup]
     public void Setup()
     {
@@ -36,16 +41,24 @@ public class EventHubBenchmarks
     [Benchmark]
     public async Task PublishSignalUsingChannel()
     {
-        var eventHubChannel = new EventHubChannel(Options.Create(optionsChannel), NSubstitute.Substitute.For<ILogger<EventHubChannel>>());
-        await benchmarkTest.EventChannelBenchmark(eventHubChannel, cancellationToken);
+        var eventHubChannel = new EventHubChannel(Options.Create(optionsChannel), eventHubChannelLogger);
+        await benchmarkTest.Benchmark(eventHubChannel, cancellationToken);
     }
 
     [Benchmark]
     public async Task PublishSignalUsingCollection()
     {
-        var eventHubCollection = new EventHubCollection(Options.Create(optionsCollection), NSubstitute.Substitute.For<ILogger<EventHubCollection>>());
-        await benchmarkTest.EventChannelBenchmark(eventHubCollection, cancellationToken);
+        var eventHubCollection = new EventHubCollection(Options.Create(optionsCollection), eventHubCollectionLogger);
+        await benchmarkTest.Benchmark(eventHubCollection, cancellationToken);
     }
+    [Benchmark]
+    public async Task PublishSignalUsingChannelHighPerf()
+    {
+        var eventHubCollection = new EventHubChannelHighPerf(Options.Create(optionsCollection), eventHubChannelHighPerfLogger);
+        await benchmarkTest.Benchmark(eventHubCollection, cancellationToken);
+    }
+
+
 }
 
 public class Program

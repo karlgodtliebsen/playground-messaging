@@ -15,36 +15,36 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
     private readonly ILogger<EventHubChannel> logger = NSubstitute.Substitute.For<ILogger<EventHubChannel>>();
     private readonly CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
-    public static async Task WaitUntilProcessedAsync(
-        IEventHub hub,
-        string eventName,
-        int expectedMessages,
-        TimeSpan timeout,
-        CancellationToken ct = default)
-    {
-        var remaining = expectedMessages;
-        var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+    //public static async Task WaitUntilProcessedAsync(
+    //    IEventHub hub,
+    //    string eventName,
+    //    int expectedMessages,
+    //    TimeSpan timeout,
+    //    CancellationToken ct = default)
+    //{
+    //    var remaining = expectedMessages;
+    //    var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        IDisposable? sub = null;
-        sub = hub.SubscribeToAll(async (name, token) =>
-        {
-            if (name == eventName)
-            {
-                if (Interlocked.Decrement(ref remaining) == 0)
-                {
-                    tcs.TrySetResult();
-                }
-            }
-            await Task.CompletedTask;
-        });
+    //    IDisposable? sub = null;
+    //    sub = hub.SubscribeToAll(async (name, token) =>
+    //    {
+    //        if (name == eventName)
+    //        {
+    //            if (Interlocked.Decrement(ref remaining) == 0)
+    //            {
+    //                tcs.TrySetResult();
+    //            }
+    //        }
+    //        await Task.CompletedTask;
+    //    });
 
-        using (sub)
-        {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(timeout);
-            await tcs.Task.WaitAsync(cts.Token);
-        }
-    }
+    //    using (sub)
+    //    {
+    //        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    //        cts.CancelAfter(timeout);
+    //        await tcs.Task.WaitAsync(cts.Token);
+    //    }
+    //}
 
 
 
@@ -124,9 +124,7 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish(@event1, cancellationToken);
             //await Task.Delay(1, cancellationToken);
         }
-        //await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken); //allows the channel to be processed completely
-
-        await WaitUntilProcessedAsync(eventHub, @event1, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
+        await eventHub.DrainAsync(cancellationToken);
 
         consumer1.Should().Be(number1);
         consumer2.Should().Be(number2);
@@ -144,8 +142,8 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish(@event1, cancellationToken);
             await eventHub.Publish(@event2, cancellationToken);
         }
-        await WaitUntilProcessedAsync(eventHub, @event1, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
-        //        await WaitUntilProcessedAsync(eventHub, @event2, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
+        await eventHub.DrainAsync(cancellationToken);
+        await eventHub.DisposeAsync();
         consumer1.Should().Be(number1);
         consumer2.Should().Be(number2);
         consumer3.Should().Be(number3);
@@ -191,7 +189,7 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish(@event1, i, cancellationToken);
         }
 
-        await WaitUntilProcessedAsync(eventHub, @event1, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
+        await eventHub.DrainAsync(cancellationToken);
 
         consumer1.Should().Be(numberRuns);
         consumer2.Should().Be(numberRuns);
@@ -206,7 +204,8 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish(@event2, i, cancellationToken);
         }
 
-        await WaitUntilProcessedAsync(eventHub, @event1, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
+        await eventHub.DrainAsync(cancellationToken);
+        await eventHub.DisposeAsync();
         consumer1.Should().Be(numberRuns);
         consumer2.Should().Be(numberRuns * 2);
         consumer3.Should().Be(numberRuns);
@@ -246,8 +245,9 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish<TestEventData>(data, cancellationToken);
         }
 
-        //await WaitUntilProcessedAsync(eventHub, @event1, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken); //allows the channel to be processed completely
+        await eventHub.DrainAsync(cancellationToken);
+        await eventHub.DisposeAsync();
+
 
         consumer1.Should().Be(number);
         consumer2.Should().Be(number);
@@ -266,7 +266,7 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
         var subscription1 = eventHub.Subscribe<IList<TestEventData>>((data, ct) =>
         {
             output.WriteLine($"Consumed 1: {data.GetType().FullName}");
-            consumer1++;
+            Interlocked.Increment(ref consumer1);
             return Task.CompletedTask;
         });
 
@@ -274,7 +274,7 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
         var subscription2 = eventHub.Subscribe<IList<TestEventData>>((data, ct) =>
         {
             output.WriteLine($"Consumed 2: {data.GetType().FullName}");
-            consumer2++;
+            Interlocked.Increment(ref consumer2);
             return Task.CompletedTask;
         });
 
@@ -288,7 +288,8 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish<IList<TestEventData>>(collection, cancellationToken);
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken); //allows the channel to be processed completely
+        await eventHub.DrainAsync(cancellationToken);
+        await eventHub.DisposeAsync();
 
         consumer1.Should().Be(number);
         consumer2.Should().Be(number);
@@ -308,7 +309,7 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
         var subscription1 = eventHub.Subscribe<List<TestEventData>>((data, ct) =>
         {
             output.WriteLine($"Consumed 1: {data.GetType().FullName}");
-            consumer1++;
+            Interlocked.Increment(ref consumer1);
             return Task.CompletedTask;
         });
 
@@ -316,7 +317,7 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
         var subscription2 = eventHub.Subscribe<IList<TestEventData>>((data, ct) =>
         {
             output.WriteLine($"Consumed 2: {data.GetType().FullName}");
-            consumer2++;
+            Interlocked.Increment(ref consumer2);
             return Task.CompletedTask;
         });
 
@@ -330,7 +331,8 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish<IList<TestEventData>>(collection, cancellationToken);
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken); //allows the channel to be processed completely
+        await eventHub.DrainAsync(cancellationToken);
+        await eventHub.DisposeAsync();
 
         consumer1.Should().Be(0);
         consumer2.Should().Be(number);
@@ -350,14 +352,14 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
         eventHub.Subscribe(@event1, (int i, CancellationToken ct) =>
         {
             output.WriteLine($"Consumed 1: {@event1} value: {i}");
-            consumer1++;
+            Interlocked.Increment(ref consumer1);
             return Task.CompletedTask;
         });
 
         eventHub.SubscribeToAll((eventName, ct) =>
         {
-            output.WriteLine($"Consumed All: {@event1} value: {eventName}");
-            consumer2++;
+            output.WriteLine($"Consumed 2 All: {eventName} value: {eventName}");
+            Interlocked.Increment(ref consumer2);
             return Task.CompletedTask;
         });
 
@@ -376,12 +378,13 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish(@event1, cancellationToken);
         }
 
-        await WaitUntilProcessedAsync(eventHub, @event1, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
-        // await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken); //allows the channel to be processed completely
+        await eventHub.DrainAsync(cancellationToken);
+        await eventHub.DisposeAsync();
 
         consumer1.Should().Be(numberRuns);
         consumer2.Should().Be(numberRuns * 2);
     }
+
     [Fact]
     public async Task VerifyUseOfEventHubWithMultipleSubscribersForSendingEventsToAllSubscribers()
     {
@@ -403,7 +406,7 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             IDisposable subscription = eventHub.Subscribe(@event, async (ct) =>
             {
                 output.WriteLine($"Consumed 1: {@event}");
-                consumer++;
+                Interlocked.Increment(ref consumer);
             });
             disposables.Add(subscription);
         }
@@ -413,11 +416,12 @@ public class TestOfEventHubChannel(ITestOutputHelper output)
             await eventHub.Publish(@event, cancellationToken);
             output.WriteLine($"Publish: {@event}");
         }
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+        await eventHub.DrainAsync(cancellationToken);
         consumer.Should().Be(numberRuns * numberRuns);
         foreach (var disposable in disposables)
         {
             disposable.Dispose();
         }
+        await eventHub.DisposeAsync();
     }
 }

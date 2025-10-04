@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 
 using Messaging.EventHub.Library;
+using Messaging.EventHub.Library.EventHubs;
 
 namespace Messaging.EventHub.Benchmark;
 
@@ -39,7 +40,7 @@ public class BenchmarkTests
     }
 
     [Benchmark]
-    public async Task EventChannelBenchmark(IEventHub eventHubChannel, CancellationToken cancellationToken)
+    public async Task Benchmark(EventHubChannel eventHub, CancellationToken cancellationToken)
     {
         var consumer = 0;
         var numberRuns = 50;
@@ -49,9 +50,9 @@ public class BenchmarkTests
 
         for (int i = 0; i < numberRuns; i++)
         {
-            IDisposable subscription = eventHubChannel.Subscribe(@event, (ct) =>
+            IDisposable subscription = eventHub.Subscribe(@event, (ct) =>
                 {
-                    consumer++;
+                    Interlocked.Increment(ref consumer);
                     return Task.CompletedTask;
                 });
             disposables.Add(subscription);
@@ -59,20 +60,56 @@ public class BenchmarkTests
 
         for (var i = 0; i < numberRuns; i++)
         {
-            await eventHubChannel.Publish(@event, cancellationToken);
+            await eventHub.Publish(@event, cancellationToken);
         }
 
-        // await WaitUntilProcessedAsync(eventHubChannel, @event, numberRuns, TimeSpan.FromSeconds(1), cancellationToken);
+        await eventHub.DrainAsync(cancellationToken);
 
         foreach (var disposable in disposables)
         {
             disposable.Dispose();
         }
+        await eventHub.DisposeAsync();
     }
 
 
     [Benchmark]
-    public async Task EventCollectionBenchmark(IEventHub eventHubCollection, CancellationToken cancellationToken)
+    public async Task Benchmark(EventHubChannelHighPerf eventHub, CancellationToken cancellationToken)
+    {
+        var consumer = 0;
+        var numberRuns = 50;
+
+        var @event = "TestEvent1";
+        var disposables = new List<IDisposable>();
+
+        for (int i = 0; i < numberRuns; i++)
+        {
+            IDisposable subscription = eventHub.Subscribe(@event, (ct) =>
+            {
+                Interlocked.Increment(ref consumer);
+                return Task.CompletedTask;
+            });
+            disposables.Add(subscription);
+        }
+
+        for (var i = 0; i < numberRuns; i++)
+        {
+            await eventHub.Publish(@event, cancellationToken);
+        }
+
+        await eventHub.DrainAsync(cancellationToken);
+
+        foreach (var disposable in disposables)
+        {
+            disposable.Dispose();
+        }
+        await eventHub.DisposeAsync();
+    }
+
+
+
+    [Benchmark]
+    public async Task Benchmark(EventHubCollection eventHub, CancellationToken cancellationToken)
     {
         var consumer = 0;
         var numberRuns = 50;
@@ -81,9 +118,9 @@ public class BenchmarkTests
 
         for (int i = 0; i < numberRuns; i++)
         {
-            IDisposable subscription = eventHubCollection.Subscribe(@event, (ct) =>
+            IDisposable subscription = eventHub.Subscribe(@event, (ct) =>
             {
-                consumer++;
+                Interlocked.Increment(ref consumer);
                 return Task.CompletedTask;
             });
             disposables.Add(subscription);
@@ -91,12 +128,13 @@ public class BenchmarkTests
 
         for (var i = 0; i < numberRuns; i++)
         {
-            await eventHubCollection.Publish(@event, cancellationToken);
+            await eventHub.Publish(@event, cancellationToken);
         }
 
         foreach (var disposable in disposables)
         {
             disposable.Dispose();
         }
+        await eventHub.DisposeAsync();
     }
 }

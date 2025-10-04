@@ -29,4 +29,7 @@
     <ProjectReference Include="..\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
     <ProjectReference Include="..\Messaging.Library\Messaging.Library.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
 </Project>
