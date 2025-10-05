@@ -20,5 +20,7 @@ public class TextMessage : MessageBase
     {
     }
 
+    public string Identity { get; set; } = Ulid.NewUlid(DateTimeOffset.UtcNow).ToString();
+
     public string MessageData { get; set; } = "";
 }

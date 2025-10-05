@@ -20,7 +20,7 @@ CancellationTokenSource cancellationTokenSource = new();
 //await kafkaConsumerHost.RunAsync(cancellationTokenSource.Token);
 
 var allHosts = new List<IHost>();
-for (int i = 0; i < 5; i++)
+for (int i = 0; i < 1; i++)
 {
     var kafkaConsumerHost = KafkaBuilder.BuildKafkaConsumerHost();
     kafkaConsumerHost.Services.UseKafkaEventListener();

@@ -1,4 +1,7 @@
-﻿using Messaging.Domain.Library.Services;
+﻿using MemoryMapped.Queue.Configuration;
+
+using Messaging.Domain.Library.Services;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -10,6 +13,8 @@ public static class ConsoleAppConfigurator
     public static IServiceCollection AddApplicationServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.TryAddSingleton<EventHubListener>();
+        service.AddMemoryMappedQueueServices(configuration);
+        //IMemoryMappedQueue
         return service;
     }
 

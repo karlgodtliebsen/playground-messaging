@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Messaging.Kafka.WebApi\Messaging.Kafka.WebApi.csproj" />
-    <ProjectReference Include="..\Messaging.RabbitMq.WebApi\Messaging.RabbitMq.WebApi.csproj" />
+    <ProjectReference Include="..\..\Messaging.Kafka.WebApi\Messaging.Kafka.WebApi.csproj" />
+    <ProjectReference Include="..\..\Messaging.RabbitMq.WebApi\Messaging.RabbitMq.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

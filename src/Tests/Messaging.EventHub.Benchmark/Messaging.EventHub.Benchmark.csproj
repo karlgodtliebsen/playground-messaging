@@ -35,7 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Messaging.EventHub.Library\Messaging.EventHub.Library.csproj" />
+	  <ProjectReference Include="..\..\Libraries\Messaging.EventHub.Library\Messaging.EventHub.Library.csproj" />
 	</ItemGroup>
 
 </Project>

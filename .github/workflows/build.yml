@@ -22,11 +22,11 @@ jobs:
       - name: Restore NuGet packages
 #        env:
 #         NUGET_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
-        run: dotnet restore src/Messaging.sln --verbosity minimal
+        run: dotnet restore src/Messaging.slnx --verbosity minimal
 
       - name: Build Messaging solution
-        run: dotnet build src/Messaging.sln --configuration Release --no-restore --verbosity minimal
+        run: dotnet build src/Messaging.slnx --configuration Release --no-restore --verbosity minimal
      
 #      - name: Run Tests from Messaging
-#        run: dotnet test src/Messaging.sln --no-build --configuration Release --logger "console;verbosity=minimal" 
+#        run: dotnet test src/Messaging.slnx --no-build --configuration Release --logger "console;verbosity=minimal" 
       

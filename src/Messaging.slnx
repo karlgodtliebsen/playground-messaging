@@ -1,22 +1,28 @@
 <Solution>
   <Folder Name="/Aspire/">
-    <Project Path="Messaging.AppHost/Messaging.AppHost.csproj" />
-    <Project Path="Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj" />
+    <Project Path="Aspire/Messaging.AppHost/Messaging.AppHost.csproj" />
+    <Project Path="Aspire/Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/MemoryMapped/">
+    <Project Path="MemoryMapped/MemoryMapped.Forwarder/MemoryMapped.Forwarder.csproj" />
+    <Project Path="MemoryMapped/MemoryMapped.Queue/MemoryMapped.Queue.csproj" />
+    <Project Path="MemoryMapped/MemoryMapped.Repository.MsSql/MemoryMapped.Repository.MsSql.csproj" />
   </Folder>
   <Folder Name="/Libraries/">
-    <Project Path="Messaging.Domain.Library/Messaging.Domain.Library.csproj" />
-    <Project Path="Messaging.EventHub.Library/Messaging.EventHub.Library.csproj" />
-    <Project Path="Messaging.Hosting.Library/Messaging.Hosting.Library.csproj" />
-    <Project Path="Messaging.Kafka.Library/Messaging.Kafka.Library.csproj" />
-    <Project Path="Messaging.Library/Messaging.Library.csproj" />
-    <Project Path="Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj" />
+    <Project Path="Libraries/Messaging.Domain.Library/Messaging.Domain.Library.csproj" />
+    <Project Path="Libraries/Messaging.EventHub.Library/Messaging.EventHub.Library.csproj" />
+    <Project Path="Libraries/Messaging.Hosting.Library/Messaging.Hosting.Library.csproj" />
+    <Project Path="Libraries/Messaging.Kafka.Library/Messaging.Kafka.Library.csproj" />
+    <Project Path="Libraries/Messaging.Library/Messaging.Library.csproj" />
+    <Project Path="Libraries/Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path="../.github/workflows/build.yml" />
     <File Path="../README.md" />
     <File Path=".editorconfig" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="Messaging.EventHub.Benchmark/Messaging.EventHub.Benchmark.csproj" />
+    <Project Path="Tests/Messaging.EventHub.Benchmark/Messaging.EventHub.Benchmark.csproj" />
     <Project Path="Tests/Messaging.EventHub.Tests/Messaging.EventHub.Tests.csproj" />
     <Project Path="Tests/Messaging.Tests/Messaging.Tests.csproj" />
   </Folder>

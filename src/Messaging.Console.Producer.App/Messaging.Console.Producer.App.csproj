@@ -47,40 +47,24 @@
 
 
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-
 		<PackageReference Include="WolverineFx" Version="4.12.0" />
-
-		<PackageReference Include="WolverineFx.AzureServiceBus" Version="4.12.0" />
-
 		<PackageReference Include="WolverineFx.Http" Version="4.12.0" />
-
 		<PackageReference Include="WolverineFx.Http.FluentValidation" Version="4.12.0" />
-
 		<PackageReference Include="WolverineFx.Kafka" Version="4.12.0" />
-
-		<PackageReference Include="WolverineFx.Marten" Version="4.12.0" />
-
 		<PackageReference Include="WolverineFx.MemoryPack" Version="4.12.0" />
-
 		<PackageReference Include="WolverineFx.MessagePack" Version="4.12.0" />
-
 		<PackageReference Include="WolverineFx.Postgresql" Version="4.12.0" />
-
 		<PackageReference Include="WolverineFx.RabbitMQ" Version="4.12.0" />
-
-		<PackageReference Include="WolverineFx.RDBMS" Version="4.12.0" />
-
-		<PackageReference Include="WolverineFx.SqlServer" Version="4.12.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Messaging.Application\Messaging.Application.csproj" />
-		<ProjectReference Include="..\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
-		<ProjectReference Include="..\Messaging.Hosting.Library\Messaging.Hosting.Library.csproj" />
-		<ProjectReference Include="..\Messaging.Kafka.Library\Messaging.Kafka.Library.csproj" />
-		<ProjectReference Include="..\Messaging.Library\Messaging.Library.csproj" />
-		<ProjectReference Include="..\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
-		<ProjectReference Include="..\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\Libraries\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
+		<ProjectReference Include="..\Libraries\Messaging.Hosting.Library\Messaging.Hosting.Library.csproj" />
+		<ProjectReference Include="..\Libraries\Messaging.Kafka.Library\Messaging.Kafka.Library.csproj" />
+		<ProjectReference Include="..\Libraries\Messaging.Library\Messaging.Library.csproj" />
+		<ProjectReference Include="..\Libraries\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
+		<ProjectReference Include="..\Aspire\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
 	</ItemGroup>
 
 </Project>
