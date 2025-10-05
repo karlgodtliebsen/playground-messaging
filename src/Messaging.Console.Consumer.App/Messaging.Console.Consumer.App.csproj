@@ -75,6 +75,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\MemoryMapped\MemoryMapped.Forwarder\MemoryMapped.Forwarder.csproj" />
+		<ProjectReference Include="..\MemoryMapped\MemoryMapped.Queue\MemoryMapped.Queue.csproj" />
+		<ProjectReference Include="..\MemoryMapped\MemoryMapped.Repository.MsSql\MemoryMapped.Repository.MsSql.csproj" />
 		<ProjectReference Include="..\Messaging.Application\Messaging.Application.csproj" />
 		<ProjectReference Include="..\Libraries\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
 		<ProjectReference Include="..\Libraries\Messaging.Hosting.Library\Messaging.Hosting.Library.csproj" />

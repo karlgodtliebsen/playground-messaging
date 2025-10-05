@@ -1,4 +1,8 @@
-﻿using Messaging.Application.Services.Hosts;
+﻿using MemoryMapped.Forwarder.Configuration;
+using MemoryMapped.Queue.Configuration;
+using MemoryMapped.Repository.MsSql.Configuration;
+
+using Messaging.Application.Services.Hosts;
 using Messaging.Kafka.Library.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -15,16 +19,18 @@ public static class KafkaBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                var configuration = context.Configuration;
                 services
-                    .AddKafkaApplicationServices(context.Configuration)
+                    .AddKafkaApplicationServices(configuration)
+                    .AddMemoryMappedQueueServices(configuration)
                     .AddHostedService<MessagingProducerServiceHost>()
                     .AddHostedService<SimpleMessagingProducerServiceHost>()
                     .AddHostedService<DiagnosticsMessagingProducerServiceHost>()
-                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); });
             });
 
 
-        builder.UseWolverine(KafkaConfigurator.BuildProducer);
+        builder.UseWolverine(KafkaConfigurationBuilder.BuildProducer);
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
@@ -35,14 +41,20 @@ public static class KafkaBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                var configuration = context.Configuration;
                 services
-                    .AddKafkaApplicationServices(context.Configuration)
+                    .AddKafkaApplicationServices(configuration)
+
+                    .AddMemoryMappedQueueServices(configuration)
+                    .AddMsSqlServices(configuration)
+                    .AddMessageForwarderServices(configuration)
+                    .AddMessageForwarderHostServices(configuration)
                     .AddHostedService<MessagingConsumerServiceHost>()
-                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); });
             });
 
 
-        builder.UseWolverine(KafkaConfigurator.BuildConsumer);
+        builder.UseWolverine(KafkaConfigurationBuilder.BuildConsumer);
         var host = builder.Build();
         host.Services.SetupSerilog();
         return host;
@@ -52,17 +64,22 @@ public static class KafkaBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                var configuration = context.Configuration;
                 services
-                    .AddKafkaApplicationServices(context.Configuration)
+                    .AddKafkaApplicationServices(configuration)
+                    .AddMemoryMappedQueueServices(configuration)
+                    .AddMessageForwarderServices(configuration)
+                    .AddMessageForwarderHostServices(configuration)
+                    .AddMsSqlServices(configuration)
                     .AddHostedService<MessagingProducerServiceHost>()
                     .AddHostedService<SimpleMessagingProducerServiceHost>()
                     .AddHostedService<DiagnosticsMessagingProducerServiceHost>()
                     .AddHostedService<MessagingConsumerServiceHost>()
-                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); });
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); });
             });
 
 
-        builder.UseWolverine(KafkaConfigurator.BuildCombined);
+        builder.UseWolverine(KafkaConfigurationBuilder.BuildCombined);
         var host = builder.Build();
         host.Services.SetupSerilog();
 

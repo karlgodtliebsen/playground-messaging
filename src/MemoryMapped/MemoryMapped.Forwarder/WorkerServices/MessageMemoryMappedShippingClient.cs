@@ -1,6 +1,6 @@
 ﻿using MemoryMapped.Queue;
 
-using Messaging.Domain.Library.DemoMessages;
+using Messaging.Library;
 
 using Microsoft.Extensions.Logging;
 
@@ -8,7 +8,7 @@ namespace MemoryMapped.Forwarder.WorkerServices;
 
 public class MessageMemoryMappedShippingClient(IMemoryMappedQueue memoryMappedQueue, IMessageForwarder forwarder, ILogger<MessageMemoryMappedShippingClient> logger) : IMessageMemoryMappedShippingClient
 {
-    private readonly int monitoringInterval = 10;
+    private readonly int monitoringIntervalMs = 10;
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         try
@@ -16,13 +16,12 @@ public class MessageMemoryMappedShippingClient(IMemoryMappedQueue memoryMappedQu
             await forwarder.Initialize(cancellationToken);
             while (!cancellationToken.IsCancellationRequested)
             {
-                var entries = memoryMappedQueue.TryDequeueBatch<TextMessage>();
-                if (logger.IsEnabled(LogLevel.Trace)) logger.LogTrace("StartAsync TryDequeue count {count}", entries.Count);
+                var entries = memoryMappedQueue.TryDequeueBatch<IMessageBase>();
                 if (entries.Count > 0)
                 {
                     await forwarder.ForwardBatchAsync(entries, cancellationToken);
                 }
-                await Task.Delay(monitoringInterval, cancellationToken);
+                await Task.Delay(monitoringIntervalMs, cancellationToken);
             }
         }
         catch (TaskCanceledException)

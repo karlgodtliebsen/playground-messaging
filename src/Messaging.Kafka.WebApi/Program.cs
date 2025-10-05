@@ -19,7 +19,7 @@ Console.WriteLine(title);
 var builder = WebApplication.CreateBuilder(args);
 //var kafkaConfig = builder.Configuration.GetSection("Kafka").Get<KafkaConfig>();
 //var kafkaConfig = builder.Configuration.GetSection("Kafka");
-builder.Host.UseWolverine(KafkaConfigurator.BuildCombined);
+builder.Host.UseWolverine(KafkaConfigurationBuilder.BuildCombined);
 
 builder.AddServiceDefaults();
 

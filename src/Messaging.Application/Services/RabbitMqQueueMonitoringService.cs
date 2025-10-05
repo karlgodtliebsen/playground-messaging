@@ -26,7 +26,7 @@ public class RabbitMqQueueMonitoringService(
 
         var serviceName = nameof(RabbitMqQueueMonitoringService);
         logger.LogInformation("Background Service:{service} is running.", serviceName);
-        var combinedPolicy = PolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
+        var combinedPolicy = HostingPolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
         await combinedPolicy.ExecuteAsync(async (ct) =>
         {
             while (!cancellationToken.IsCancellationRequested)

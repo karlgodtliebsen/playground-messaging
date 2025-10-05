@@ -12,11 +12,11 @@ public abstract class WaitingBackgroundService<T>(IServiceProvider serviceProvid
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var serviceName = this.GetType().FullName!;
-        logger.LogInformation("Waiting Background Service:{service} is starting.", serviceName);
+        logger.LogInformation("Waiting while Background Service:{service} is starting.", serviceName);
 
         await WaitForApplicationStartedAsync(cancellationToken);
 
-        var combinedPolicy = PolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
+        var combinedPolicy = HostingPolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
         await combinedPolicy.ExecuteAsync(async (ct) =>
         {
             var worker = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<T>();

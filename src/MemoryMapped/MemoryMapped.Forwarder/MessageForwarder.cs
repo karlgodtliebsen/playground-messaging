@@ -1,6 +1,6 @@
 ﻿using MemoryMapped.Forwarder.Repositories;
 
-using Messaging.Domain.Library.DemoMessages;
+using Messaging.Library;
 
 namespace MemoryMapped.Forwarder;
 
@@ -11,12 +11,12 @@ public class MessageForwarder(IMessageRepository repository) : IMessageForwarder
         await repository.CreateTable(cancellationToken);
     }
 
-    public async Task ForwardAsync(TextMessage entry, CancellationToken cancellationToken)
+    public async Task ForwardAsync(IMessageBase entry, CancellationToken cancellationToken)
     {
         await repository.Add([entry], cancellationToken);
     }
 
-    public async Task ForwardBatchAsync(IEnumerable<TextMessage> entries, CancellationToken cancellationToken)
+    public async Task ForwardBatchAsync(IEnumerable<IMessageBase> entries, CancellationToken cancellationToken)
     {
         await repository.Add(entries, cancellationToken);
     }

@@ -22,20 +22,20 @@ public sealed class DiagnosticsMessagingProducerWorkerService(IMessageBus messag
 
                 });
 
-            //await messageBus.PublishAsync(
-            //    new PingMessage("the host", "the app", DateTimeOffset.UtcNow),
-            //    new DeliveryOptions
-            //    {
+            await messageBus.PublishAsync(
+                new PingMessage("the host", "the app", DateTimeOffset.UtcNow),
+                new DeliveryOptions
+                {
 
-            //    });
+                });
 
 
-            //await messageBus.PublishAsync(
-            //    new HeartbeatMessage("the host", "the app", DateTimeOffset.UtcNow),
-            //    new DeliveryOptions
-            //    {
+            await messageBus.PublishAsync(
+                new HeartbeatMessage("the host", "the app", DateTimeOffset.UtcNow),
+                new DeliveryOptions
+                {
 
-            //    });
+                });
 
             await Task.Delay(10, cancellationToken);
         }

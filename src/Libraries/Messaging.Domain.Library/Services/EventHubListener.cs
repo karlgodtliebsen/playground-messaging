@@ -17,6 +17,7 @@ public class EventHubListener(IEventHub eventHub, IMemoryMappedQueue queue, ILog
             logger.LogInformation("EventListener Received Alive Signal");
             return Task.CompletedTask;
         });
+
         eventHub.Subscribe<string>("Alive", (msg, ct) =>
         {
             logger.LogInformation("EventListener Received Alive Signal from {msg}", msg);
@@ -28,7 +29,7 @@ public class EventHubListener(IEventHub eventHub, IMemoryMappedQueue queue, ILog
         //    logger.LogInformation("EventListener using 'TextMessage' Received TextMessage: {@message}", m);
         //    return Task.CompletedTask;
         //});
-
+        //IMessageBase
         eventHub.Subscribe<TextMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received TextMessage: {@message}", m);
@@ -39,26 +40,30 @@ public class EventHubListener(IEventHub eventHub, IMemoryMappedQueue queue, ILog
         eventHub.Subscribe<PingMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received PingMessage: {@message}", m);
+            queue.TryEnqueue<PingMessage>(m);
+            return Task.CompletedTask;
+        });
+        eventHub.Subscribe<HeartbeatMessage>((m, ct) =>
+        {
+            logger.LogInformation("EventListener Received HeartbeatMessage: {@message}", m);
+            queue.TryEnqueue<HeartbeatMessage>(m);
             return Task.CompletedTask;
         });
 
         eventHub.Subscribe<CreateMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received CreateMessage: {@message}", m);
+            queue.TryEnqueue<CreateMessage>(m);
             return Task.CompletedTask;
         });
 
         eventHub.Subscribe<InformationMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received InformationMessage: {@message}", m);
+            queue.TryEnqueue<InformationMessage>(m);
             return Task.CompletedTask;
         });
 
-        eventHub.Subscribe<HeartbeatMessage>((m, ct) =>
-        {
-            logger.LogInformation("EventListener Received HeartbeatMessage: {@message}", m);
-            return Task.CompletedTask;
-        });
 
         eventHub.SubscribeToAll((eventName, ct) =>
         {

@@ -1,9 +1,8 @@
 ﻿using Dapper;
 
-using Messaging.Domain.Library.DemoMessages;
+using Messaging.Library;
 
-using Serilog;
-using Serilog.Debugging;
+using Microsoft.Extensions.Logging;
 
 using System.Data.Common;
 using System.Diagnostics;
@@ -11,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace MemoryMapped.Forwarder.Repositories;
 
-public abstract class MessageRepository(ILogger logger) : IMessageRepository
+public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger logger) : IMessageRepository
 {
     protected abstract string GetConnectionString();
 
@@ -20,14 +19,14 @@ public abstract class MessageRepository(ILogger logger) : IMessageRepository
 
     private void PrintInformation(string message)
     {
-        SelfLog.WriteLine(message);
+        //SelfLog.WriteLine(message);
         Debug.Print(message);
         Trace.WriteLine(message);
         Console.WriteLine(message);
     }
     private void PrintError(Exception ex, string action)
     {
-        SelfLog.WriteLine($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
+        //SelfLog.WriteLine($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
         Debug.Print($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
         Trace.WriteLine($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
         Console.WriteLine($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
@@ -40,30 +39,30 @@ public abstract class MessageRepository(ILogger logger) : IMessageRepository
             await using var connection = GetConnection();
             await connection.OpenAsync(cancellationToken);
             await connection.ExecuteAsync(GetCreateTableStatement());
-            PrintInformation($"Successfully Created text_message Table");
-            logger.Information("Successfully Created text_message Table");
+            PrintInformation($"Successfully Created message Table");
+            logger.LogInformation("Successfully Created message Table");
         }
         catch (Exception ex)
         {
-            PrintError(ex, "Error Creating text_message Table");
-            logger.Error(ex, "Error Creating logtext_message_event Table");
+            PrintError(ex, "Error Creating message Table");
+            logger.LogError(ex, "Error Creating message Table");
         }
     }
 
-    public async IAsyncEnumerable<TextMessage> Find(object? parameters, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IMessageBase> Find<T>(object? parameters, [EnumeratorCancellation] CancellationToken cancellationToken) where T : IMessageBase
     {
-        var sqlStatement = "SELECT * FROM text_messages";
+        var sqlStatement = "SELECT * FROM messages";
         await using var connection = GetConnection();
         await connection.OpenAsync(cancellationToken);
-        IEnumerable<TextMessage> reader = await connection.QueryAsync<TextMessage>(sqlStatement, parameters);
+        IEnumerable<PersistMessage> reader = await connection.QueryAsync<PersistMessage>(sqlStatement, parameters);
         foreach (var message in reader)
         {
-            yield return message;
+            yield return System.Text.Json.JsonSerializer.Deserialize<T>(message.Message);
         }
     }
 
 
-    public async Task Add(IEnumerable<TextMessage> entries, CancellationToken cancellationToken)
+    public async Task Add(IEnumerable<IMessageBase> entries, CancellationToken cancellationToken)
     {
         var entriesList = entries.ToList();
         if (!entriesList.Any()) return;
@@ -78,38 +77,35 @@ public abstract class MessageRepository(ILogger logger) : IMessageRepository
             {
                 var parameters = entriesList.Select(entity => new
                 {
-                    //timestamp = entity.Timestamp.UtcDateTime,
-                    //level = entity.Level.ToString(),
-                    //exception = entity.Exception,
-                    //rendered_message = entity.RenderedMessage,
-                    //message_template = entity.MessageTemplate,
-                    //trace_id = entity.TraceId,
-                    //span_id = entity.SpanId,
-                    //properties = entity.Properties,
+                    id = entity.Id,
+                    timestamp = entity.TimeStamp,
+                    correlationId = entity.CorrelationId,
+                    typeFullName = entity.GetType().FullName!,
+                    message = System.Text.Json.JsonSerializer.Serialize(entity),
 
                 }).ToArray();
 
                 var sqlStatement =
-                    @" INSERT INTO text_message (timestamp, level, exception, rendered_message, message_template,trace_id, span_id,properties) 
-                            VALUES (@timestamp, @level, @exception, @rendered_message, @message_template,@trace_id, @span_id, @properties);";
+                    @"INSERT INTO message (id, timestamp, correlationId,typeFullName,message) 
+                            VALUES (@id,@timestamp, @correlationId,@typeFullName, @message);";
 
                 var rowsAffected = await connection.ExecuteAsync(sqlStatement, parameters, transaction);
 
                 await transaction.CommitAsync(cancellationToken);
-                PrintInformation($"Successfully inserted {rowsAffected} entries into text_message table");
+                PrintInformation($"Successfully inserted {rowsAffected} entries into message table");
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
-                PrintError(ex, "Unexpected error while forwarding text_message entries");
-                logger.Error(ex, "Failed to insert {Count} entries, transaction rolled back", entriesList.Count);
+                PrintError(ex, "Unexpected error while forwarding message entries");
+                logger.LogError(ex, "Failed to insert {Count} entries, transaction rolled back", entriesList.Count);
                 throw;
             }
         }
         catch (Exception ex)
         {
             PrintError(ex, "Unexpected error while forwarding text_message entries");
-            logger.Error(ex, "Unexpected error while forwarding {Count} text_message entries", entriesList.Count);
+            logger.LogError(ex, "Unexpected error while forwarding {Count} text_message entries", entriesList.Count);
             throw;
         }
     }
@@ -129,8 +125,10 @@ public abstract class MessageRepository(ILogger logger) : IMessageRepository
         catch (Exception ex)
         {
             PrintError(ex, "Connection test failed");
-            logger.Error(ex, "Connection test failed");
+            logger.LogError(ex, "Connection test failed");
             return false;
         }
     }
+
+
 }

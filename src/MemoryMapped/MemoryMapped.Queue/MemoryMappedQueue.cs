@@ -9,19 +9,19 @@ public class MemoryMappedQueue(IOptions<MemoryMappedOptions> mmOptions, IFastSer
 {
     private readonly MemoryMappedQueueBuffer mmBuffer = new(mmOptions.Value.Name);
 
-    public bool TryEnqueue<T>(T entry) where T : class
+    public bool TryEnqueue<T>(T entry)
     {
         var payload = serializer.Serialize(entry);
         return (uint)payload.Length <= ushort.MaxValue && mmBuffer.TryEnqueue(payload);
     }
 
-    public T? TryDequeue<T>() where T : class
+    public T? TryDequeue<T>()
     {
         var messageBytes = mmBuffer.TryDequeue();
-        return messageBytes == Array.Empty<byte>() ? null : serializer.Deserialize<T>(messageBytes.AsSpan());
+        return messageBytes == Array.Empty<byte>() ? default : serializer.Deserialize<T>(messageBytes.AsSpan());
     }
 
-    public IList<T> TryDequeueBatch<T>(int maxCount = 100) where T : class
+    public IList<T> TryDequeueBatch<T>(int maxCount = 100)
     {
         var results = new List<T>(Math.Max(0, maxCount));
         for (var i = 0; i < maxCount; i++)

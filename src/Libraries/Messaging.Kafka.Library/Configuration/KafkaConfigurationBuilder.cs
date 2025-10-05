@@ -11,10 +11,8 @@ using Wolverine.Kafka;
 
 namespace Messaging.Kafka.Library.Configuration;
 
-public static class KafkaConfigurator
+public static class KafkaConfigurationBuilder
 {
-
-
     public static void BuildProducer(WolverineOptions opts)
     {
         //opts.Policies.OnException<InvalidOperationException>()
@@ -53,16 +51,16 @@ public static class KafkaConfigurator
 
         // Simple topic publishing
 
-        opts.PublishMessage<OrderCreated>().ToKafkaTopic("orders-created");
-        opts.PublishMessage<OrderUpdated>().ToKafkaTopic("orders-updated");
+        opts.PublishMessage<OrderCreated>().ToKafkaTopic("orders");//.ConfigureProducer();
+        opts.PublishMessage<OrderUpdated>().ToKafkaTopic("orders");
         opts.PublishMessage<PaymentProcessed>().ToKafkaTopic("payments");
 
-        opts.PublishMessage<CreateMessage>().ToKafkaTopic("create-message");
-        opts.PublishMessage<InformationMessage>().ToKafkaTopic("information-message");
+        opts.PublishMessage<CreateMessage>().ToKafkaTopic("messages");
+        opts.PublishMessage<InformationMessage>().ToKafkaTopic("messages");
 
-        opts.PublishMessage<PingMessage>().ToKafkaTopic("diagnostics-message");
-        opts.PublishMessage<HeartbeatMessage>().ToKafkaTopic("diagnostics-message");
-        opts.PublishMessage<TextMessage>().ToKafkaTopic("diagnostics-message");
+        opts.PublishMessage<PingMessage>().ToKafkaTopic("diagnostics-messages");
+        opts.PublishMessage<HeartbeatMessage>().ToKafkaTopic("diagnostics-messages");
+        opts.PublishMessage<TextMessage>().ToKafkaTopic("diagnostics-messages");
 
         // Discovery
         opts.Discovery.IncludeAssembly(typeof(Messaging.Kafka.Library.Configuration.Anchor).Assembly);
@@ -106,15 +104,56 @@ public static class KafkaConfigurator
             logging.SetMinimumLevel(LogLevel.Debug);
             logging.AddConsole();
         });
+        const string consumerGroup = "messaging-group";
         // Listen to topics (simple syntax)
-        opts.ListenToKafkaTopic("orders-created");
-        opts.ListenToKafkaTopic("orders-updated");
+
+        opts.ListenToKafkaTopic("orders");
         opts.ListenToKafkaTopic("payments");
+        opts.ListenToKafkaTopic("messages");
+        opts.ListenToKafkaTopic("diagnostics-messages");
 
-        opts.ListenToKafkaTopic("create-message");
-        opts.ListenToKafkaTopic("information-message");
+        //opts.ListenToKafkaTopic("orders")
+        //    .ProcessInline()
+        //    .ConfigureConsumer(consumer =>
+        //    {
+        //        consumer.AutoOffsetReset = AutoOffsetReset.Earliest;
+        //        consumer.GroupId = consumerGroup + "-orders";
+        //        consumer.EnableAutoCommit = true;
+        //        consumer.AutoCommitIntervalMs = 5000;
+        //    })
+        //    ;
+        //opts.ListenToKafkaTopic("payments")
+        //    .ProcessInline()
+        //    .ConfigureConsumer(consumer =>
+        //    {
+        //        // Start from earliest available messages
+        //        consumer.GroupId = consumerGroup + "-payments";
+        //        consumer.AutoOffsetReset = AutoOffsetReset.Earliest;
+        //        consumer.EnableAutoCommit = true;
+        //        consumer.AutoCommitIntervalMs = 5000;
+        //    });
 
-        opts.ListenToKafkaTopic("diagnostics-message");
+        //opts.ListenToKafkaTopic("messages")
+        //    .ProcessInline()
+        //    .ConfigureConsumer(consumer =>
+        //    {
+        //        // Start from earliest available messages
+        //        consumer.GroupId = consumerGroup + "-messages";
+        //        consumer.AutoOffsetReset = AutoOffsetReset.Earliest;
+        //        consumer.EnableAutoCommit = true;
+        //        consumer.AutoCommitIntervalMs = 5000;
+        //    });
+
+        //opts.ListenToKafkaTopic("diagnostics-messages")
+        //    //.ProcessInline()
+        //    .ConfigureConsumer(consumer =>
+        //    {
+        //        // Start from earliest available messages
+        //        consumer.AutoOffsetReset = AutoOffsetReset.Earliest;
+        //        consumer.GroupId = consumerGroup + "-diagnostics-messages";
+        //        consumer.EnableAutoCommit = true;
+        //        consumer.AutoCommitIntervalMs = 5000;
+        //    });
 
     }
 

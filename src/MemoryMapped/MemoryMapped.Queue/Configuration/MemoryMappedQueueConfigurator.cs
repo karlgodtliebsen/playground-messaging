@@ -32,7 +32,7 @@ public static class MemoryMappedQueueConfigurator
         services.TryAddSingleton(monOptions);
 
         services.TryAddTransient<IMemoryMappedQueue, MemoryMappedQueue>();
-        //services.TryAddTransient<IFastSerializer, FastMemoryPackSerializer>();
+        //services.TryAddTransient<IFastSerializer, FastMemoryPackSerializer>();//Required attributes for message class
         services.TryAddTransient<IFastSerializer, FastJsonSerializer>();
 
         services.TryAddTransient<IMemoryMappedQueueMonitor, MemoryMappedQueueMonitor>();

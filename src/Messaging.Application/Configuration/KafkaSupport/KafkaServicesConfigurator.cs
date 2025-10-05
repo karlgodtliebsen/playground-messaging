@@ -1,6 +1,4 @@
-﻿using MemoryMapped.Queue.Configuration;
-
-using Messaging.Application.Services.Workers;
+﻿using Messaging.Application.Services.Workers;
 using Messaging.Domain.Library.Services;
 using Messaging.EventHub.Library.Configuration;
 
@@ -20,7 +18,6 @@ public static class KafkaServicesConfigurator
         service.TryAddScoped<MessagingConsumerWorkerService>();
         service
             .AddEventHubServices(configuration)
-            .AddMemoryMappedQueueServices(configuration)
             .TryAddSingleton<EventHubListener>();
         return service;
     }

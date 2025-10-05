@@ -1,5 +1,7 @@
 ﻿using MemoryMapped.Queue.Monitor;
 
+using Messaging.Hosting.Library;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
