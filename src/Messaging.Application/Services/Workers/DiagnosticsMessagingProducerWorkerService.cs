@@ -1,9 +1,9 @@
-﻿using Messaging.Console.App.Services.Hosts;
+﻿using Messaging.Application.Services.Hosts;
 using Messaging.Domain.Library.DemoMessages;
 using Microsoft.Extensions.Logging;
 using Wolverine;
 
-namespace Messaging.Console.App.Services.Workers;
+namespace Messaging.Application.Services.Workers;
 
 public sealed class DiagnosticsMessagingProducerWorkerService(IMessageBus messageBus, ILogger<MessagingProducerWorkerService> logger)
 {

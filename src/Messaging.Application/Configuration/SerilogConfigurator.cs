@@ -6,7 +6,7 @@ using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
-namespace Messaging.Console.App.Configuration;
+namespace Messaging.Application.Configuration;
 
 public static class SerilogConfigurator
 {

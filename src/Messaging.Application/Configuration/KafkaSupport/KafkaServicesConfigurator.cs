@@ -1,4 +1,4 @@
-﻿using Messaging.Console.App.Services.Workers;
+﻿using Messaging.Application.Services.Workers;
 using Messaging.Domain.Library.Services;
 using Messaging.EventHub.Library.Configuration;
 
@@ -6,16 +6,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Messaging.Console.App.Configuration.KafkaSupport;
+namespace Messaging.Application.Configuration.KafkaSupport;
 
 public static class KafkaServicesConfigurator
 {
     public static IServiceCollection AddKafkaApplicationServices(this IServiceCollection service, IConfiguration configuration)
     {
-        service.TryAddSingleton<MessagingProducerWorkerService>();
-        service.TryAddSingleton<DiagnosticsMessagingProducerWorkerService>();
-        service.TryAddSingleton<SimpleMessagingProducerWorkerService>();
-        service.TryAddSingleton<MessagingConsumerWorkerService>();
+        service.TryAddScoped<MessagingProducerWorkerService>();
+        service.TryAddScoped<DiagnosticsMessagingProducerWorkerService>();
+        service.TryAddScoped<SimpleMessagingProducerWorkerService>();
+        service.TryAddScoped<MessagingConsumerWorkerService>();
         service
             .AddEventHubServices(configuration)
             .TryAddSingleton<EventHubListener>();

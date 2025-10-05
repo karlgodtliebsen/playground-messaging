@@ -15,6 +15,11 @@ public class EventHubListener(IEventHub eventHub, ILogger<EventHubListener> logg
             logger.LogInformation("EventListener Received Alive Signal");
             return Task.CompletedTask;
         });
+        eventHub.Subscribe<string>("Alive", (msg, ct) =>
+        {
+            logger.LogInformation("EventListener Received Alive Signal from {msg}", msg);
+            return Task.CompletedTask;
+        });
 
         eventHub.Subscribe<TextMessage>("TextMessage", (m, ct) =>
         {

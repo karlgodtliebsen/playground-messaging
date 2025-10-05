@@ -1,13 +1,11 @@
 ﻿using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
 using Wolverine;
 using Wolverine.RabbitMQ;
 
-namespace Messaging.Console.App.Configuration.RabbitMqSupport;
+namespace Messaging.Application.Configuration.RabbitMqSupport;
 
 public static class RabbitMqProducerConfigurator
 {

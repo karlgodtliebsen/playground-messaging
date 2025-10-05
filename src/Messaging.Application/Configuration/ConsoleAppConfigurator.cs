@@ -1,10 +1,9 @@
 ﻿using Messaging.Domain.Library.Services;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Messaging.Console.App.Configuration;
+namespace Messaging.Application.Configuration;
 
 public static class ConsoleAppConfigurator
 {

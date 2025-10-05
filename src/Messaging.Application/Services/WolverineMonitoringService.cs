@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Wolverine.Runtime;
 
-namespace Messaging.Console.App.Services;
+namespace Messaging.Application.Services;
 
 public class WolverineMonitoringService(IWolverineRuntime runtime, ILogger<WolverineMonitoringService> logger)
     : BackgroundService

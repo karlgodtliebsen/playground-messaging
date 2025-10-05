@@ -1,14 +1,12 @@
-﻿using Messaging.Console.App.Services.Hosts;
-using Messaging.Console.App.Services.Workers;
+﻿using Messaging.Application.Services.Hosts;
 using Messaging.Kafka.Library.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 using Wolverine;
 
-namespace Messaging.Console.App.Configuration.KafkaSupport;
+namespace Messaging.Application.Configuration.KafkaSupport;
 
 public static class KafkaBuilder
 {
@@ -17,7 +15,6 @@ public static class KafkaBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.TryAddSingleton<MessagingProducerWorkerService>();
                 services
                     .AddKafkaApplicationServices(context.Configuration)
                     .AddHostedService<MessagingProducerServiceHost>()

@@ -1,14 +1,12 @@
 ﻿using Messaging.Hosting.Library;
 using Messaging.RabbitMq.Library.Configuration;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
 using RabbitMQ.Client;
 
-namespace Messaging.Console.App.Services;
+namespace Messaging.Application.Services;
 
 public class RabbitMqQueueMonitoringService(
 

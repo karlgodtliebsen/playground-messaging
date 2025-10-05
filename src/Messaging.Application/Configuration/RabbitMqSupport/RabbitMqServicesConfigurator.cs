@@ -1,16 +1,14 @@
-﻿using Messaging.Domain.Library.DemoMessages;
+﻿using System.Reflection;
+using Messaging.Domain.Library.DemoMessages;
 using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
 using Messaging.RabbitMq.Library.MessageSupport;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-using System.Reflection;
-
-namespace Messaging.Console.App.Configuration.RabbitMqSupport;
+namespace Messaging.Application.Configuration.RabbitMqSupport;
 
 public static class RabbitMqServicesConfigurator
 {

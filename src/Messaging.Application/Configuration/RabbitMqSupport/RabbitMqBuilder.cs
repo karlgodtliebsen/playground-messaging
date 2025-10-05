@@ -1,14 +1,12 @@
-﻿using Messaging.Console.App.Services;
-using Messaging.Console.App.Services.Hosts;
+﻿using Messaging.Application.Services;
+using Messaging.Application.Services.Hosts;
 using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
 using Wolverine;
 
-namespace Messaging.Console.App.Configuration.RabbitMqSupport;
+namespace Messaging.Application.Configuration.RabbitMqSupport;
 
 public static class RabbitMqBuilder
 {

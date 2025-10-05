@@ -1,11 +1,17 @@
 {
   "profiles": {
-    "Messaging.Console.App": {
-      "commandName": "Project"
+    "Messaging.Console.Producer.App": {
+      "commandName": "Project",
+      "commandLineArgs": "x=43",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "hotReloadEnabled": false
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
         "RABBITMQ_HOST": "host.docker.internal",
         "RabbitMqOptions__HostName": "host.docker.internal",
         "RabbitMqOptions__Port": "5672",

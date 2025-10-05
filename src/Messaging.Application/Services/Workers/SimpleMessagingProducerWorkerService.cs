@@ -1,10 +1,10 @@
-﻿using Messaging.Console.App.Services.Hosts;
+﻿using Messaging.Application.Services.Hosts;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.SimpleMessages;
 using Microsoft.Extensions.Logging;
 using Wolverine;
 
-namespace Messaging.Console.App.Services.Workers;
+namespace Messaging.Application.Services.Workers;
 
 public sealed class SimpleMessagingProducerWorkerService(IMessageBus messageBus, ILogger<SimpleMessagingProducerWorkerService> logger)
 {

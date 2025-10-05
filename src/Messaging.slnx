@@ -20,7 +20,10 @@
     <Project Path="Tests/Messaging.EventHub.Tests/Messaging.EventHub.Tests.csproj" />
     <Project Path="Tests/Messaging.Tests/Messaging.Tests.csproj" />
   </Folder>
+  <Project Path="Messaging.Application/Messaging.Application.csproj" />
   <Project Path="Messaging.Console.App/Messaging.Console.App.csproj" />
+  <Project Path="Messaging.Console.Consumer.App/Messaging.Console.Consumer.App.csproj" Id="d64b76f1-662c-40a5-a2d9-6ae339a4b05a" />
+  <Project Path="Messaging.Console.Producer.App/Messaging.Console.Producer.App.csproj" Id="3e77a98c-9a6d-46e9-aee0-128569518da5" />
   <Project Path="Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj" />
   <Project Path="Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj" />
 </Solution>

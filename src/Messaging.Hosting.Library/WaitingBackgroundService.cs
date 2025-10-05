@@ -19,7 +19,7 @@ public abstract class WaitingBackgroundService<T>(IServiceProvider serviceProvid
         var combinedPolicy = PolicyBuilder.CreateCombinedRetryPolicy(serviceName, continuousRetryTimeSpan, logger);
         await combinedPolicy.ExecuteAsync(async (ct) =>
         {
-            var worker = serviceProvider.GetRequiredService<T>();
+            var worker = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<T>();
             await Run(worker, ct);
         }, cancellationToken);
     }

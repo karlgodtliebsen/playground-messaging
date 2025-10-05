@@ -1,7 +1,5 @@
-﻿
-using Messaging.Console.App.Configuration;
-using Messaging.Console.App.Configuration.KafkaSupport;
-
+﻿using Messaging.Application.Configuration;
+using Messaging.Application.Configuration.KafkaSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

@@ -1,10 +1,10 @@
-﻿using Messaging.Console.App.Services.Hosts;
+﻿using Messaging.Application.Services.Hosts;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
 using Microsoft.Extensions.Logging;
 using Wolverine;
 
-namespace Messaging.Console.App.Services.Workers;
+namespace Messaging.Application.Services.Workers;
 
 public sealed class MessagingProducerWorkerService(IMessageBus messageBus, ILogger<MessagingProducerWorkerService> logger)
 {
