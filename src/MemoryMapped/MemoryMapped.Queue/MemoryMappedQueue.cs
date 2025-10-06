@@ -9,25 +9,27 @@ public class MemoryMappedQueue(IOptions<MemoryMappedOptions> mmOptions, IFastSer
 {
     private readonly MemoryMappedQueueBuffer mmBuffer = new(mmOptions.Value.Name);
 
-    public bool TryEnqueue<T>(T entry)
+    public bool TryEnqueue(object entry)
     {
         var payload = serializer.Serialize(entry);
         return (uint)payload.Length <= ushort.MaxValue && mmBuffer.TryEnqueue(payload);
     }
 
-    public T? TryDequeue<T>()
+    public object? TryDequeue()
     {
         var messageBytes = mmBuffer.TryDequeue();
-        return messageBytes == Array.Empty<byte>() ? default : serializer.Deserialize<T>(messageBytes.AsSpan());
+        return messageBytes == Array.Empty<byte>() ? null : serializer.Deserialize(messageBytes.AsSpan());
     }
 
-    public IList<T> TryDequeueBatch<T>(int maxCount = 100)
+    public IList<object> TryDequeueBatch(int maxCount = 100)
     {
-        var results = new List<T>(Math.Max(0, maxCount));
+        var results = new List<object>(Math.Max(0, maxCount));
         for (var i = 0; i < maxCount; i++)
         {
-            var entry = TryDequeue<T>();
-            if (entry == null) break;
+            var entry = TryDequeue();
+            if (entry is null) break;
+
+            var t = entry.GetType();
             results.Add(entry);
         }
         return results;

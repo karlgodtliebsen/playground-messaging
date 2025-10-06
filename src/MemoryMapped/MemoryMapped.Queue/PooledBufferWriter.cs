@@ -1,48 +1,95 @@
 ﻿using System.Buffers;
 
 namespace MemoryMapped.Queue;
-
-sealed class PooledBufferWriter : IBufferWriter<byte>, IDisposable
+public sealed class PooledBufferWriter(int initialCapacity = 16 * 1024) : IBufferWriter<byte>, IDisposable
 {
-    private byte[] _buffer;
-    private int _written;
+    private byte[] buffer = ArrayPool<byte>.Shared.Rent(initialCapacity);
+    private int written;
+    private bool disposed;
 
-    public PooledBufferWriter(int initialCapacity = 16 * 1024)
+    public void Advance(int count)
     {
-        _buffer = ArrayPool<byte>.Shared.Rent(initialCapacity);
-        _written = 0;
+        if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+        if (written + count > buffer.Length) throw new InvalidOperationException("Cannot advance past buffer size");
+        written += count;
     }
-
-    public void Advance(int count) => _written += count;
 
     public Memory<byte> GetMemory(int sizeHint = 0)
     {
+        CheckDisposed();
         Ensure(sizeHint);
-        return _buffer.AsMemory(_written);
+        return buffer.AsMemory(written);
     }
 
     public Span<byte> GetSpan(int sizeHint = 0)
     {
+        CheckDisposed();
         Ensure(sizeHint);
-        return _buffer.AsSpan(_written);
+        return buffer.AsSpan(written);
     }
 
     private void Ensure(int sizeHint)
     {
-        if (sizeHint < 1) sizeHint = 1;
-        if (_written + sizeHint <= _buffer.Length) return;
-        var newBuf = ArrayPool<byte>.Shared.Rent(Math.Max(_buffer.Length * 2, _written + sizeHint));
-        Buffer.BlockCopy(_buffer, 0, newBuf, 0, _written);
-        ArrayPool<byte>.Shared.Return(_buffer);
-        _buffer = newBuf;
+        if (sizeHint < 0) throw new ArgumentOutOfRangeException(nameof(sizeHint));
+
+        var availableSpace = buffer.Length - written;
+        if (availableSpace >= sizeHint) return;
+
+        var requiredSize = written + sizeHint;
+        var newSize = Math.Max(buffer.Length * 2, requiredSize);
+
+        var newBuffer = ArrayPool<byte>.Shared.Rent(newSize);
+        buffer.AsSpan(0, written).CopyTo(newBuffer);
+
+        ArrayPool<byte>.Shared.Return(buffer, clearArray: false);
+        buffer = newBuffer;
     }
 
-    public ReadOnlySpan<byte> WrittenSpan => new(_buffer, 0, _written);
+    public ReadOnlySpan<byte> WrittenSpan
+    {
+        get
+        {
+            CheckDisposed();
+            return new ReadOnlySpan<byte>(buffer, 0, written);
+        }
+    }
+
+    public ReadOnlyMemory<byte> WrittenMemory
+    {
+        get
+        {
+            CheckDisposed();
+            return new ReadOnlyMemory<byte>(buffer, 0, written);
+        }
+    }
+
+    public int WrittenCount => written;
+
+    public int Capacity => buffer.Length;
+
+    // Reuse the writer without reallocating
+    public void Clear()
+    {
+        CheckDisposed();
+        written = 0;
+    }
+
+    private void CheckDisposed()
+    {
+        if (disposed) throw new ObjectDisposedException(nameof(PooledBufferWriter));
+    }
 
     public void Dispose()
     {
-        var buf = _buffer;
-        _buffer = Array.Empty<byte>();
-        ArrayPool<byte>.Shared.Return(buf);
+        if (disposed) return;
+
+        if (buffer.Length > 0)
+        {
+            ArrayPool<byte>.Shared.Return(buffer, clearArray: false);
+        }
+
+        buffer = [];
+        written = 0;
+        disposed = true;
     }
 }

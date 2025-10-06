@@ -1,6 +1,6 @@
 ﻿namespace MemoryMapped.Forwarder.WorkerServices;
 
-public interface IMessageMemoryMappedShippingClient
+public interface IMessageMemoryMappedShippingWorker
 {
     Task StartAsync(CancellationToken cancellationToken);
 }

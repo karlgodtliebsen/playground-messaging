@@ -2,8 +2,8 @@
 
 public interface IMemoryMappedQueue : IDisposable
 {
-    bool TryEnqueue<T>(T entry);
-    T? TryDequeue<T>();
-    IList<T> TryDequeueBatch<T>(int maxCount = 100);
+    bool TryEnqueue(object entry);
+    object? TryDequeue();
+    IList<object> TryDequeueBatch(int maxCount = 100);
 }
 

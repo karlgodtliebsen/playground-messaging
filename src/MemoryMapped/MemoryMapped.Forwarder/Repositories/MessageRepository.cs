@@ -1,6 +1,6 @@
 ﻿using Dapper;
 
-using Messaging.Library;
+using MemoryMapped.Queue;
 
 using Microsoft.Extensions.Logging;
 
@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace MemoryMapped.Forwarder.Repositories;
 
-public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger logger) : IMessageRepository
+public abstract class MessageRepository(ILogger logger) : IMessageRepository
 {
     protected abstract string GetConnectionString();
 
@@ -26,7 +26,6 @@ public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger log
     }
     private void PrintError(Exception ex, string action)
     {
-        //SelfLog.WriteLine($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
         Debug.Print($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
         Trace.WriteLine($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
         Console.WriteLine($"Failed {action}\n Exception: {ex}\n In Database: {GetConnectionString()}");
@@ -49,20 +48,20 @@ public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger log
         }
     }
 
-    public async IAsyncEnumerable<IMessageBase> Find<T>(object? parameters, [EnumeratorCancellation] CancellationToken cancellationToken) where T : IMessageBase
+    public async IAsyncEnumerable<MessageEnvelope> Find(object? parameters, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var sqlStatement = "SELECT * FROM messages";
         await using var connection = GetConnection();
         await connection.OpenAsync(cancellationToken);
-        IEnumerable<PersistMessage> reader = await connection.QueryAsync<PersistMessage>(sqlStatement, parameters);
+        IEnumerable<MessageEnvelope> reader = await connection.QueryAsync<MessageEnvelope>(sqlStatement, parameters);
         foreach (var message in reader)
         {
-            yield return System.Text.Json.JsonSerializer.Deserialize<T>(message.Message);
+            yield return message;
         }
     }
 
 
-    public async Task Add(IEnumerable<IMessageBase> entries, CancellationToken cancellationToken)
+    public async Task Add(IEnumerable<MessageEnvelope> entries, CancellationToken cancellationToken)
     {
         var entriesList = entries.ToList();
         if (!entriesList.Any()) return;
@@ -72,7 +71,7 @@ public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger log
         try
         {
             await connection.OpenAsync(cancellationToken);
-            await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+            // await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
             try
             {
                 var parameters = entriesList.Select(entity => new
@@ -80,8 +79,8 @@ public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger log
                     id = entity.Id,
                     timestamp = entity.TimeStamp,
                     correlationId = entity.CorrelationId,
-                    typeFullName = entity.GetType().FullName!,
-                    message = System.Text.Json.JsonSerializer.Serialize(entity),
+                    typeFullName = entity.TypeFullName,
+                    message = entity.Message,
 
                 }).ToArray();
 
@@ -89,14 +88,14 @@ public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger log
                     @"INSERT INTO message (id, timestamp, correlationId,typeFullName,message) 
                             VALUES (@id,@timestamp, @correlationId,@typeFullName, @message);";
 
-                var rowsAffected = await connection.ExecuteAsync(sqlStatement, parameters, transaction);
+                var rowsAffected = await connection.ExecuteAsync(sqlStatement, parameters /*,transaction*/);
 
-                await transaction.CommitAsync(cancellationToken);
+                // await transaction.CommitAsync(cancellationToken);
                 PrintInformation($"Successfully inserted {rowsAffected} entries into message table");
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(cancellationToken);
+                // await transaction.RollbackAsync(cancellationToken);
                 PrintError(ex, "Unexpected error while forwarding message entries");
                 logger.LogError(ex, "Failed to insert {Count} entries, transaction rolled back", entriesList.Count);
                 throw;
@@ -129,6 +128,4 @@ public abstract class MessageRepository(Microsoft.Extensions.Logging.ILogger log
             return false;
         }
     }
-
-
 }

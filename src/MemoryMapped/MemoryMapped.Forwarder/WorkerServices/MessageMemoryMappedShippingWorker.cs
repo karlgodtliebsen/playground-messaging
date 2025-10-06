@@ -1,12 +1,10 @@
 ﻿using MemoryMapped.Queue;
 
-using Messaging.Library;
-
 using Microsoft.Extensions.Logging;
 
 namespace MemoryMapped.Forwarder.WorkerServices;
 
-public class MessageMemoryMappedShippingClient(IMemoryMappedQueue memoryMappedQueue, IMessageForwarder forwarder, ILogger<MessageMemoryMappedShippingClient> logger) : IMessageMemoryMappedShippingClient
+public class MessageMemoryMappedShippingWorker(IMemoryMappedQueue memoryMappedQueue, IMessageForwarder forwarder, ILogger<MessageMemoryMappedShippingWorker> logger) : IMessageMemoryMappedShippingWorker
 {
     private readonly int monitoringIntervalMs = 10;
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -16,7 +14,7 @@ public class MessageMemoryMappedShippingClient(IMemoryMappedQueue memoryMappedQu
             await forwarder.Initialize(cancellationToken);
             while (!cancellationToken.IsCancellationRequested)
             {
-                var entries = memoryMappedQueue.TryDequeueBatch<IMessageBase>();
+                var entries = memoryMappedQueue.TryDequeueBatch();
                 if (entries.Count > 0)
                 {
                     await forwarder.ForwardBatchAsync(entries, cancellationToken);

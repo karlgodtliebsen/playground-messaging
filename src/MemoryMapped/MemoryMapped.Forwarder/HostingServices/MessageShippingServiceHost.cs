@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 namespace MemoryMapped.Forwarder.WorkerServices;
 
-public sealed class MessageShippingServiceHost(IMessageMemoryMappedShippingClient workerService, ILogger<MessageShippingServiceHost> logger) : BackgroundService
+public sealed class MessageShippingServiceHost(IMessageMemoryMappedShippingWorker workerService, ILogger<MessageShippingServiceHost> logger) : BackgroundService
 {
     private Task? runningTask;
 

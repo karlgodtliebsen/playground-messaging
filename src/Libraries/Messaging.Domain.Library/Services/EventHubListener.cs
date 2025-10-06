@@ -1,6 +1,8 @@
 ﻿using MemoryMapped.Queue;
 
 using Messaging.Domain.Library.DemoMessages;
+using Messaging.Domain.Library.Orders;
+using Messaging.Domain.Library.Payments;
 using Messaging.Domain.Library.SimpleMessages;
 using Messaging.EventHub.Library;
 
@@ -24,43 +26,55 @@ public class EventHubListener(IEventHub eventHub, IMemoryMappedQueue queue, ILog
             return Task.CompletedTask;
         });
 
-        //eventHub.Subscribe<TextMessage>("TextMessage", (m, ct) =>
-        //{
-        //    logger.LogInformation("EventListener using 'TextMessage' Received TextMessage: {@message}", m);
-        //    return Task.CompletedTask;
-        //});
-        //IMessageBase
         eventHub.Subscribe<TextMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received TextMessage: {@message}", m);
-            queue.TryEnqueue<TextMessage>(m);
+            queue.TryEnqueue(m);
             return Task.CompletedTask;
         });
 
         eventHub.Subscribe<PingMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received PingMessage: {@message}", m);
-            queue.TryEnqueue<PingMessage>(m);
+            queue.TryEnqueue(m);
             return Task.CompletedTask;
         });
         eventHub.Subscribe<HeartbeatMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received HeartbeatMessage: {@message}", m);
-            queue.TryEnqueue<HeartbeatMessage>(m);
+            queue.TryEnqueue(m);
             return Task.CompletedTask;
         });
 
         eventHub.Subscribe<CreateMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received CreateMessage: {@message}", m);
-            queue.TryEnqueue<CreateMessage>(m);
+            queue.TryEnqueue(m);
             return Task.CompletedTask;
         });
 
         eventHub.Subscribe<InformationMessage>((m, ct) =>
         {
             logger.LogInformation("EventListener Received InformationMessage: {@message}", m);
-            queue.TryEnqueue<InformationMessage>(m);
+            queue.TryEnqueue(m);
+            return Task.CompletedTask;
+        });
+        eventHub.Subscribe<PaymentProcessed>((m, ct) =>
+        {
+            logger.LogInformation("EventListener Received PaymentProcessed: {@message}", m);
+            queue.TryEnqueue(m);
+            return Task.CompletedTask;
+        });
+        eventHub.Subscribe<OrderUpdated>((m, ct) =>
+        {
+            logger.LogInformation("EventListener Received OrderUpdated: {@message}", m);
+            queue.TryEnqueue(m);
+            return Task.CompletedTask;
+        });
+        eventHub.Subscribe<OrderCreated>((m, ct) =>
+        {
+            logger.LogInformation("EventListener Received OrderCreated: {@message}", m);
+            queue.TryEnqueue(m);
             return Task.CompletedTask;
         });
 

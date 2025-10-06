@@ -2,6 +2,7 @@
 
 public interface IFastSerializer
 {
-    ReadOnlySpan<byte> Serialize<T>(T entry);
-    T? Deserialize<T>(ReadOnlySpan<byte> buffer);
+    ReadOnlySpan<byte> Serialize(object entry);
+
+    object? Deserialize(ReadOnlySpan<byte> buffer);
 }

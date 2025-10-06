@@ -11,7 +11,7 @@ public static class MessageForwarderConfigurator
 
     public static IServiceCollection AddMessageForwarderServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.TryAddTransient<IMessageMemoryMappedShippingClient, MessageMemoryMappedShippingClient>();
+        services.TryAddTransient<IMessageMemoryMappedShippingWorker, MessageMemoryMappedShippingWorker>();
         services.TryAddTransient<IMessageForwarder, MessageForwarder>();
         return services;
     }

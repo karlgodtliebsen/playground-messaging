@@ -8,9 +8,9 @@ public class FastJsonSerializer : IFastSerializer
 {
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
 
-    public ReadOnlySpan<byte> Serialize<T>(T entry)// where T : class
+    public ReadOnlySpan<byte> Serialize(object entry)
     {
-        var t = typeof(T);
+        var t = entry.GetType();
         var typeName = t.AssemblyQualifiedName!;
         var typeNameBytes = Encoding.UTF8.GetBytes(typeName);
         using var writer = new PooledBufferWriter();
@@ -29,9 +29,29 @@ public class FastJsonSerializer : IFastSerializer
         return writer.WrittenSpan;
     }
 
-    public T? Deserialize<T>(ReadOnlySpan<byte> buffer)
+    //public T? Deserialize<T>(ReadOnlySpan<byte> buffer)
+    //{
+    //    if (buffer.IsEmpty) return default;
+
+    //    // Read type name length
+    //    var typeNameLength = BitConverter.ToInt32(buffer.Slice(0, 4));
+
+    //    // Read type name
+    //    var typeName = Encoding.UTF8.GetString(buffer.Slice(4, typeNameLength));
+
+    //    // Get the type
+    //    var type = Type.GetType(typeName);
+    //    if (type == null)
+    //        throw new InvalidOperationException($"Type not found: {typeName}");
+
+    //    // Deserialize payload
+    //    var payload = buffer.Slice(4 + typeNameLength);
+    //    return (T)JsonSerializer.Deserialize(payload, type, JsonOpts);
+    //}
+
+    public object? Deserialize(ReadOnlySpan<byte> buffer)
     {
-        if (buffer.IsEmpty) return default;
+        if (buffer.IsEmpty) return null;
 
         // Read type name length
         var typeNameLength = BitConverter.ToInt32(buffer.Slice(0, 4));
@@ -46,7 +66,7 @@ public class FastJsonSerializer : IFastSerializer
 
         // Deserialize payload
         var payload = buffer.Slice(4 + typeNameLength);
-        return (T)JsonSerializer.Deserialize(payload, type, JsonOpts);
+        return JsonSerializer.Deserialize(payload, type, JsonOpts);
     }
 }
 
