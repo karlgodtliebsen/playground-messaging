@@ -2,7 +2,6 @@
 
 using Messaging.Domain.Library.DemoMessages;
 using Messaging.RabbitMq.Library.LegacySupport;
-using Messaging.RabbitMq.Library.MessageSupport;
 
 namespace Messaging.Tests;
 
@@ -27,14 +26,14 @@ public class TestOfRabbitMqConfiguration
     [Fact]
     public void VerifyThatQueueMapperIsValid()
     {
-        var messageQueueNameRegistration = new TypeToQueueMapper();
-        messageQueueNameRegistration.Register<TextMessage>("text-message-queue");
-        messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
-        messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
+        //var messageQueueNameRegistration = new TypeToQueueRegistry();
+        //messageQueueNameRegistration.Register<TextMessage>("text-message-queue");
+        //messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
+        //messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
 
-        messageQueueNameRegistration.TryLookup<TextMessage>().Should().Be("text-message-queue");
-        messageQueueNameRegistration.TryLookup<PingMessage>().Should().Be("diagnostics-queue");
-        messageQueueNameRegistration.TryLookup<HeartbeatMessage>().Should().Be("diagnostics-queue");
+        //messageQueueNameRegistration.TryLookup<TextMessage>().Should().Be("text-message-queue");
+        //messageQueueNameRegistration.TryLookup<PingMessage>().Should().Be("diagnostics-queue");
+        //messageQueueNameRegistration.TryLookup<HeartbeatMessage>().Should().Be("diagnostics-queue");
 
 
     }

@@ -1,10 +1,11 @@
 ﻿using Messaging.Application.Configuration;
 using Messaging.Application.Configuration.KafkaSupport;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-const string title = "Messaging Demo";
+const string title = "Kafka Messaging Demo";
 
 Console.Title = title;
 Console.WriteLine(title);
@@ -24,7 +25,7 @@ serviceProvider.UseKafkaEventListener();
 
 var logger = serviceProvider.SetupSerilog();
 var mLogger = serviceProvider.GetRequiredService<ILogger<Program>>();
-logger.Information("Starting Multi Host {title}", title);
+logger.Information("Starting Kafka Host {title}", title);
 
 await kafkaCombinedHost.RunAsync(cancellationTokenSource.Token);
 
@@ -37,11 +38,3 @@ await kafkaCombinedHost.RunAsync(cancellationTokenSource.Token);
 //   kafkaCombinedHost
 //], title, mLogger, cancellationTokenSource.Token);
 
-//rabbitMqProducerHost,
-//rabbitMqConsumerHost
-
-//var rabbitMqConsumerHost = RabbitMqBuilder.BuildRabbitMqConsumerHost();
-//var host = rabbitMqConsumerHost;
-//var rabbitMqProducerHost = RabbitMqBuilder.BuildRabbitMqProducerHost();
-//var host = rabbitMqProducerHost;
-//var host = HostBuilder.BuildRabbitMqCombinedHost();

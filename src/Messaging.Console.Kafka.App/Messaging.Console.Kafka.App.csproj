@@ -82,7 +82,6 @@
     <ProjectReference Include="..\Libraries\Messaging.Hosting.Library\Messaging.Hosting.Library.csproj" />
     <ProjectReference Include="..\Libraries\Messaging.Kafka.Library\Messaging.Kafka.Library.csproj" />
     <ProjectReference Include="..\Libraries\Messaging.Library\Messaging.Library.csproj" />
-    <ProjectReference Include="..\Libraries\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
     <ProjectReference Include="..\Aspire\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,6 @@
 ﻿using Messaging.Domain.Library.DemoMessages;
+using Messaging.Domain.Library.Orders;
+using Messaging.Domain.Library.Payments;
 using Messaging.Domain.Library.SimpleMessages;
 using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
@@ -51,18 +53,23 @@ public static class RabbitMqWebApiConfigurator
 
         //publishing messages
         var publishingCollection = new ServiceCollection();
-        publishingCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>();
-        publishingCollection.AddSingleton<IMessageMap, MessageMap>((sp) =>
-            new MessageMap<CreateMessage>()
-            {
-                ExchangeName = "create-message",
-                RoutingKey = "create-message-route",
-                BindingPattern = "create-message.#",
-                QueueName = "create-message-queue",
-            }
-        );
+        var registry = new MessageMetaDataRegistry();
+        registry.Register<TextMessage>("text-message", "text-message.route", "text-message.#");
+        registry.Register<PingMessage>("diagnostics", "diagnostics.ping", "diagnostics.ping.#");
+        registry.Register<HeartbeatMessage>("diagnostics", "diagnostics.heartbeat", "diagnostics.heartbeat.#");
+
+        registry.Register<InformationMessage>("message", "message", "message.#");
+        registry.Register<CreateMessage>("message", "message", "message.#");
+
+        registry.Register<PaymentProcessed>("payments", "payments", "payments.#");
+
+        registry.Register<OrderUpdated>("orders", "orders.updated", "orders.updated.#");
+        registry.Register<OrderCreated>("orders", "orders.created", "orders.created.#");
+
+
+        publishingCollection.TryAddSingleton(registry);
+
         service.TryAddKeyedSingleton<Assembly[]>("producer", assemblies);
-        service.TryAddKeyedSingleton<TypeToQueueMapper>("producer");
         service.TryAddKeyedSingleton<IServiceCollection>("producer", publishingCollection);
         return service;
     }
@@ -79,15 +86,21 @@ public static class RabbitMqWebApiConfigurator
 
         //publishing messages
         var publishingCollection = new ServiceCollection();
-        publishingCollection.AddSingleton<IMessageMap, MessageMap>((sp) =>
-            new MessageMap<CreateMessage>()
-            {
-                ExchangeName = "create-message",
-                RoutingKey = "create-message-route",
-                BindingPattern = "create-message.#",
-                QueueName = "create-message-queue",
-            }
-        );
+        var registry = new MessageMetaDataRegistry();
+        registry.Register<TextMessage>("text-message", "text-message.route", "text-message.#");
+        registry.Register<PingMessage>("diagnostics", "diagnostics.ping", "diagnostics.ping.#");
+        registry.Register<HeartbeatMessage>("diagnostics", "diagnostics.heartbeat", "diagnostics.heartbeat.#");
+
+        registry.Register<InformationMessage>("message", "message", "message.#");
+        registry.Register<CreateMessage>("message", "message", "message.#");
+
+        registry.Register<PaymentProcessed>("payments", "payments", "payments.#");
+
+        registry.Register<OrderUpdated>("orders", "orders.updated", "orders.updated.#");
+        registry.Register<OrderCreated>("orders", "orders.created", "orders.created.#");
+
+        publishingCollection.TryAddSingleton(registry);
+
         LegacyTypeMapper mapper = new LegacyTypeMapper();
         ////mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
         ////mapper.Register<PingMessage>(typeof(PingMessage).FullName!);
@@ -95,10 +108,6 @@ public static class RabbitMqWebApiConfigurator
 
         service.TryAddSingleton<LegacyTypeMapper>(mapper);
 
-        var messageQueueNameRegistration = new TypeToQueueMapper();
-        //messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
-        //messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
-        service.TryAddKeyedSingleton<TypeToQueueMapper>("producer", messageQueueNameRegistration);
         service.TryAddKeyedSingleton<Assembly[]>("producer", assemblies);
         service.TryAddKeyedSingleton<IServiceCollection>("producer", publishingCollection);
         return service;
@@ -119,27 +128,13 @@ public static class RabbitMqWebApiConfigurator
 
         //listening to messages
         var listeningCollection = new ServiceCollection();
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>();
-        //listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
-        //listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
 
-        listeningCollection.AddSingleton<IMessageMap, MessageMap>((sp) =>
-            new MessageMap<CreateMessage>()
-            {
-                ExchangeName = "create-message",
-                RoutingKey = "create-message-route",
-                BindingPattern = "create-message.#",
-                QueueName = "create-message-queue",
-            }
-        );
-
-        // var messageQueueNameRegistration = new TypeToQueueMapper();
-        //messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
-        //messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
-
-        service.TryAddKeyedSingleton<TypeToQueueMapper>("consumer");
-        service.TryAddKeyedSingleton<Assembly[]>("consumer", assemblies);
+        MessageMetaDataRegistry registry = new MessageMetaDataRegistry();
+        registry.Register<TextMessage>("text-message", "text-message.route", "text-message.#");
+        registry.Register<PingMessage>("diagnostics", "diagnostics.ping", "diagnostics.ping.#");
+        registry.Register<HeartbeatMessage>("diagnostics", "diagnostics.heartbeat", "diagnostics.heartbeat.#");
         service.TryAddKeyedSingleton<IServiceCollection>("consumer", listeningCollection);
+        service.TryAddKeyedSingleton<Assembly[]>("consumer", assemblies);
         return service;
     }
 
@@ -157,15 +152,11 @@ public static class RabbitMqWebApiConfigurator
 
         //listening to messages
         var listeningCollection = new ServiceCollection();
-        listeningCollection.AddSingleton<IMessageMap, MessageMap>((sp) =>
-            new MessageMap<CreateMessage>()
-            {
-                ExchangeName = "create-message",
-                RoutingKey = "create-message-route",
-                BindingPattern = "create-message.#",
-                QueueName = "create-message-queue",
-            }
-        );
+        MessageMetaDataRegistry registry = new MessageMetaDataRegistry();
+        registry.Register<TextMessage>("text-message", "text-message.route", "text-message.#");
+        registry.Register<PingMessage>("diagnostics", "diagnostics.ping", "diagnostics.ping.#");
+        registry.Register<HeartbeatMessage>("diagnostics", "diagnostics.heartbeat", "diagnostics.heartbeat.#");
+        service.TryAddKeyedSingleton<IServiceCollection>("consumer", listeningCollection);
 
         LegacyTypeMapper mapper = new LegacyTypeMapper();
         //mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
@@ -174,10 +165,6 @@ public static class RabbitMqWebApiConfigurator
 
         service.TryAddSingleton<LegacyTypeMapper>(mapper);
 
-        var messageQueueNameRegistration = new TypeToQueueMapper();
-        //messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
-        //messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
-        service.TryAddKeyedSingleton<TypeToQueueMapper>("consumer", messageQueueNameRegistration);
 
         service.TryAddKeyedSingleton<Assembly[]>("consumer", assemblies);
         service.TryAddKeyedSingleton<IServiceCollection>("consumer", listeningCollection);

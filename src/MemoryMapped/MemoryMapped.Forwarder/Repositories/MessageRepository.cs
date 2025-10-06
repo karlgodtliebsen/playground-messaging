@@ -71,7 +71,6 @@ public abstract class MessageRepository(ILogger logger) : IMessageRepository
         try
         {
             await connection.OpenAsync(cancellationToken);
-            // await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
             try
             {
                 var parameters = entriesList.Select(entity => new
@@ -85,19 +84,16 @@ public abstract class MessageRepository(ILogger logger) : IMessageRepository
                 }).ToArray();
 
                 var sqlStatement =
-                    @"INSERT INTO message (id, timestamp, correlationId,typeFullName,message) 
-                            VALUES (@id,@timestamp, @correlationId,@typeFullName, @message);";
+                    @"INSERT INTO message (id, timestamp, correlationId,typeFullName,message) VALUES (@id,@timestamp, @correlationId, @typeFullName, @message);";
 
                 var rowsAffected = await connection.ExecuteAsync(sqlStatement, parameters /*,transaction*/);
 
-                // await transaction.CommitAsync(cancellationToken);
                 PrintInformation($"Successfully inserted {rowsAffected} entries into message table");
             }
             catch (Exception ex)
             {
-                // await transaction.RollbackAsync(cancellationToken);
                 PrintError(ex, "Unexpected error while forwarding message entries");
-                logger.LogError(ex, "Failed to insert {Count} entries, transaction rolled back", entriesList.Count);
+                logger.LogError(ex, "Failed to insert {Count} entries", entriesList.Count);
                 throw;
             }
         }

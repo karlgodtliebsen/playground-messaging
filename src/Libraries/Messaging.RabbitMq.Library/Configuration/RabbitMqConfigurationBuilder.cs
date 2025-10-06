@@ -72,11 +72,10 @@ public static class RabbitMqConfigurationBuilder
                 logging.AddConsole();
             });
         }
-        var messageQueueNameRegistration = sp.GetKeyedService<TypeToQueueMapper>(Consumer);
-        if (listeningCollection is not null && messageQueueNameRegistration is not null)
+        if (listeningCollection is not null && listeningCollection.Count > 0)
         {
-
-            var listeningMessagesMaps = listeningCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
+            var registry = listeningCollection.BuildServiceProvider().GetRequiredService<MessageMetaDataRegistry>();
+            var listeningMessagesMaps = registry.Registries.ToList();
 
             if (setupOptions.DeclareExchanges)
             {
@@ -105,11 +104,7 @@ public static class RabbitMqConfigurationBuilder
                     //look up for explicit setting
                     if (queueName is null)
                     {
-                        queueName = messageQueueNameRegistration.TryLookup(messageMap.MessageType);
-                        if (queueName is null)
-                        {
-                            queueName = "default-queue";
-                        }
+                        queueName = "default-queue";
                     }
 
                     if (!string.IsNullOrEmpty(queueName))
@@ -117,7 +112,6 @@ public static class RabbitMqConfigurationBuilder
                         queues.Add(queueName);
                         opts.ListenToRabbitQueue(queueName, queue =>
                         {
-                            //Can we not bind to exchange??
                             queue.BindExchange(exchangeName, messageMap.BindingPattern);
                             queue.IsDurable = messageMap.DurableQueue;
                             queue.AutoDelete = messageMap.AutoDeleteQueue;
@@ -139,13 +133,11 @@ public static class RabbitMqConfigurationBuilder
                 }
             }
         }
-        messageQueueNameRegistration = sp.GetKeyedService<TypeToQueueMapper>(Producer);
 
-        if (publishingCollection is not null && messageQueueNameRegistration is not null)
+        if (publishingCollection is not null && publishingCollection.Count > 0)
         {
-            var publishingMessagesMaps =
-                publishingCollection.BuildServiceProvider().GetServices<IMessageMap>().ToList();
-
+            var registry = publishingCollection.BuildServiceProvider().GetRequiredService<MessageMetaDataRegistry>();
+            var publishingMessagesMaps = registry.Registries.ToList();
             if (setupOptions.DeclareExchanges)
             {
                 var exchanges = publishingMessagesMaps.GroupBy(m => m.ExchangeName).Select(group => group.First()).ToList();
@@ -171,11 +163,7 @@ public static class RabbitMqConfigurationBuilder
                 {
                     if (queueName is null)
                     {
-                        queueName = messageQueueNameRegistration.TryLookup(messageMap.MessageType);
-                        if (queueName is null)
-                        {
-                            queueName = "default-queue";
-                        }
+                        queueName = "default-queue";
                     }
 
                     if (!string.IsNullOrEmpty(queueName))

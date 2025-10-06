@@ -62,7 +62,7 @@ public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnv
         {
             outgoing.Headers["SendBy"] = message.ApplicationName ?? "";
             outgoing.Headers["MachineName"] = message.MachineName ?? "";
-            outgoing.Headers["Sent-Timestamp"] = DateTimeOffset.UtcNow.ToString("O");
+            outgoing.Headers["Sent-Timestamp"] = DateTimeOffset.UtcNow.ToString("O");//Make an IDateTimeProvider
             outgoing.Headers["Timestamp"] = message.TimeStamp.ToString("O");
             outgoing.Headers["Version"] = message.Version.ToString();
             outgoing.Headers["CorrelationId"] = message.CorrelationId.ToString();
@@ -78,7 +78,7 @@ public sealed class RabbitMqHeaderEnrich(LegacyTypeMapper mapper) : IRabbitMqEnv
 
     private static string? ReadHeader(IDictionary<string, object> headers, string key)
     {
-        if (!headers.TryGetValue(key, out var value) || value is null) return null;
+        if (!headers.TryGetValue(key, out var value)) return null;
 
         return value switch
         {

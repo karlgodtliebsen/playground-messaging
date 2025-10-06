@@ -1,6 +1,5 @@
 ﻿using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
-using Messaging.RabbitMq.Library.MessageSupport;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +34,7 @@ public static class LegacyRabbitMqConfigurator
         service.TryAddSingleton(Options.Create(setupOptions));
         service.TryAddKeyedSingleton(Monitor, Options.Create(Array.Empty<string>()));
         service.TryAddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
-        service.TryAddSingleton<TypeToQueueMapper>();
+        //service.TryAddSingleton<TypeToQueueRegistry>();
         service.AddEventHubServices(configuration);
         return service;
     }

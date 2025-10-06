@@ -1,5 +1,6 @@
 ﻿using MemoryMapped.Queue.Configuration;
 
+using Messaging.Application.Services.Workers;
 using Messaging.Domain.Library.Services;
 
 using Microsoft.Extensions.Configuration;
@@ -14,7 +15,10 @@ public static class ConsoleAppConfigurator
     {
         service.TryAddSingleton<EventHubListener>();
         service.AddMemoryMappedQueueServices(configuration);
-        //IMemoryMappedQueue
+        service.TryAddScoped<MessagingProducerWorkerService>();
+        service.TryAddScoped<DiagnosticsMessagingProducerWorkerService>();
+        service.TryAddScoped<SimpleMessagingProducerWorkerService>();
+        service.TryAddScoped<MessagingConsumerWorkerService>();        //IMemoryMappedQueue
         return service;
     }
 

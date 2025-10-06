@@ -3,21 +3,21 @@ using Wolverine.RabbitMQ.Internal;
 
 namespace Messaging.RabbitMq.Library.MessageSupport;
 
-public interface IMessageMap
+public interface IMessageTypeMap
 {
     ExchangeType ExchangeType { get; set; }
     QueueType QueueType { get; set; }
     Type MessageType { get; }
-
+    string ExchangeName { get; }
+    string BindingPattern { get; }
+    string RoutingKey { get; }
+    string? QueueName { get; }
     bool UseExchange { get; set; }
     bool DurableExchange { get; set; }
     bool DurableQueue { get; set; }
     bool UseQueue { get; set; }
     bool UseHeaderMapping { get; set; }
-    string ExchangeName { get; set; }
-    string BindingPattern { get; set; }
-    string RoutingKey { get; set; }
-    string? QueueName { get; set; }
+
     bool Exclusive { get; set; }
     bool NoWait { get; set; }
     bool AutoDeleteQueue { get; set; }

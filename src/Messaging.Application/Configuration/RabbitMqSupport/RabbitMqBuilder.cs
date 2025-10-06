@@ -2,8 +2,10 @@
 using Messaging.Application.Services.Hosts;
 using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using Wolverine;
 
 namespace Messaging.Application.Configuration.RabbitMqSupport;
@@ -15,12 +17,14 @@ public static class RabbitMqBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                var configuration = context.Configuration;
                 services
-                    .AddProducerServices(context.Configuration)
-                    .AddApplicationServices(context.Configuration)
-                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); })
+                    .AddProducerServices(configuration)
+                    .AddApplicationServices(configuration)
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); })
                     .AddHostedService<DiagnosticsMessagingProducerServiceHost>()
-                    .AddHostedService<RabbitMqQueueMonitoringService>();
+                    //.AddHostedService<RabbitMqQueueMonitoringService>()
+                    ;
             });
 
         builder.UseWolverine((opt) => RabbitMqConfigurationBuilder.BuildRabbitMqSetupUsingWolverine(opt));
@@ -34,13 +38,15 @@ public static class RabbitMqBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                var configuration = context.Configuration;
                 services
-                    .AddConsumerServices(context.Configuration)
-                    .AddEventHubServices(context.Configuration)
-                    .AddApplicationServices(context.Configuration)
-                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); })
+                    .AddConsumerServices(configuration)
+                    .AddEventHubServices(configuration)
+                    .AddApplicationServices(configuration)
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); })
                     .AddHostedService<MessagingConsumerServiceHost>()
-                    .AddHostedService<RabbitMqQueueMonitoringService>();
+                    //.AddHostedService<RabbitMqQueueMonitoringService>()
+                    ;
             });
         builder.UseWolverine((opt) => RabbitMqConfigurationBuilder.BuildRabbitMqSetupUsingWolverine(opt));
         var host = builder.Build();
@@ -53,12 +59,13 @@ public static class RabbitMqBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                var configuration = context.Configuration;
                 services
-                    .AddProducerServices(context.Configuration)
-                    .AddConsumerServices(context.Configuration)
-                    .AddEventHubServices(context.Configuration)
-                    .AddApplicationServices(context.Configuration)
-                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, context.Configuration); })
+                    .AddProducerServices(configuration)
+                    .AddConsumerServices(configuration)
+                    .AddEventHubServices(configuration)
+                    .AddApplicationServices(configuration)
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); })
                     .AddHostedService<MessagingConsumerServiceHost>()
                     .AddHostedService<DiagnosticsMessagingProducerServiceHost>()
                     .AddHostedService<RabbitMqQueueMonitoringService>()

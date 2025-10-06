@@ -1,12 +1,14 @@
-﻿using System.Reflection;
-using Messaging.Domain.Library.DemoMessages;
+﻿using Messaging.Domain.Library.DemoMessages;
 using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
 using Messaging.RabbitMq.Library.MessageSupport;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+
+using System.Reflection;
 
 namespace Messaging.Application.Configuration.RabbitMqSupport;
 
@@ -26,20 +28,16 @@ public static class RabbitMqServicesConfigurator
 
         //publishing messages
         var publishingCollection = new ServiceCollection();
-        publishingCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
-            new MessageMap<TextMessage>()
-            {
-                QueueName = "text-message-queue",//to show customization
-            }
-        );
-        publishingCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
-        publishingCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+        var registry = new MessageMetaDataRegistry();
+        registry.Register<TextMessage>("text-message", "text-message.route", "text-message.#", "text-message-queue");
+        registry.Register<PingMessage>("diagnostics", "diagnostics.ping", "diagnostics.ping.#", "diagnostics-queue");
+        registry.Register<HeartbeatMessage>("diagnostics", "diagnostics.heartbeat", "diagnostics.heartbeat.#", "diagnostics-queue");
+        publishingCollection.TryAddSingleton(registry);
 
-        var messageQueueNameRegistration = new TypeToQueueMapper();
-        messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
-        messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
-
-        service.TryAddKeyedSingleton("producer", messageQueueNameRegistration);
+        //var messageQueueNameRegistration = new TypeToQueueRegistry();
+        //messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
+        //messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
+        //service.TryAddKeyedSingleton("producer", messageQueueNameRegistration);
 
         LegacyTypeMapper mapper = new LegacyTypeMapper();
         mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
@@ -63,21 +61,30 @@ public static class RabbitMqServicesConfigurator
             typeof(Domain.Library.Configuration.Anchor).Assembly
         };
 
-        //listening to messages
+        ////listening to messages
         var listeningCollection = new ServiceCollection();
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<TextMessage>>((sp) =>
-            new MessageMap<TextMessage>()
-            {
-                QueueName = "text-message-queue",//to show customization
-            }
-        );
+        //listeningCollection.AddSingleton<IMessageTypeMap, MessageTypeMap>((sp) =>
+        //    new MessageTypeMap()
+        //    {
+        //        QueueName = "text-message-queue",//to show customization
+        //    }
+        //);
 
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<PingMessage>>();
-        listeningCollection.AddSingleton<IMessageMap, MessageMap<HeartbeatMessage>>();
+        //listeningCollection.AddSingleton<IMessageTypeMap, MessageTypeMap>();
+        //listeningCollection.AddSingleton<IMessageTypeMap, MessageTypeMap>();
+        // service.TryAddKeyedSingleton("consumer", messageQueueNameRegistration);
 
-        var messageQueueNameRegistration = new TypeToQueueMapper();
-        messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
-        messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
+        var registry = new MessageMetaDataRegistry();
+        registry.Register<TextMessage>("text-message", "text-message.route", "text-message.#", "text-message-queue");
+        registry.Register<PingMessage>("diagnostics", "diagnostics.ping", "diagnostics.ping.#", "diagnostics-queue");
+        registry.Register<HeartbeatMessage>("diagnostics", "diagnostics.heartbeat", "diagnostics.heartbeat.#", "diagnostics-queue");
+        listeningCollection.TryAddSingleton(registry);
+
+
+        //var messageQueueNameRegistration = new TypeToQueueRegistry();
+        //messageQueueNameRegistration.Register<PingMessage>("diagnostics-queue");
+        //messageQueueNameRegistration.Register<HeartbeatMessage>("diagnostics-queue");
+        //service.TryAddKeyedSingleton("consumer", messageQueueNameRegistration);
 
         LegacyTypeMapper mapper = new LegacyTypeMapper();
         mapper.Register<TextMessage>(typeof(TextMessage).FullName!);
@@ -85,7 +92,6 @@ public static class RabbitMqServicesConfigurator
         mapper.Register<HeartbeatMessage>(typeof(HeartbeatMessage).FullName!);
 
         service.TryAddSingleton(mapper);
-        service.TryAddKeyedSingleton("consumer", messageQueueNameRegistration);
         service.TryAddKeyedSingleton("consumer", assemblies);
         service.TryAddKeyedSingleton<IServiceCollection>("consumer", listeningCollection);
         return service;
