@@ -29,8 +29,8 @@ builder.AddServiceDefaults();
 services
     .AddSingleton<EventHubListener>()
     .AddProducerServices(configuration)
-    //.AddLegacyProducerServices(configuration)
     .AddConsumerServices(configuration)
+    //.AddLegacyProducerServices(configuration)
     //.AddLegacyConsumerServices(configuration)
     .AddOptions(configuration)
     .AddEventHubServices(configuration)
