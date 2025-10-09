@@ -21,18 +21,25 @@
     <Project Path="Libraries/Messaging.Hosting.Library/Messaging.Hosting.Library.csproj" />
     <Project Path="Libraries/Messaging.Kafka.Library/Messaging.Kafka.Library.csproj" />
     <Project Path="Libraries/Messaging.Library/Messaging.Library.csproj" />
+    <Project Path="Libraries/Messaging.PostgreSql.Library/Messaging.PostgreSql.Library.csproj" />
     <Project Path="Libraries/Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="../.github/workflows/build.yml" />
     <File Path="../README.md" />
     <File Path=".editorconfig" />
+    <File Path="docker-compose-kafka.v2.yml" />
+    <File Path="docker-compose-kafka.yml" />
+    <File Path="docker-compose.kafka.dev.yml" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/Messaging.EventHub.Benchmark/Messaging.EventHub.Benchmark.csproj" />
     <Project Path="Tests/Messaging.EventHub.Tests/Messaging.EventHub.Tests.csproj" />
     <Project Path="Tests/Messaging.Tests/Messaging.Tests.csproj" />
   </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
   <Project Path="Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj" />
   <Project Path="Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj" />
 </Solution>

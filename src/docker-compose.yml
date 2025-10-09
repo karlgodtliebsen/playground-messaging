@@ -1,0 +1,21 @@
+services:
+  kafka:
+    image: apache/kafka:latest
+    hostname: kafka
+    
+  redpanda-console:
+    image: redpandadata/console:latest
+    
+  messaging.console.producer.app:
+    image: ${DOCKER_REGISTRY-}messagingconsoleproducerapp
+    build:
+      context: .
+      dockerfile: Messaging.Console.Producer.App/Dockerfile
+
+networks:
+  messaging:
+    driver: bridge
+
+volumes:
+  kafka-data:
+    

@@ -18,7 +18,7 @@ public static class ConsoleAppConfigurator
         service.TryAddScoped<MessagingProducerWorkerService>();
         service.TryAddScoped<DiagnosticsMessagingProducerWorkerService>();
         service.TryAddScoped<SimpleMessagingProducerWorkerService>();
-        service.TryAddScoped<MessagingConsumerWorkerService>();        //IMemoryMappedQueue
+        service.TryAddScoped<MessagingConsumerWorkerService>();
         return service;
     }
 

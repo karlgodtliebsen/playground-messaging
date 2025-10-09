@@ -1,10 +1,13 @@
-﻿using Messaging.Domain.Library.DemoMessages;
+﻿using Confluent.Kafka;
+
+using Messaging.Domain.Library.DemoMessages;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.Payments;
 using Messaging.Domain.Library.SimpleMessages;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Wolverine;
 using Wolverine.Kafka;
@@ -13,23 +16,58 @@ namespace Messaging.Kafka.Library.Configuration;
 
 public static class KafkaConfigurationBuilder
 {
+    public static void BuildTestProducer(WolverineOptions opts)
+    {
+        var services = opts.Services;
+        var sp = services.BuildServiceProvider();
+        var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+        var hostPortName = $"{options.HostName}:{options.Port}";
+
+        var kafka = opts.UseKafka(hostPortName)
+            .ConfigureClient(client =>
+            {
+                // These are important for development
+                client.SecurityProtocol = SecurityProtocol.Plaintext;
+                client.Acks = Acks.All; // Wait for all replicas
+                client.Debug = "broker,topic,msg"; // Enable debug logging temporarily
+            });
+        opts.PublishMessage<PingMessage>().ToKafkaTopic("diagnostics-messages").DeliverWithin(TimeSpan.FromSeconds(30));
+        opts.PublishMessage<HeartbeatMessage>().ToKafkaTopic("diagnostics-messages").DeliverWithin(TimeSpan.FromSeconds(30));
+        opts.PublishMessage<TextMessage>().ToKafkaTopic("diagnostics-messages").DeliverWithin(TimeSpan.FromSeconds(30));
+
+        opts.Discovery.IncludeAssembly(typeof(Messaging.Kafka.Library.Configuration.Anchor).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(Messaging.Domain.Library.Configuration.Anchor).Assembly);
+    }
+
+    //opts.Policies.OnException<InvalidOperationException>()
+    //    .RetryWithCooldown(maxAttempts: 3,
+    //        cooldown: TimeSpan.FromSeconds(2),
+    //        maxCooldown: TimeSpan.FromSeconds(10));
+    //// With consumer group and client ID
+    //opts.UseKafka("localhost:9094;group.id=my-consumer-group;client.id=my-app");
+
+    //// Production with multiple brokers
+    //opts.UseKafka("broker1:9094,broker2:9094,broker3:9094");
+
+    //// With SSL/SASL (production)
+    //opts.UseKafka("broker:9094;security.protocol=SASL_SSL;sasl.mechanism=PLAIN;sasl.username=user;sasl.password=pass");
     public static void BuildProducer(WolverineOptions opts)
     {
-        //opts.Policies.OnException<InvalidOperationException>()
-        //    .RetryWithCooldown(maxAttempts: 3,
-        //        cooldown: TimeSpan.FromSeconds(2),
-        //        maxCooldown: TimeSpan.FromSeconds(10));
 
-        var kafka = opts.UseKafka("localhost:9094"); //default is 9092, so this is wired to the docker-compose setup
-
-        //// With consumer group and client ID
-        //opts.UseKafka("localhost:9094;group.id=my-consumer-group;client.id=my-app");
-
-        //// Production with multiple brokers
-        //opts.UseKafka("broker1:9094,broker2:9094,broker3:9094");
-
-        //// With SSL/SASL (production)
-        //opts.UseKafka("broker:9094;security.protocol=SASL_SSL;sasl.mechanism=PLAIN;sasl.username=user;sasl.password=pass");
+        var services = opts.Services;
+        var sp = services.BuildServiceProvider();
+        var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+        var hostPortName = $"{options.HostName}:{options.Port}";
+        var kafka = opts.UseKafka(hostPortName).ConfigureClient(client =>
+        {
+            // These are important for development
+            client.SecurityProtocol = SecurityProtocol.Plaintext;
+            client.Acks = Acks.All; // Wait for all replicas
+            //client.MessageTimeoutMs = 30000; // 30 second timeout
+            //client.RequestTimeoutMs = 30000;
+            //client.LingerMs = 100; // Wait up to 100ms to batch messages
+            client.Debug = "broker,topic,msg"; // Enable debug logging temporarily
+        });
 
         BuildProducer(opts, kafka);
         // Discovery
@@ -51,16 +89,16 @@ public static class KafkaConfigurationBuilder
 
         // Simple topic publishing
 
-        opts.PublishMessage<OrderCreated>().ToKafkaTopic("orders");//.ConfigureProducer();
-        opts.PublishMessage<OrderUpdated>().ToKafkaTopic("orders");
-        opts.PublishMessage<PaymentProcessed>().ToKafkaTopic("payments");
+        opts.PublishMessage<OrderCreated>().ToKafkaTopic("orders").DeliverWithin(TimeSpan.FromSeconds(30));
+        opts.PublishMessage<OrderUpdated>().ToKafkaTopic("orders").DeliverWithin(TimeSpan.FromSeconds(30));
+        opts.PublishMessage<PaymentProcessed>().ToKafkaTopic("payments").DeliverWithin(TimeSpan.FromSeconds(30));
 
-        opts.PublishMessage<CreateMessage>().ToKafkaTopic("messages");
-        opts.PublishMessage<InformationMessage>().ToKafkaTopic("messages");
+        opts.PublishMessage<CreateMessage>().ToKafkaTopic("messages").DeliverWithin(TimeSpan.FromSeconds(30));
+        opts.PublishMessage<InformationMessage>().ToKafkaTopic("messages").DeliverWithin(TimeSpan.FromSeconds(30));
 
-        opts.PublishMessage<PingMessage>().ToKafkaTopic("diagnostics-messages");
-        opts.PublishMessage<HeartbeatMessage>().ToKafkaTopic("diagnostics-messages");
-        opts.PublishMessage<TextMessage>().ToKafkaTopic("diagnostics-messages");
+        opts.PublishMessage<PingMessage>().ToKafkaTopic("diagnostics-messages").DeliverWithin(TimeSpan.FromSeconds(30));
+        opts.PublishMessage<HeartbeatMessage>().ToKafkaTopic("diagnostics-messages").DeliverWithin(TimeSpan.FromSeconds(30));
+        opts.PublishMessage<TextMessage>().ToKafkaTopic("diagnostics-messages").DeliverWithin(TimeSpan.FromSeconds(30));
 
         // Discovery
         opts.Discovery.IncludeAssembly(typeof(Messaging.Kafka.Library.Configuration.Anchor).Assembly);
@@ -75,17 +113,20 @@ public static class KafkaConfigurationBuilder
         //    .RetryWithCooldown(maxAttempts: 3,
         //        cooldown: TimeSpan.FromSeconds(2),
         //        maxCooldown: TimeSpan.FromSeconds(10));
-
-        var kafka = opts.UseKafka("localhost:9094"); //default is 9092, so this is wired to the docker-compose setup
-
+        var services = opts.Services;
+        var sp = services.BuildServiceProvider();
+        var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+        var hostPortName = $"{options.HostName}:{options.Port};group.id={options.ConsumerGroup};client.id={options.ClientId}";
+        var kafka = opts.UseKafka(hostPortName).ConfigureClient(client =>
+        {
+            // These are important for development
+            client.SecurityProtocol = SecurityProtocol.Plaintext;
+            client.Acks = Acks.All;
+            client.Debug = "broker,topic,msg"; // Enable debug logging temporarily
+        });
         //variations
         // With consumer group and client ID
         //var kafka = opts.UseKafka("localhost:9094;group.id=my-consumer-group;client.id=my-app");
-        // Production with multiple brokers
-        //var kafka = opts.UseKafka("broker1:9094,broker2:9094,broker3:9094");
-
-        //// With SSL/SASL (production)
-        //var kafka = opts.UseKafka("broker:9094;security.protocol=SASL_SSL;sasl.mechanism=PLAIN;sasl.username=user;sasl.password=pass");
 
         BuildConsumer(opts, kafka);
     }
@@ -159,7 +200,11 @@ public static class KafkaConfigurationBuilder
 
     public static void BuildCombined(WolverineOptions opts)
     {
-        var kafka = opts.UseKafka("localhost:9094"); //default is 9092, so this is wired to the docker-compose setup
+        var services = opts.Services;
+        var sp = services.BuildServiceProvider();
+        var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+        var hostPortName = $"{options.HostName}:{options.Port}";
+        var kafka = opts.UseKafka(hostPortName); //default is 9092, so this is wired to the docker-compose setup
         BuildProducer(opts, kafka);
         BuildConsumer(opts, kafka);
     }

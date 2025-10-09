@@ -31,7 +31,6 @@ await kafkaCombinedHost.RunAsync(cancellationTokenSource.Token);
 
 
 //start multiple hosts
-
 //await BackgroundServicesRunner.RunAsync([
 //   // kafkaProducerHost,
 //   //  kafkaConsumerHost, 

@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "messaging.console.producer.app": "StartDebugging",
+        "kafka": "StartWithoutDebugging",
+        "redpanda-console": "StartWithoutDebugging"
+      }
+    }
+  }
+}

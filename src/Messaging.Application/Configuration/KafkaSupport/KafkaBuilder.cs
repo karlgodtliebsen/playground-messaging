@@ -14,6 +14,24 @@ namespace Messaging.Application.Configuration.KafkaSupport;
 
 public static class KafkaBuilder
 {
+    public static IHost BuildKafkaTestProducerHost()
+    {
+        var builder = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                var configuration = context.Configuration;
+                services
+                    .AddKafkaApplicationServices(configuration)
+                    .AddHostedService<DiagnosticsMessagingProducerServiceHost>()
+                    .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); });
+            });
+
+
+        builder.UseWolverine(KafkaConfigurationBuilder.BuildTestProducer);
+        var host = builder.Build();
+        host.Services.SetupSerilog();
+        return host;
+    }
     public static IHost BuildKafkaProducerHost()
     {
         var builder = Host.CreateDefaultBuilder()
@@ -22,7 +40,6 @@ public static class KafkaBuilder
                 var configuration = context.Configuration;
                 services
                     .AddKafkaApplicationServices(configuration)
-                    .AddMemoryMappedQueueServices(configuration)
                     .AddHostedService<MessagingProducerServiceHost>()
                     .AddHostedService<SimpleMessagingProducerServiceHost>()
                     .AddHostedService<DiagnosticsMessagingProducerServiceHost>()
@@ -44,7 +61,7 @@ public static class KafkaBuilder
                 var configuration = context.Configuration;
                 services
                     .AddKafkaApplicationServices(configuration)
-
+                    .AddEventHubListenerServices(configuration)
                     .AddMemoryMappedQueueServices(configuration)
                     .AddMsSqlServices(configuration)
                     .AddMessageForwarderServices(configuration)
@@ -67,6 +84,7 @@ public static class KafkaBuilder
                 var configuration = context.Configuration;
                 services
                     .AddKafkaApplicationServices(configuration)
+                    .AddEventHubListenerServices(configuration)
                     .AddMemoryMappedQueueServices(configuration)
                     .AddMessageForwarderServices(configuration)
                     .AddMessageForwarderHostServices(configuration)

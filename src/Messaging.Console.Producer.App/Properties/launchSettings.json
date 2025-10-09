@@ -2,9 +2,10 @@
   "profiles": {
     "Messaging.Console.Producer.App": {
       "commandName": "Project",
-      "commandLineArgs": "x=43",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "KafkaOptions__HostName": "localhost",
+        "KafkaOptions__Port": "9094"
       },
       "hotReloadEnabled": false
     },
@@ -12,22 +13,16 @@
       "commandName": "Docker",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        "RABBITMQ_HOST": "host.docker.internal",
-        "RabbitMqOptions__HostName": "host.docker.internal",
-        "RabbitMqOptions__Port": "5672",
-        "RabbitMqOptions__UserName": "guest",
-        "RabbitMqOptions__Password": "guest"
-      },
-      "publishAllPorts": true,
-      "useSSL": true
+        "KafkaOptions__HostName": "kafka",
+        "KafkaOptions__Port": "9092"
+      }
     },
     "Container (Production-like)": {
       "commandName": "Docker",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Production",
-        "RabbitMqOptions__HostName": "host.docker.internal",
-        "RabbitMqOptions__UserName": "guest",
-        "RabbitMqOptions__Password": "guest"
+        "KafkaOptions__HostName": "host.docker.internal",
+        "KafkaOptions__Port": "9092"
       },
       "publishAllPorts": true,
       "useSSL": true
