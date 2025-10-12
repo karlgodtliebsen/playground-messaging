@@ -3,14 +3,13 @@
     "Messaging.Console.App": {
       "commandName": "Project"
     },
+
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "environmentVariables": {
-        "RABBITMQ_HOST": "host.docker.internal",
-        "RabbitMqOptions__HostName": "host.docker.internal",
-        "RabbitMqOptions__Port": "5672",
-        "RabbitMqOptions__UserName": "guest",
-        "RabbitMqOptions__Password": "guest"
+        "DOTNET_ENVIRONMENT": "Development",
+        "KafkaOptions__HostName": "kafka",
+        "KafkaOptions__Port": "9092"
       },
       "publishAllPorts": true,
       "useSSL": true

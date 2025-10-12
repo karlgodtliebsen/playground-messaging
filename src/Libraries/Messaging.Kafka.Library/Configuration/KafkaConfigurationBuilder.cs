@@ -22,6 +22,7 @@ public static class KafkaConfigurationBuilder
         var sp = services.BuildServiceProvider();
         var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
         var hostPortName = $"{options.HostName}:{options.Port}";
+        //var hostPortNameWithConsumerName = $"{options.HostName}:{options.Port};group.id={options.ConsumerGroup};client.id={options.ClientId}";
 
         var kafka = opts.UseKafka(hostPortName)
             .ConfigureClient(client =>
@@ -60,7 +61,7 @@ public static class KafkaConfigurationBuilder
         var hostPortName = $"{options.HostName}:{options.Port}";
         var kafka = opts.UseKafka(hostPortName).ConfigureClient(client =>
         {
-            // These are important for development
+            // These are for development
             client.SecurityProtocol = SecurityProtocol.Plaintext;
             client.Acks = Acks.All; // Wait for all replicas
             //client.MessageTimeoutMs = 30000; // 30 second timeout
@@ -82,7 +83,7 @@ public static class KafkaConfigurationBuilder
         //Debug logging
         services.AddLogging(logging =>
         {
-            logging.SetMinimumLevel(LogLevel.Debug);
+            logging.SetMinimumLevel(LogLevel.Trace);
             logging.AddConsole();
         });
         kafka.AutoPurgeOnStartup();
@@ -109,25 +110,18 @@ public static class KafkaConfigurationBuilder
 
     public static void BuildConsumer(WolverineOptions opts)
     {
-        //opts.Policies.OnException<InvalidOperationException>()
-        //    .RetryWithCooldown(maxAttempts: 3,
-        //        cooldown: TimeSpan.FromSeconds(2),
-        //        maxCooldown: TimeSpan.FromSeconds(10));
         var services = opts.Services;
         var sp = services.BuildServiceProvider();
         var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-        var hostPortName = $"{options.HostName}:{options.Port};group.id={options.ConsumerGroup};client.id={options.ClientId}";
+        //var hostPortNameWithConsumerName = $"{options.HostName}:{options.Port};group.id={options.ConsumerGroup};client.id={options.ClientId}";
+        var hostPortName = $"{options.HostName}:{options.Port}";
         var kafka = opts.UseKafka(hostPortName).ConfigureClient(client =>
         {
-            // These are important for development
+            // These are for development
             client.SecurityProtocol = SecurityProtocol.Plaintext;
             client.Acks = Acks.All;
             client.Debug = "broker,topic,msg"; // Enable debug logging temporarily
         });
-        //variations
-        // With consumer group and client ID
-        //var kafka = opts.UseKafka("localhost:9094;group.id=my-consumer-group;client.id=my-app");
-
         BuildConsumer(opts, kafka);
     }
 
@@ -142,7 +136,7 @@ public static class KafkaConfigurationBuilder
         //Debug logging
         services.AddLogging(logging =>
         {
-            logging.SetMinimumLevel(LogLevel.Debug);
+            logging.SetMinimumLevel(LogLevel.Trace);
             logging.AddConsole();
         });
         const string consumerGroup = "messaging-group";
@@ -203,6 +197,7 @@ public static class KafkaConfigurationBuilder
         var services = opts.Services;
         var sp = services.BuildServiceProvider();
         var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+        //var hostPortNameWithConsumerName = $"{options.HostName}:{options.Port};group.id={options.ConsumerGroup};client.id={options.ClientId}";
         var hostPortName = $"{options.HostName}:{options.Port}";
         var kafka = opts.UseKafka(hostPortName); //default is 9092, so this is wired to the docker-compose setup
         BuildProducer(opts, kafka);

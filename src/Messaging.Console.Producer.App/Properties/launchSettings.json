@@ -14,7 +14,7 @@
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
         "KafkaOptions__HostName": "kafka",
-        "KafkaOptions__Port": "9092"
+        "KafkaOptions__Port": "9092",
       }
     },
     "Container (Production-like)": {

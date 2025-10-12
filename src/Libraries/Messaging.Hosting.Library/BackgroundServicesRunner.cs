@@ -9,7 +9,6 @@ public static class BackgroundServicesRunner
     {
         try
         {
-            //await host.StartAsync(cancellationToken);
             await host.RunAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -26,8 +25,6 @@ public static class BackgroundServicesRunner
             IList<Task> tasks = new List<Task>();
             foreach (var host in hosts)
             {
-                //var task = host.StartAsync(cancellationToken);
-                //tasks.Add(task);
                 tasks.Add(host.RunAsync(cancellationToken));
             }
 

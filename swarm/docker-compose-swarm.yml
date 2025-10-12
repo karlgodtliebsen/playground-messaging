@@ -1,0 +1,106 @@
+services:
+  kafka:
+    image: apache/kafka:latest
+    hostname: kafka
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9094'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_NUM_PARTITIONS: 3
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - messaging
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  redpanda-console:
+    image: redpandadata/console:latest
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BROKERS: "kafka:9092"  
+    networks:
+      - messaging
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s          
+        max_attempts: 10    
+        window: 120s 
+        
+    depends_on:
+      - kafka
+
+  producer:
+    image: registry:5000/messaging-producer:latest
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - KafkaOptions__HostName=kafka  
+      - KafkaOptions__Port=9092
+    networks:
+      - messaging
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  consumer:
+    image: registry:5000/messaging-consumer:latest
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - KafkaOptions__HostName=kafka  
+      - KafkaOptions__Port=9092
+      - ConsumerGroup=my-consumer-group
+    networks:
+      - messaging
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+networks:
+  messaging:
+    external: true  # ← This tells Docker to use the existing network
+    name: messaging # ← Explicitly name it (optional but clear)
+
+volumes:
+  kafka-data:

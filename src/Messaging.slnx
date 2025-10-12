@@ -28,9 +28,21 @@
     <File Path="../.github/workflows/build.yml" />
     <File Path="../README.md" />
     <File Path=".editorconfig" />
-    <File Path="docker-compose-kafka.v2.yml" />
-    <File Path="docker-compose-kafka.yml" />
-    <File Path="docker-compose.kafka.dev.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/kafka/">
+    <File Path="../kafka/docker-compose-kafka.v2.yml" />
+    <File Path="../kafka/docker-compose-kafka.yml" />
+    <File Path="../kafka/docker-compose.kafka.dev.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/swarm/">
+    <File Path="../swarm/build-and-deploy-kafka-producer.sh" />
+    <File Path="../swarm/build-and-deploy-kafka.sh" />
+    <File Path="../swarm/build-and-deploy-registry.sh" />
+    <File Path="../swarm/docker-compose-swarm.yml" />
+    <File Path="../swarm/docker-compose.yml" />
+    <File Path="../swarm/swarm-cleanup.sh" />
+    <File Path="../swarm/swarm-cli.sh" />
+    <File Path="../swarm/swarm-setup.sh" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/Messaging.EventHub.Benchmark/Messaging.EventHub.Benchmark.csproj" />

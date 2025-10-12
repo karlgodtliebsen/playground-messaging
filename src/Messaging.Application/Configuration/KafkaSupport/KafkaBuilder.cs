@@ -1,8 +1,4 @@
-﻿using MemoryMapped.Forwarder.Configuration;
-using MemoryMapped.Queue.Configuration;
-using MemoryMapped.Repository.MsSql.Configuration;
-
-using Messaging.Application.Services.Hosts;
+﻿using Messaging.Application.Services.Hosts;
 using Messaging.Kafka.Library.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -62,10 +58,10 @@ public static class KafkaBuilder
                 services
                     .AddKafkaApplicationServices(configuration)
                     .AddEventHubListenerServices(configuration)
-                    .AddMemoryMappedQueueServices(configuration)
-                    .AddMsSqlServices(configuration)
-                    .AddMessageForwarderServices(configuration)
-                    .AddMessageForwarderHostServices(configuration)
+                    // .AddMemoryMappedQueueServices(configuration)
+                    //.AddMsSqlServices(configuration)
+                    //.AddMessageForwarderServices(configuration)
+                    //.AddMessageForwarderHostServices(configuration)
                     .AddHostedService<MessagingConsumerServiceHost>()
                     .AddLogging(loggingBuilder => { services.AddSerilogServices(loggingBuilder, configuration); });
             });
@@ -85,10 +81,10 @@ public static class KafkaBuilder
                 services
                     .AddKafkaApplicationServices(configuration)
                     .AddEventHubListenerServices(configuration)
-                    .AddMemoryMappedQueueServices(configuration)
-                    .AddMessageForwarderServices(configuration)
-                    .AddMessageForwarderHostServices(configuration)
-                    .AddMsSqlServices(configuration)
+                    // .AddMemoryMappedQueueServices(configuration)
+                    //.AddMessageForwarderServices(configuration)
+                    // .AddMessageForwarderHostServices(configuration)
+                    //.AddMsSqlServices(configuration)
                     .AddHostedService<MessagingProducerServiceHost>()
                     .AddHostedService<SimpleMessagingProducerServiceHost>()
                     .AddHostedService<DiagnosticsMessagingProducerServiceHost>()

@@ -1,0 +1,108 @@
+operations 
+
+cd /mnt/c/projects/docker/swarm
+
+# Cleanup
+sudo ./swarm-cleanup.sh           # Tear down entire swarm
+
+# Create new swarm with insecure registry support
+sudo ./swarm-setup.sh
+
+# Verify network was created
+docker exec manager1 docker network ls | grep messaging
+
+# Build images and push to registry
+sudo ./build-and-deploy-registry.sh
+
+# Deploy
+sudo ./swarm-cli.sh deploy
+
+
+#############################################################################
+Monitor Logs
+
+# Watch producer logs for successful connection
+./swarm-cli.sh logs producer
+
+# Should now see:
+# "Connected to kafka:9092"
+# "Produced message to topic..."
+
+# Watch consumer logs
+./swarm-cli.sh logs consumer
+
+# Should see:
+# "Connected to kafka:9092"
+# "Joined consumer group: my-consumer-group"
+# "Assigned partitions: ..."
+
+
+# Kafka logs
+./swarm-cli.sh logs kafka
+
+#############################################################################
+# Service management
+./swarm-cli.sh services      # List all services
+./swarm-cli.sh ps            # Show task distribution
+./swarm-cli.sh nodes         # Show swarm nodes
+./swarm-cli.sh shell         # Shell into manager
+
+# Scaling
+./swarm-cli.sh scale producer 5
+./swarm-cli.sh scale consumer 10
+
+#############################################################################
+
+# Deploy/Remove
+./swarm-cli.sh deploy        # Deploy stack
+./swarm-cli.sh remove        # Remove stack
+
+
+#############################################################################
+
+## Check Service Distribution
+
+# See which node is running what
+./swarm-cli.sh ps
+
+# Or detailed view
+docker exec manager1 docker stack ps messaging
+
+#############################################################################
+
+# Watch services (updates every 2 seconds)
+watch -n 2 'docker exec manager1 docker service ls'
+
+# Or just check once
+docker exec manager1 docker service ls
+
+
+#############################################################################
+
+Future Rebuilds (Quick Reference)
+When you make code changes and need to update:
+
+cd /mnt/c/projects/playground-projects/playground-messaging/src
+
+# Rebuild specific service
+docker build -f Messaging.Console.Producer.App/Dockerfile -t registry:5000/messaging-producer:latest .
+docker tag registry:5000/messaging-producer:latest localhost:5000/messaging-producer:latest
+docker push localhost:5000/messaging-producer:latest
+
+# Update in swarm
+docker exec manager1 docker pull registry:5000/messaging-producer:latest
+docker exec manager1 docker service update --image registry:5000/messaging-producer:latest --force messaging_producer
+
+# Watch rollout
+docker exec manager1 docker service ps messaging_producer
+
+
+Or for both services at once:
+bash
+sudo ./build-and-deploy-registry.sh
+docker exec manager1 docker service update --image registry:5000/messaging-producer:latest --force messaging_producer
+docker exec manager1 docker service update --image registry:5000/messaging-consumer:latest --force messaging_consumer
+
+#############################################################################
+
+

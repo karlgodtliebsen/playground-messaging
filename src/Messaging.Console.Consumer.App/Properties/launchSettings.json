@@ -13,8 +13,9 @@
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "environmentVariables": {
-        "KafkaOptions__HostName": "host.docker.internal",
-        "KafkaOptions__Port": "9094"
+        "DOTNET_ENVIRONMENT": "Development",
+        "KafkaOptions__HostName": "kafka",
+        "KafkaOptions__Port": "9092"
       },
       "publishAllPorts": true,
       "useSSL": true
