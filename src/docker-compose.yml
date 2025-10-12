@@ -12,6 +12,12 @@ services:
       context: .
       dockerfile: Messaging.Console.Producer.App/Dockerfile
 
+  messaging.console.consumer.app:
+    image: ${DOCKER_REGISTRY-}messagingconsoleconsumerapp
+    build:
+      context: .
+      dockerfile: Messaging.Console.Consumer.App/Dockerfile
+
 networks:
   messaging:
     driver: bridge

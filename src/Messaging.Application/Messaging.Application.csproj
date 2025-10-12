@@ -41,22 +41,12 @@
 	  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
 
 	  <PackageReference Include="WolverineFx" Version="4.12.0" />
-
 	  <PackageReference Include="WolverineFx.Http" Version="4.12.0" />
-
 	  <PackageReference Include="WolverineFx.Http.FluentValidation" Version="4.12.0" />
-
 	  <PackageReference Include="WolverineFx.Kafka" Version="4.12.0" />
-
-
 	  <PackageReference Include="WolverineFx.MemoryPack" Version="4.12.0" />
-
 	  <PackageReference Include="WolverineFx.MessagePack" Version="4.12.0" />
-
-
-
 	  <PackageReference Include="WolverineFx.RabbitMQ" Version="4.12.0" />
-
   </ItemGroup>
 
   <ItemGroup>

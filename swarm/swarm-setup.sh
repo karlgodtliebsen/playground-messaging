@@ -25,6 +25,7 @@ docker run -d --privileged --name manager1 \
   -p 7946:7946/udp \
   -p 4789:4789/udp \
   -p 8090:8080 \
+  -p 5341:80 \
   -e DOCKER_TLS_CERTDIR="" \
   docker:dind \
   dockerd --insecure-registry=registry:5000

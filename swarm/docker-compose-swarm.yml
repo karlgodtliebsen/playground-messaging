@@ -38,26 +38,50 @@ services:
     ports:
       - "8080:8080"
     environment:
-      KAFKA_BROKERS: "kafka:9092"  
+      KAFKA_BROKERS: "kafka:9092"
     networks:
       - messaging
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
-        delay: 10s          
-        max_attempts: 10    
-        window: 120s 
-        
+        delay: 10s
+        max_attempts: 10
+        window: 120s
     depends_on:
       - kafka
+
+  seq:
+    image: datalust/seq:latest
+    hostname: seq
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_ADMINUSERNAME: admin
+      SEQ_FIRSTRUN_ADMINPASSWORDHASH: Abc123456789
+    ports:
+      - "80:80"
+    networks:
+      - messaging
+    volumes:
+      - seq-data:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
 
   producer:
     image: registry:5000/messaging-producer:latest
     environment:
       - DOTNET_ENVIRONMENT=Production
-      - KafkaOptions__HostName=kafka  
+      - KafkaOptions__HostName=kafka
       - KafkaOptions__Port=9092
+      # Seq logging configuration
+      - Serilog__WriteTo__2__Name=Seq
+      - Serilog__WriteTo__2__Args__serverUrl=http://seq:80
+      - Serilog__WriteTo__2__Args__apiKey=
     networks:
       - messaging
     deploy:
@@ -73,14 +97,21 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+    depends_on:
+      - kafka
+      - seq
 
   consumer:
     image: registry:5000/messaging-consumer:latest
     environment:
       - DOTNET_ENVIRONMENT=Production
-      - KafkaOptions__HostName=kafka  
+      - KafkaOptions__HostName=kafka
       - KafkaOptions__Port=9092
       - ConsumerGroup=my-consumer-group
+      # Seq logging configuration
+      - Serilog__WriteTo__2__Name=Seq
+      - Serilog__WriteTo__2__Args__serverUrl=http://seq:80
+      - Serilog__WriteTo__2__Args__apiKey=
     networks:
       - messaging
     deploy:
@@ -96,11 +127,15 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+    depends_on:
+      - kafka
+      - seq
 
 networks:
   messaging:
-    external: true  # ← This tells Docker to use the existing network
-    name: messaging # ← Explicitly name it (optional but clear)
+    external: true
+    name: messaging
 
 volumes:
   kafka-data:
+  seq-data:

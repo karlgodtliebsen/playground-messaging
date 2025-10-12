@@ -18,6 +18,13 @@ sudo ./build-and-deploy-registry.sh
 sudo ./swarm-cli.sh deploy
 
 
+# combined
+sudo ./swarm-cleanup.sh 
+sudo ./swarm-setup.sh
+sudo ./build-and-deploy-registry.sh
+sudo ./swarm-cli.sh deploy
+
+
 #############################################################################
 Monitor Logs
 

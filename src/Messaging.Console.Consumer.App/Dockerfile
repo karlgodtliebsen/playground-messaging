@@ -27,9 +27,6 @@ COPY . .
 WORKDIR "/src/Messaging.Console.Consumer.App"
 RUN dotnet build "./Messaging.Console.Consumer.App.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-RUN mkdir -p /var/logs && chmod 777 /var/logs
-
-
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
