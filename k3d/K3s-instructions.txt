@@ -1,0 +1,167 @@
+docker compose -f docker-compose-kafka.yml up -d
+
+
+
+
+#Install k3d in Docker
+
+# Install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+# Make it executable
+chmod +x kubectl
+
+# Move to PATH
+sudo mv kubectl /usr/local/bin/
+
+# Verify installation
+kubectl version --client
+
+
+# Check if kubeconfig is set
+cat ~/.kube/config
+
+# If empty or missing, get config from k3d
+k3d kubeconfig merge messaging --kubeconfig-merge-default
+
+# Test
+kubectl get nodes
+
+
+
+
+
+# Stop cluster (when not using it)
+k3d cluster stop messaging
+
+# Start cluster
+k3d cluster start messaging
+
+# Delete cluster
+k3d cluster delete messaging
+
+# List clusters
+k3d cluster list
+
+
+
+# Delete the current k3d cluster
+k3d cluster delete messaging
+
+# Recreate and connect to existing registry
+k3d cluster create messaging \
+  --registry-config /tmp/k3d-registries.yaml \
+  --port "9080:80@loadbalancer" \
+  --port "9341:5341@loadbalancer"
+
+# Create registry config
+cat > /tmp/k3d-registries.yaml <<EOF
+mirrors:
+  "localhost:5000":
+    endpoint:
+      - http://host.k3d.internal:5000
+EOF
+
+
+New port mappings:
+
+RedPanda Console: 
+http://localhost:9080 (instead of 8080)
+Seq: 
+http://localhost:9341 (instead of 5341)
+
+
+kubectl cluster-info
+Kubernetes control plane is running at https://0.0.0.0:37977
+CoreDNS is running at https://0.0.0.0:37977/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Metrics-server is running at https://0.0.0.0:37977/api/v1/namespaces/kube-system/services/https:metrics-server:https/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+
+
+
+# Verify images are in registry
+curl http://localhost:5000/v2/_catalog
+
+
+Create Kubernetes Manifests Directory_
+mkdir -p /mnt/c/projects/playground-projects/playground-messaging/k3d/messaging
+cd /mnt/c/projects/playground-projects/playground-messaging/k3d/messaging
+
+
+
+playground-projects/playground-messaging/
+
+#Create files and make it executable:
+01-namespace.yaml
+02-kafka.yaml
+
+
+
+#Deploy Everything
+./99-deploy-all.sh
+
+
+
+##############################################################
+Ingress with nginx
+##############################################################
+
+Install an Ingress Controller
+k3d comes with Traefik disabled (we used --disable traefik), so let's install nginx-ingress which is simpler for learning:
+bash# Install nginx ingress controller
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml
+
+# Wait for it to be ready (takes 30-60 seconds)
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+
+# Check it's running
+kubectl get pods -n ingress-nginx
+
+##############################################################
+Step 2: Expose Ingress Controller via k3d
+The ingress controller needs to be accessible from your host. We need to recreate the k3d cluster with proper port mappings for the ingress controller:
+bash# Delete current cluster
+k3d cluster delete messaging
+
+# Recreate with ingress port mapping
+k3d cluster create messaging \
+  --registry-config /tmp/k3d-registries.yaml \
+  --port "80:80@loadbalancer" \
+  --port "443:443@loadbalancer"
+
+# Wait for cluster
+sleep 15
+
+# Verify
+kubectl get nodes
+
+
+##############################################################
+Step 3: Install Nginx Ingress (in new cluster)
+bash# Install nginx ingress
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml
+
+# Wait for ready
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+
+
+
+
+
+
+
+
+
+
+
+
+
+

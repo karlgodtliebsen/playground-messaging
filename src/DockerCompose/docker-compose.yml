@@ -16,7 +16,7 @@ services:
     image: ${DOCKER_REGISTRY-}messagingconsoleconsumerapp
     build:
       context: .
-      dockerfile: ../Hosts/KafkaApplications/Messaging.Console.Kafka.Messaging.Console.Kafka.Consumer.App/Dockerfile
+      dockerfile: ../Hosts/KafkaApplications/Messaging.Console.Kafka.Consumer.App/Dockerfile
 
 networks:
   messaging:

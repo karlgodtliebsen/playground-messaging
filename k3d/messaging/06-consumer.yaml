@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  namespace: messaging
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: localhost:5000/messaging-consumer:latest
+        imagePullPolicy: Always
+        env:
+        - name: DOTNET_ENVIRONMENT
+          value: "Production"
+        - name: KafkaOptions__HostName
+          value: "kafka"
+        - name: KafkaOptions__Port
+          value: "9092"
+        - name: ConsumerGroup
+          value: "my-consumer-group"
+        - name: Serilog__WriteTo__2__Name
+          value: "Seq"
+        - name: Serilog__WriteTo__2__Args__serverUrl
+          value: "http://seq:80"
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+            
+            

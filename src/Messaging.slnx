@@ -15,6 +15,7 @@
   </Folder>
   <Folder Name="/Hosts/">
     <Project Path="Hosts/Messaging.Application/Messaging.Application.csproj" />
+    <Project Path="Hosts/Monitoring/Messaging.Monitor.Console.App/Messaging.Monitor.Console.App.csproj" Id="90b25b6e-4395-4520-8967-7d0543ce2bcf" />
   </Folder>
   <Folder Name="/Hosts/KafkaApplications/">
     <Project Path="Hosts/KafkaApplications/Messaging.Console.Kafka.Combined.App/Messaging.Console.Kafka.Combined.App.csproj" />
@@ -42,16 +43,18 @@
   </Folder>
   <Folder Name="/Solution Items/K3s/" />
   <Folder Name="/Solution Items/kafka/">
-    <File Path="../kafka/docker-compose-kafka.v2.yml" />
+    <File Path="../kafka/docker-compose-kafka.producer-consumer.yml" />
     <File Path="../kafka/docker-compose-kafka.yml" />
-    <File Path="../kafka/docker-compose.kafka.dev.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/seq/">
+    <File Path="../seq/seq-up.sh" />
   </Folder>
   <Folder Name="/Solution Items/swarm/">
     <File Path="../swarm/build-and-deploy-kafka-producer.sh" />
     <File Path="../swarm/build-and-deploy-kafka.sh" />
     <File Path="../swarm/build-and-deploy-registry.sh" />
+    <File Path="../swarm/docker-compose-kafka-redpanda.yml" />
     <File Path="../swarm/docker-compose-swarm.yml" />
-    <File Path="../swarm/docker-compose.yml" />
     <File Path="../swarm/swarm-cleanup.sh" />
     <File Path="../swarm/swarm-cli.sh" />
     <File Path="../swarm/swarm-operations.txt" />

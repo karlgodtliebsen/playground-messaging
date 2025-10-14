@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer
+  namespace: messaging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      containers:
+      - name: producer
+        image: localhost:5000/messaging-producer:latest
+        imagePullPolicy: Always
+        env:
+        - name: DOTNET_ENVIRONMENT
+          value: "Production"
+        - name: KafkaOptions__HostName
+          value: "kafka"
+        - name: KafkaOptions__Port
+          value: "9092"
+        - name: Serilog__WriteTo__2__Name
+          value: "Seq"
+        - name: Serilog__WriteTo__2__Args__serverUrl
+          value: "http://seq:80"
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+            

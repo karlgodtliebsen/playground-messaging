@@ -1,5 +1,9 @@
 operations 
 
+docker compose -f docker-compose-kafka.yml up -d
+
+
+
 cd /mnt/c/projects/playground-projects/playground-messaging/swarm
 
 # Cleanup

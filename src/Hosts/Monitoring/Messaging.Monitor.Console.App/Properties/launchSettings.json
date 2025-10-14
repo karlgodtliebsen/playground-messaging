@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Messaging.Monitor.Console.App": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
