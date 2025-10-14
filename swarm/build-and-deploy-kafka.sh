@@ -2,9 +2,9 @@
 
 # Configuration
 SOLUTION_ROOT="/mnt/c/projects/playground-projects/playground-messaging/src" 
-PRODUCER_DOCKERFILE="Messaging.Console.Producer.App/Dockerfile"
-CONSUMER_DOCKERFILE="Messaging.Console.Consumer.App/Dockerfile"
-SWARM_DIR="/mnt/c/projects/docker/swarm"
+PRODUCER_DOCKERFILE="Hosts/KafkaApplications/Messaging.Console.Kafka.Producer.App/Dockerfile"
+CONSUMER_DOCKERFILE="Hosts/KafkaApplications/Messaging.Console.Kafka.Consumer.App/Dockerfile"
+SWARM_DIR="/mnt/c/projects/playground-projects/playground-messaging/swarm"
 
 echo "Building Docker images..."
 

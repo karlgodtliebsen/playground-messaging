@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
 
@@ -65,12 +66,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Messaging.Application\Messaging.Application.csproj" />
-    <ProjectReference Include="..\Libraries\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
-    <ProjectReference Include="..\Libraries\Messaging.Hosting.Library\Messaging.Hosting.Library.csproj" />
-    <ProjectReference Include="..\Libraries\Messaging.Kafka.Library\Messaging.Kafka.Library.csproj" />
-    <ProjectReference Include="..\Libraries\Messaging.Library\Messaging.Library.csproj" />
-    <ProjectReference Include="..\Aspire\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Messaging.Application\Messaging.Application.csproj" />
+    <ProjectReference Include="..\..\..\Libraries\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
+    <ProjectReference Include="..\..\..\Libraries\Messaging.Hosting.Library\Messaging.Hosting.Library.csproj" />
+    <ProjectReference Include="..\..\..\Libraries\Messaging.Kafka.Library\Messaging.Kafka.Library.csproj" />
+    <ProjectReference Include="..\..\..\Libraries\Messaging.Library\Messaging.Library.csproj" />
+    <ProjectReference Include="..\..\..\Aspire\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

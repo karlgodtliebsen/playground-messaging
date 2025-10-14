@@ -38,7 +38,22 @@ services:
   producer:
     build:
       context: .
-      dockerfile: Messaging.Console.Producer.App/Dockerfile
+      dockerfile: Hosts/KafkaApplications/Messaging.Console.Kafka.Producer.App/Dockerfile
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - KafkaOptions__HostName=kafka
+      - KafkaOptions__Port=9092
+    depends_on:
+      - kafka
+    networks:
+      - messaging
+    volumes:
+      - logs:/var/logs
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Hosts/KafkaApplications/Messaging.Console.Kafka.Consumer.App/Dockerfile
     environment:
       - DOTNET_ENVIRONMENT=Development
       - KafkaOptions__HostName=kafka

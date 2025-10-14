@@ -10,13 +10,13 @@ services:
     image: ${DOCKER_REGISTRY-}messagingconsoleproducerapp
     build:
       context: .
-      dockerfile: Messaging.Console.Producer.App/Dockerfile
+      dockerfile: ../Hosts/KafkaApplications/Messaging.Console.Kafka.Producer.App/Dockerfile
 
   messaging.console.consumer.app:
     image: ${DOCKER_REGISTRY-}messagingconsoleconsumerapp
     build:
       context: .
-      dockerfile: Messaging.Console.Consumer.App/Dockerfile
+      dockerfile: ../Hosts/KafkaApplications/Messaging.Console.Kafka.Messaging.Console.Kafka.Consumer.App/Dockerfile
 
 networks:
   messaging:

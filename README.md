@@ -5,24 +5,27 @@
 
 - It also give an opportunity to use both MessagePack and MemoryPack
 - And to se how far the Kafka messaging can bring us in that world
+- Combined with Aspire, Docker, Docker Compose project, Docker Swarm and K3s
+
 
 
 ## Status
 
 ### Kafka
-You now have a solid setup with (Claude):
-- Kafka with KRaft (no Zookeeper dependency)
-- WolverineFx publishing and consuming messages
-- Auto-topic creation working properly
+- Kafka (no Zookeeper dependency)
+- WolverineFx publishing and consuming messages using RabbitMq and Kafka
 - Redpanda Console for easy management at http://localhost:8080
+- Seq for logging at http://localhost:5341
 
-This gives you a great foundation for exploring more advanced messaging patterns with WolverineFx and Kafka. You can now experiment with:
+This gives a great foundation for exploring more advanced messaging patterns with WolverineFx and Kafka. 
+Experiment with:
 
 - Different message types and handlers
 - Batch processing
 - Error handling and retry policies
 - Saga patterns
 - Event sourcing
+
 
 ### RabbitMq
 
@@ -44,7 +47,18 @@ This gives you a great foundation for exploring more advanced messaging patterns
 
 ### Docker commands to run Kafka using docker-compose.yml
 - Messaging.Kafka.WebApi/README.md
+
+### Aspire project to run debugging from inside Visual Studio
+
+### Docker Compose project to run debugging from inside Visual Studio
+
  
+### Swarm
+A complete setup for Kafka Console Apps Producer/Consumer
+Use WSL or Linux
+Note: some paths needs adjusting
+
+
 
 ### Info:
 - The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.

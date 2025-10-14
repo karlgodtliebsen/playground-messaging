@@ -38,7 +38,7 @@ services:
   producer:
     build:
       context: .
-      dockerfile: Messaging.Console.Producer.App/Dockerfile
+      dockerfile: Hosts/KafkaApplications/Messaging.Console.Kafka.Producer.App/Dockerfile
     environment:
       - DOTNET_ENVIRONMENT=Development
       - KafkaOptions__HostName=kafka

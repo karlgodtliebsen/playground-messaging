@@ -1,10 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 
-builder.AddProject<Projects.Messaging_Kafka_WebApi>("messaging-kafka-webapi");
 
 
-builder.AddProject<Projects.Messaging_RabbitMq_WebApi>("messaging-rabbitmq-webapi");
+builder.AddProject<Projects.Messaging_Console_Kafka_Producer_App>("messaging-console-kafka-producer-app");
+
+
 
 
 builder.Build().Run();

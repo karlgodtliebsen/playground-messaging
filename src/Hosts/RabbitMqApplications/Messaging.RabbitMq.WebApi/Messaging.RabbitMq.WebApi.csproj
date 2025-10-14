@@ -6,6 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>83cd654f-e930-4b90-ad1a-c5f07a5e427f</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileContext>..\..\..</DockerfileContext>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -72,10 +73,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Libraries\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
-		<ProjectReference Include="..\Libraries\Messaging.Library\Messaging.Library.csproj" />
-		<ProjectReference Include="..\Libraries\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
-		<ProjectReference Include="..\Aspire\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\..\..\Libraries\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
+		<ProjectReference Include="..\..\..\Libraries\Messaging.Library\Messaging.Library.csproj" />
+		<ProjectReference Include="..\..\..\Libraries\Messaging.RabbitMq.Library\Messaging.RabbitMq.Library.csproj" />
+		<ProjectReference Include="..\..\..\Aspire\Messaging.ServiceDefaults\Messaging.ServiceDefaults.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="README.md">

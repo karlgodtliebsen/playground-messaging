@@ -8,12 +8,23 @@
     <Project Path="MemoryMapped/MemoryMapped.Queue/MemoryMapped.Queue.csproj" />
     <Project Path="MemoryMapped/MemoryMapped.Repository.MsSql/MemoryMapped.Repository.MsSql.csproj" />
   </Folder>
+  <Folder Name="/DockerCompose/">
+    <Project Path="DockerCompose/docker-compose.dcproj" Id="81dded9d-158b-e303-5f62-77a2896d2a5a">
+      <Build />
+    </Project>
+  </Folder>
   <Folder Name="/Hosts/">
-    <Project Path="Messaging.Application/Messaging.Application.csproj" />
-    <Project Path="Messaging.Console.Consumer.App/Messaging.Console.Consumer.App.csproj" Id="d64b76f1-662c-40a5-a2d9-6ae339a4b05a" />
-    <Project Path="Messaging.Console.Kafka.App/Messaging.Console.Kafka.App.csproj" />
-    <Project Path="Messaging.Console.Producer.App/Messaging.Console.Producer.App.csproj" Id="3e77a98c-9a6d-46e9-aee0-128569518da5" />
-    <Project Path="Messaging.Console.RabbitMq.App/Messaging.Console.RabbitMq.App.csproj" />
+    <Project Path="Hosts/Messaging.Application/Messaging.Application.csproj" />
+  </Folder>
+  <Folder Name="/Hosts/KafkaApplications/">
+    <Project Path="Hosts/KafkaApplications/Messaging.Console.Kafka.Combined.App/Messaging.Console.Kafka.Combined.App.csproj" />
+    <Project Path="Hosts/KafkaApplications/Messaging.Console.Kafka.Consumer.App/Messaging.Console.Kafka.Consumer.App.csproj" />
+    <Project Path="Hosts/KafkaApplications/Messaging.Console.Kafka.Producer.App/Messaging.Console.Kafka.Producer.App.csproj" />
+    <Project Path="Hosts/KafkaApplications/Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/Hosts/RabbitMqApplications/">
+    <Project Path="Hosts/RabbitMqApplications/Messaging.Console.RabbitMq.App/Messaging.Console.RabbitMq.App.csproj" />
+    <Project Path="Hosts/RabbitMqApplications/Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj" />
   </Folder>
   <Folder Name="/Libraries/">
     <Project Path="Libraries/Messaging.Domain.Library/Messaging.Domain.Library.csproj" />
@@ -29,6 +40,7 @@
     <File Path="../README.md" />
     <File Path=".editorconfig" />
   </Folder>
+  <Folder Name="/Solution Items/K3s/" />
   <Folder Name="/Solution Items/kafka/">
     <File Path="../kafka/docker-compose-kafka.v2.yml" />
     <File Path="../kafka/docker-compose-kafka.yml" />
@@ -42,6 +54,7 @@
     <File Path="../swarm/docker-compose.yml" />
     <File Path="../swarm/swarm-cleanup.sh" />
     <File Path="../swarm/swarm-cli.sh" />
+    <File Path="../swarm/swarm-operations.txt" />
     <File Path="../swarm/swarm-setup.sh" />
   </Folder>
   <Folder Name="/Tests/">
@@ -49,9 +62,4 @@
     <Project Path="Tests/Messaging.EventHub.Tests/Messaging.EventHub.Tests.csproj" />
     <Project Path="Tests/Messaging.Tests/Messaging.Tests.csproj" />
   </Folder>
-  <Project Path="docker-compose.dcproj">
-    <Build />
-  </Project>
-  <Project Path="Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj" />
-  <Project Path="Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj" />
 </Solution>

@@ -1,6 +1,6 @@
 operations 
 
-cd /mnt/c/projects/docker/swarm
+cd /mnt/c/projects/playground-projects/playground-messaging/swarm
 
 # Cleanup
 sudo ./swarm-cleanup.sh           # Tear down entire swarm

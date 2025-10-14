@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Messaging.Kafka.WebApi\Messaging.Kafka.WebApi.csproj" />
-    <ProjectReference Include="..\..\Messaging.RabbitMq.WebApi\Messaging.RabbitMq.WebApi.csproj" />
+    <ProjectReference Include="..\..\Hosts\KafkaApplications\Messaging.Console.Kafka.Consumer.App\Messaging.Console.Kafka.Consumer.App.csproj" />
+    <ProjectReference Include="..\..\Hosts\KafkaApplications\Messaging.Console.Kafka.Producer.App\Messaging.Console.Kafka.Producer.App.csproj" />
   </ItemGroup>
 
 </Project>

@@ -12,25 +12,25 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj", "Messaging.RabbitMq.WebApi/"]
+COPY ["Hosts/KafkaApplications/Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj", "Hosts/KafkaApplications/Messaging.Kafka.WebApi/"]
 COPY ["Libraries/Messaging.Domain.Library/Messaging.Domain.Library.csproj", "Libraries/Messaging.Domain.Library/"]
 COPY ["MemoryMapped/MemoryMapped.Queue/MemoryMapped.Queue.csproj", "MemoryMapped/MemoryMapped.Queue/"]
 COPY ["Libraries/Messaging.EventHub.Library/Messaging.EventHub.Library.csproj", "Libraries/Messaging.EventHub.Library/"]
 COPY ["Libraries/Messaging.Library/Messaging.Library.csproj", "Libraries/Messaging.Library/"]
-COPY ["Libraries/Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj", "Libraries/Messaging.RabbitMq.Library/"]
+COPY ["Libraries/Messaging.Kafka.Library/Messaging.Kafka.Library.csproj", "Libraries/Messaging.Kafka.Library/"]
 COPY ["Aspire/Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj", "Aspire/Messaging.ServiceDefaults/"]
-RUN dotnet restore "./Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj"
+RUN dotnet restore "./Hosts/KafkaApplications/Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj"
 COPY . .
-WORKDIR "/src/Messaging.RabbitMq.WebApi"
-RUN dotnet build "./Messaging.RabbitMq.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Hosts/KafkaApplications/Messaging.Kafka.WebApi"
+RUN dotnet build "./Messaging.Kafka.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Messaging.RabbitMq.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Messaging.Kafka.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Messaging.RabbitMq.WebApi.dll"]
+ENTRYPOINT ["dotnet", "Messaging.Kafka.WebApi.dll"]
