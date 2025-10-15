@@ -1,8 +1,6 @@
 docker compose -f docker-compose-kafka.yml up -d
 
 
-
-
 #Install k3d in Docker
 
 # Install kubectl
@@ -26,7 +24,6 @@ k3d kubeconfig merge messaging --kubeconfig-merge-default
 
 # Test
 kubectl get nodes
-
 
 
 
@@ -151,6 +148,10 @@ kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
   --timeout=120s
+  
+  
+  
+  
 
 
 

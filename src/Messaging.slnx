@@ -41,7 +41,22 @@
     <File Path="../README.md" />
     <File Path=".editorconfig" />
   </Folder>
-  <Folder Name="/Solution Items/K3s/" />
+  <Folder Name="/Solution Items/k3d/">
+    <File Path="../k3d/k3-registry.sh" />
+    <File Path="../k3d/K3s-instructions.txt" />
+  </Folder>
+  <Folder Name="/Solution Items/k3d/messaging/">
+    <File Path="../k3d/messaging/01-namespace.yaml" />
+    <File Path="../k3d/messaging/02-kafka-minimal.yaml" />
+    <File Path="../k3d/messaging/02-kafka.yaml" />
+    <File Path="../k3d/messaging/03-seq.yaml" />
+    <File Path="../k3d/messaging/04-redpanda-console.yaml" />
+    <File Path="../k3d/messaging/05-producer.yaml" />
+    <File Path="../k3d/messaging/06-consumer.yaml" />
+    <File Path="../k3d/messaging/07-ingress.yaml" />
+    <File Path="../k3d/messaging/99-deploy-all.sh" />
+    <File Path="../k3d/messaging/startup-k3d.sh" />
+  </Folder>
   <Folder Name="/Solution Items/kafka/">
     <File Path="../kafka/docker-compose-kafka.producer-consumer.yml" />
     <File Path="../kafka/docker-compose-kafka.yml" />
