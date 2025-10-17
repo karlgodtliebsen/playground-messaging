@@ -18,7 +18,7 @@ COPY ["Libraries/Messaging.EventHub.Library/Messaging.EventHub.Library.csproj", 
 COPY ["Libraries/Messaging.Library/Messaging.Library.csproj", "Libraries/Messaging.Library/"]
 COPY ["Libraries/Messaging.Hosting.Library/Messaging.Hosting.Library.csproj", "Libraries/Messaging.Hosting.Library/"]
 COPY ["Libraries/Messaging.Kafka.Library/Messaging.Kafka.Library.csproj", "Libraries/Messaging.Kafka.Library/"]
-COPY ["Libraries/Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj", "Libraries/Messaging.RabbitMq.Library/"]
+COPY ["Libraries/Messaging.Observability.Library/Messaging.Observability.Library.csproj", "Libraries/Messaging.Observability.Library/"]
 COPY ["Aspire/Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj", "Aspire/Messaging.ServiceDefaults/"]
 COPY ["MemoryMapped/MemoryMapped.Forwarder/MemoryMapped.Forwarder.csproj", "MemoryMapped/MemoryMapped.Forwarder/"]
 COPY ["MemoryMapped/MemoryMapped.Repository.MsSql/MemoryMapped.Repository.MsSql.csproj", "MemoryMapped/MemoryMapped.Repository.MsSql/"]

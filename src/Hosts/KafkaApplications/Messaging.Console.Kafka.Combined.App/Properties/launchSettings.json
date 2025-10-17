@@ -1,29 +1,7 @@
 {
   "profiles": {
-    "Messaging.Console.App": {
+    "Messaging.Console.Kafka.Combined.App": {
       "commandName": "Project"
-    },
-
-    "Container (Dockerfile)": {
-      "commandName": "Docker",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development",
-        "KafkaOptions__HostName": "kafka",
-        "KafkaOptions__Port": "9092"
-      },
-      "publishAllPorts": true,
-      "useSSL": true
-    },
-    "Container (Production-like)": {
-      "commandName": "Docker",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Production",
-        "RabbitMqOptions__HostName": "host.docker.internal",
-        "RabbitMqOptions__UserName": "guest",
-        "RabbitMqOptions__Password": "guest"
-      },
-      "publishAllPorts": true,
-      "useSSL": true
     }
   }
 }

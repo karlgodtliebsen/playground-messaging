@@ -20,7 +20,7 @@ COPY ["Libraries/Messaging.Hosting.Library/Messaging.Hosting.Library.csproj", "L
 COPY ["MemoryMapped/MemoryMapped.Repository.MsSql/MemoryMapped.Repository.MsSql.csproj", "MemoryMapped/MemoryMapped.Repository.MsSql/"]
 COPY ["Hosts/Messaging.Application/Messaging.Application.csproj", "Hosts/Messaging.Application/"]
 COPY ["Libraries/Messaging.Kafka.Library/Messaging.Kafka.Library.csproj", "Libraries/Messaging.Kafka.Library/"]
-COPY ["Libraries/Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj", "Libraries/Messaging.RabbitMq.Library/"]
+COPY ["Libraries/Messaging.Observability.Library/Messaging.Observability.Library.csproj", "Libraries/Messaging.Observability.Library/"]
 COPY ["Aspire/Messaging.ServiceDefaults/Messaging.ServiceDefaults.csproj", "Aspire/Messaging.ServiceDefaults/"]
 RUN dotnet restore "./Hosts/KafkaApplications/Messaging.Console.Kafka.Consumer.App/Messaging.Console.Kafka.Consumer.App.csproj"
 COPY . .

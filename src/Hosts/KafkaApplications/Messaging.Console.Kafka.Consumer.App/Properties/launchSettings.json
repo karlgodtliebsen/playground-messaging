@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Messaging.Console.Consumer.App": {
+    "Messaging.Console.Kafka.Consumer.App": {
       "commandName": "Project",
       "commandLineArgs": "x=43",
       "environmentVariables": {
