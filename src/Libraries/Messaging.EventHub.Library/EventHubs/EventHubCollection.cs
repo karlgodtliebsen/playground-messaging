@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Messaging.EventHub.Library.EventHubs;
 
@@ -174,6 +175,9 @@ public sealed class EventHubCollection : IEventHub
 
     public async Task Publish(string eventName, CancellationToken cancellationToken = default)
     {
+        // Increment published metric
+        metrics?.IncrementEventsPublished(eventName);
+
         if (eventSubscribers.TryGetValue(eventName, out var handlers))
         {
             List<Func<CancellationToken, Task>> actionsSnapshot;
@@ -201,6 +205,7 @@ public sealed class EventHubCollection : IEventHub
             throw new ObjectDisposedException(nameof(EventHubCollection));
         }
     }
+
     public void Dispose() => DisposeAsync().AsTask().GetAwaiter().GetResult();
 
     public ValueTask DisposeAsync()
@@ -251,39 +256,69 @@ public sealed class EventHubCollection : IEventHub
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        if (dataChannels.TryGetValue(key, out var actions))
+        // START METRICS - Increment published count
+        metrics?.IncrementEventsPublished(eventName);
+
+        var sw = Stopwatch.StartNew();
+        var handlerCount = 0;
+
+        try
         {
-            List<object> actionsSnapshot;
-            using (lockObj.EnterScope())
+            if (dataChannels.TryGetValue(key, out var actions))
             {
-                actionsSnapshot = [.. actions];
+                List<object> actionsSnapshot;
+                using (lockObj.EnterScope())
+                {
+                    actionsSnapshot = [.. actions];
+                }
+
+                foreach (var action in actionsSnapshot)
+                {
+                    handlerCount++;
+                    var handlerSw = Stopwatch.StartNew();
+
+                    try
+                    {
+                        if (action is Func<T, CancellationToken, Task> typedAction)
+                        {
+                            await typedAction.Invoke(data, cancellationToken);
+                        }
+                        else
+                        {
+                            await ((dynamic)action).Invoke((dynamic)data, cancellationToken);
+                        }
+
+                        // Record successful processing
+                        handlerSw.Stop();
+                        metrics?.RecordProcessingTime(handlerSw.Elapsed.TotalMilliseconds, eventName);
+                        metrics?.IncrementEventsProcessed(eventName);
+                    }
+                    catch (RuntimeBinderException ex)
+                    {
+                        logger.LogError(ex, "Action invocation failed due to type mismatch for event {EventName}", eventName);
+                        metrics?.IncrementHandlerErrors(eventName);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Action invocation failed for event {EventName}", eventName);
+                        metrics?.IncrementHandlerErrors(eventName);
+                    }
+                }
             }
 
-            foreach (var action in actionsSnapshot)
+            await BroadCastEvent(eventName, cancellationToken);
+        }
+        finally
+        {
+            sw.Stop();
+
+            // Log summary if there were handlers
+            if (handlerCount > 0)
             {
-                try
-                {
-                    if (action is Func<T, CancellationToken, Task> typedAction)
-                    {
-                        await typedAction.Invoke(data, cancellationToken);
-                    }
-                    else
-                    {
-                        await ((dynamic)action).Invoke((dynamic)data, cancellationToken);
-                    }
-                }
-                catch (RuntimeBinderException ex)
-                {
-                    logger.LogError(ex, "Action invocation failed due to type mismatch");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Action invocation failed");
-                }
+                logger.LogDebug("Published {EventName}: {HandlerCount} handlers in {Duration}ms",
+                    eventName, handlerCount, sw.Elapsed.TotalMilliseconds);
             }
         }
-
-        await BroadCastEvent(eventName, cancellationToken);
     }
 
 

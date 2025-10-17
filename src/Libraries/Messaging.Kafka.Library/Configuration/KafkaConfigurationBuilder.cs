@@ -83,9 +83,26 @@ public static class KafkaConfigurationBuilder
         //Debug logging
         services.AddLogging(logging =>
         {
-            logging.SetMinimumLevel(LogLevel.Trace);
-            logging.AddConsole();
+            //logging.SetMinimumLevel(LogLevel.Trace);
+            logging.SetMinimumLevel(LogLevel.Information);
+            // logging.AddConsole();
         });
+        services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+                // Wolverine automatically adds its ActivitySource
+                tracing.AddSource("Wolverine");
+            })
+            .WithMetrics(metrics =>
+            {
+                // Wolverine automatically registers these meters:
+                // - Wolverine (message processing metrics)
+                // - Wolverine.Runtime (runtime metrics)
+                metrics.AddMeter("Wolverine");
+                metrics.AddMeter("Wolverine.Runtime");
+            });
+
+
         kafka.AutoPurgeOnStartup();
 
         // Simple topic publishing
@@ -136,9 +153,25 @@ public static class KafkaConfigurationBuilder
         //Debug logging
         services.AddLogging(logging =>
         {
-            logging.SetMinimumLevel(LogLevel.Trace);
-            logging.AddConsole();
+            //logging.SetMinimumLevel(LogLevel.Trace);
+            logging.SetMinimumLevel(LogLevel.Information);
+            //logging.AddConsole();
         });
+        services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+                // Wolverine automatically adds its ActivitySource
+                tracing.AddSource("Wolverine");
+            })
+            .WithMetrics(metrics =>
+            {
+                // Wolverine automatically registers these meters:
+                // - Wolverine (message processing metrics)
+                // - Wolverine.Runtime (runtime metrics)
+                metrics.AddMeter("Wolverine");
+                metrics.AddMeter("Wolverine.Runtime");
+            });
+
         const string consumerGroup = "messaging-group";
         // Listen to topics (simple syntax)
 

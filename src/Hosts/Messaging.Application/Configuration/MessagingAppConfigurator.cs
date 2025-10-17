@@ -13,7 +13,7 @@ public static class MessagingAppConfigurator
     {
         service.TryAddSingleton<EventHubListener>();
         //service.AddMemoryMappedQueueServices(configuration);
-        service.TryAddScoped<MessagingProducerWorkerService>();
+        service.TryAddScoped<OrderDomainProducerWorkerService>();
         service.TryAddScoped<DiagnosticsMessagingProducerWorkerService>();
         service.TryAddScoped<SimpleMessagingProducerWorkerService>();
         service.TryAddScoped<MessagingConsumerWorkerService>();

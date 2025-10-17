@@ -11,7 +11,11 @@ CancellationTokenSource cancellationTokenSource = new();
 
 var kafkaProducerHost = KafkaBuilder.BuildKafkaProducerHost();
 var serviceProvider = kafkaProducerHost.Services;
-var logger = serviceProvider.SetupSerilog();
-logger.Information("Starting Host {title}", title);
-await kafkaProducerHost.RunAsync(cancellationTokenSource.Token);
+var seriLogger = serviceProvider.SetupSerilog();
+seriLogger.Information("Starting Host {title}", title);
 
+
+
+
+
+await kafkaProducerHost.RunAsync(cancellationTokenSource.Token);

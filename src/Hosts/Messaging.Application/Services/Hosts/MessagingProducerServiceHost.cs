@@ -6,9 +6,9 @@ using Microsoft.Extensions.Logging;
 namespace Messaging.Application.Services.Hosts;
 
 public sealed class MessagingProducerServiceHost(IServiceProvider serviceProvider, IHostApplicationLifetime lifetime, ILogger<MessagingProducerServiceHost> logger)
-    : WaitingBackgroundService<MessagingProducerWorkerService>(serviceProvider, lifetime, logger)
+    : WaitingBackgroundService<OrderDomainProducerWorkerService>(serviceProvider, lifetime, logger)
 {
-    protected override async Task Run(MessagingProducerWorkerService worker, CancellationToken cancellationToken)
+    protected override async Task Run(OrderDomainProducerWorkerService worker, CancellationToken cancellationToken)
     {
         await worker.Run(cancellationToken);
     }

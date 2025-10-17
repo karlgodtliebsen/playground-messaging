@@ -1,4 +1,5 @@
 ﻿using Messaging.EventHub.Library.Configuration;
+using Messaging.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
 
 using Microsoft.Extensions.Configuration;
@@ -17,7 +18,7 @@ public static class LegacyRabbitMqConfigurator
     private const string Producer = "producer";
     private const string Monitor = "monitor";
 
-    public static IServiceCollection AddLegacyRabbitMqServices(this IServiceCollection service, IConfiguration configuration)
+    public static IServiceCollection AddLegacyRabbitMqServices(this IServiceCollection services, IConfiguration configuration)
     {
         var options = configuration.GetSection(RabbitMqOptions.SectionName).Get<RabbitMqOptions>();
         var setupOptions = configuration.GetSection(RabbitMqSetupOptions.SectionName).Get<RabbitMqSetupOptions>();
@@ -25,18 +26,30 @@ public static class LegacyRabbitMqConfigurator
         {
             options = new RabbitMqOptions();
         }
-        service.TryAddSingleton(Options.Create(options));
+        services.TryAddSingleton(Options.Create(options));
         if (setupOptions is null)
         {
             setupOptions = new RabbitMqSetupOptions();
         }
         setupOptions.UseLegacyMapping = true;
-        service.TryAddSingleton(Options.Create(setupOptions));
-        service.TryAddKeyedSingleton(Monitor, Options.Create(Array.Empty<string>()));
-        service.TryAddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
+        services.TryAddSingleton(Options.Create(setupOptions));
+        var appOptions = configuration.GetSection(ApplicationInformationOptions.SectionName).Get<ApplicationInformationOptions>();
+        if (appOptions is null)
+        {
+            appOptions = new ApplicationInformationOptions();
+        }
+        services.TryAddSingleton(Options.Create(appOptions));
+
+        services.TryAddKeyedSingleton(Monitor, Options.Create(Array.Empty<string>()));
+
+
+        services.TryAddSingleton<IRabbitMqEnvelopeMapper, RabbitMqHeaderEnrich>();
         //service.TryAddSingleton<TypeToQueueRegistry>();
-        service.AddEventHubServices(configuration);
-        return service;
+        services.AddEventHubServices(configuration);
+        services.AddObservability(configuration, appOptions, useOtelLoggingProvider: false);
+        services.AddActivitySourceLogging(configuration);
+
+        return services;
     }
 
 }

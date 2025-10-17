@@ -1,4 +1,5 @@
-﻿using Messaging.Application.Services.Workers;
+﻿using Messaging.Application.Services;
+using Messaging.Application.Services.Workers;
 using Messaging.Domain.Library.Services;
 using Messaging.EventHub.Library.Configuration;
 using Messaging.Kafka.Library.Configuration;
@@ -14,11 +15,13 @@ public static class KafkaServicesConfigurator
     public static IServiceCollection AddKafkaApplicationServices(this IServiceCollection service, IConfiguration configuration)
     {
         service.AddKafkaServices(configuration);
-        service.TryAddScoped<MessagingProducerWorkerService>();
+        service.AddEventHubServices(configuration);
+        service.TryAddTransient<MetricTestService>();
+
+        service.TryAddScoped<OrderDomainProducerWorkerService>();
         service.TryAddScoped<DiagnosticsMessagingProducerWorkerService>();
         service.TryAddScoped<SimpleMessagingProducerWorkerService>();
         service.TryAddScoped<MessagingConsumerWorkerService>();
-        service.AddEventHubServices(configuration);
         return service;
     }
 

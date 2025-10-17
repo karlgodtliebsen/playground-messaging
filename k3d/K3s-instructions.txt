@@ -77,7 +77,6 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 
 
-
 # Verify images are in registry
 curl http://localhost:5000/v2/_catalog
 
@@ -87,13 +86,11 @@ mkdir -p /mnt/c/projects/playground-projects/playground-messaging/k3d/messaging
 cd /mnt/c/projects/playground-projects/playground-messaging/k3d/messaging
 
 
-
 playground-projects/playground-messaging/
 
 #Create files and make it executable:
 01-namespace.yaml
 02-kafka.yaml
-
 
 
 #Deploy Everything
