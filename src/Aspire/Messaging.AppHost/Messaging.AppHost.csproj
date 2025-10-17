@@ -4,9 +4,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-
-
-
     <UserSecretsId>f03a37c1-6f97-4356-98e8-5244c431772b</UserSecretsId>
   </PropertyGroup>
 

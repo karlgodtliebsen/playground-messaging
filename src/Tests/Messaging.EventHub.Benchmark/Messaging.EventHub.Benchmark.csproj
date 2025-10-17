@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-
-
-
   </PropertyGroup>
 
 	<ItemGroup>
