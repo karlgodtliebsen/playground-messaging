@@ -23,7 +23,7 @@ jobs:
       #  run: dotnet workload install maui-android maui-ios maui-maccatalyst maui-windows
     
       - name: Restore .NET Workloads
-        run: dotnet workload restore
+        run: dotnet workload restore src/Hosts/Monitoring/Maui.Prometheus.Viewer/Maui.Prometheus.Viewer.csproj
     
       - name: Restore NuGet packages
         run: dotnet restore src/Messaging.slnx --verbosity minimal
