@@ -44,6 +44,7 @@
     <File Path="../.github/workflows/build.yml" />
     <File Path="../README.md" />
     <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
   </Folder>
   <Folder Name="/Solution Items/k3d/">
     <File Path="../k3d/k3-registry.sh" />

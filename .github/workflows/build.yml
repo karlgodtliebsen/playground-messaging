@@ -31,7 +31,10 @@ jobs:
     
     - name: Restore dependencies
       run: dotnet restore src/Messaging.slnx --verbosity minimal
-    
+
+#    - name: Restore dependencies
+#      run: dotnet restore src/Messaging.CI.slnf --verbosity minimal
+
     - name: Build (Full - macOS)
       if: runner.os == 'macOS'
       run: dotnet build src/Messaging.slnx --no-restore --configuration Release

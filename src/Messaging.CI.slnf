@@ -1,0 +1,29 @@
+{
+  "solution": {
+    "path": "Messaging.slnx",
+    "projects": [
+      "Libraries/Messaging.Library/Messaging.Library.csproj",
+      "Libraries/Messaging.Domain.Library/Messaging.Domain.Library.csproj",
+      "Libraries/Messaging.EventHub.Library/Messaging.EventHub.Library.csproj",
+      "Libraries/Messaging.Hosting.Library/Messaging.Hosting.Library.csproj",
+      "Libraries/Messaging.Kafka.Library/Messaging.Kafka.Library.csproj",
+      "Libraries/Messaging.Observability.Library/Messaging.Observability.Library.csproj",
+      "Libraries/Messaging.PostgreSql.Library/Messaging.PostgreSql.Library.csproj",
+      "Libraries/Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj",
+      "MemoryMapped/MemoryMapped.Forwarder/MemoryMapped.Forwarder.csproj",
+      "MemoryMapped/MemoryMapped.Queue/MemoryMapped.Queue.csproj",
+      "MemoryMapped/MemoryMapped.Repository.MsSql/MemoryMapped.Repository.MsSql.csproj",
+      "Hosts/Messaging.Application/Messaging.Application.csproj",
+      "Hosts/Monitoring/Messaging.Monitor.Console.App/Messaging.Monitor.Console.App.csproj",
+      "Hosts/KafkaApplications/Messaging.Console.Kafka.Combined.App/Messaging.Console.Kafka.Combined.App.csproj",
+      "Hosts/KafkaApplications/Messaging.Console.Kafka.Consumer.App/Messaging.Console.Kafka.Consumer.App.csproj",
+      "Hosts/KafkaApplications/Messaging.Console.Kafka.Producer.App/Messaging.Console.Kafka.Producer.App.csproj",
+      "Hosts/KafkaApplications/Messaging.Kafka.WebApi/Messaging.Kafka.WebApi.csproj",
+      "Hosts/RabbitMqApplications/Messaging.Console.RabbitMq.App/Messaging.Console.RabbitMq.App.csproj",
+      "Hosts/RabbitMqApplications/Messaging.RabbitMq.WebApi/Messaging.RabbitMq.WebApi.csproj",
+      "Tests/Messaging.EventHub.Benchmark/Messaging.EventHub.Benchmark.csproj",
+      "Tests/Messaging.EventHub.Tests/Messaging.EventHub.Tests.csproj",
+      "Tests/Messaging.Tests/Messaging.Tests.csproj"
+    ]
+  }
+}
