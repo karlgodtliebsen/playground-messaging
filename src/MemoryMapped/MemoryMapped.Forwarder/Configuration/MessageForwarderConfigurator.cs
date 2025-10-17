@@ -1,4 +1,5 @@
-﻿using MemoryMapped.Forwarder.WorkerServices;
+﻿using MemoryMapped.Forwarder.HostingServices;
+using MemoryMapped.Forwarder.WorkerServices;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

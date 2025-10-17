@@ -1,11 +1,9 @@
 ﻿using MemoryMapped.Queue.Monitor;
-
 using Messaging.Hosting.Library;
-
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace MemoryMapped.Forwarder.WorkerServices;
+namespace MemoryMapped.Forwarder.HostingServices;
 
 public sealed class MessageMonitorServiceHost(IMemoryMappedQueueMonitor workerService, ILogger<MessageMonitorServiceHost> logger) : BackgroundService
 {

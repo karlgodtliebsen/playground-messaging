@@ -1,12 +1,10 @@
 ﻿using Messaging.Application.Services.Hosts;
 using Messaging.Domain.Library.Orders;
 using Messaging.Domain.Library.SimpleMessages;
-using Messaging.Library.ActivitySourceLogging;
-
 using Microsoft.Extensions.Logging;
 
 using System.Diagnostics;
-
+using Messaging.Observability.Library.ActivitySourceLogging;
 using Wolverine;
 
 namespace Messaging.Application.Services.Workers;

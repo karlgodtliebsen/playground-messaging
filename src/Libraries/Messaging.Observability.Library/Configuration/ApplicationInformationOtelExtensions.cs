@@ -1,6 +1,6 @@
 ﻿using OpenTelemetry.Resources;
 
-namespace Messaging.Library.Configuration;
+namespace Messaging.Observability.Library.Configuration;
 
 public static class ApplicationInformationOtelExtensions
 {

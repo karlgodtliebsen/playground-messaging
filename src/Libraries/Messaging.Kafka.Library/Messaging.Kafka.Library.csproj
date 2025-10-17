@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Messaging.Domain.Library\Messaging.Domain.Library.csproj" />
     <ProjectReference Include="..\Messaging.Library\Messaging.Library.csproj" />
+    <ProjectReference Include="..\Messaging.Observability.Library\Messaging.Observability.Library.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\" />

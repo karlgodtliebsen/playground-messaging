@@ -1,4 +1,4 @@
-﻿namespace Messaging.Library.Configuration;
+﻿namespace Messaging.Observability.Library.Configuration;
 
 public sealed class OtelOptions
 {

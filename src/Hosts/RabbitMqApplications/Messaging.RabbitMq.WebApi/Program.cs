@@ -6,7 +6,7 @@ using Messaging.EventHub.Library.Configuration;
 using Messaging.RabbitMq.Library.Configuration;
 using Messaging.RabbitMq.WebApi.Configuration;
 using Messaging.RabbitMq.WebApi.Controllers;
-
+using Messaging.ServiceDefaults;
 using Scalar.AspNetCore;
 
 using Serilog;

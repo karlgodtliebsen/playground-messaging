@@ -33,6 +33,7 @@
     <Project Path="Libraries/Messaging.Hosting.Library/Messaging.Hosting.Library.csproj" />
     <Project Path="Libraries/Messaging.Kafka.Library/Messaging.Kafka.Library.csproj" />
     <Project Path="Libraries/Messaging.Library/Messaging.Library.csproj" />
+    <Project Path="Libraries/Messaging.Observability.Library/Messaging.Observability.Library.csproj" />
     <Project Path="Libraries/Messaging.PostgreSql.Library/Messaging.PostgreSql.Library.csproj" />
     <Project Path="Libraries/Messaging.RabbitMq.Library/Messaging.RabbitMq.Library.csproj" />
   </Folder>

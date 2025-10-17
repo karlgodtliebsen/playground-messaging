@@ -1,5 +1,5 @@
 ﻿using Messaging.Library.Configuration;
-
+using Messaging.Observability.Library.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

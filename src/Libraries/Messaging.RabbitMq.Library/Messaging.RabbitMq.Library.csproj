@@ -25,5 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Messaging.EventHub.Library\Messaging.EventHub.Library.csproj" />
     <ProjectReference Include="..\Messaging.Library\Messaging.Library.csproj" />
+    <ProjectReference Include="..\Messaging.Observability.Library\Messaging.Observability.Library.csproj" />
   </ItemGroup>
 </Project>

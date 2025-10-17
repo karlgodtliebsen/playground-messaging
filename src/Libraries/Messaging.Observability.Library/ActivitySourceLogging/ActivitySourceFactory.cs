@@ -1,13 +1,11 @@
-﻿using Messaging.Library.Configuration;
-
+﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Runtime.CompilerServices;
+using Messaging.Observability.Library.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Runtime.CompilerServices;
-
-namespace Messaging.Library.ActivitySourceLogging;
+namespace Messaging.Observability.Library.ActivitySourceLogging;
 
 public sealed class ActivitySourceFactory : IActivitySourceFactory, IDisposable
 {

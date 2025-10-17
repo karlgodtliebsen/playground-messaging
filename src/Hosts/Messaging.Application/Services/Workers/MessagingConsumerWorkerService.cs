@@ -1,9 +1,8 @@
 ﻿using Messaging.EventHub.Library;
-using Messaging.Library.ActivitySourceLogging;
-
 using Microsoft.Extensions.Logging;
 
 using System.Diagnostics;
+using Messaging.Observability.Library.ActivitySourceLogging;
 
 namespace Messaging.Application.Services.Workers;
 

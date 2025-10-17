@@ -1,12 +1,10 @@
-﻿using Messaging.Library.ActivitySourceLogging;
-
+﻿using System.Diagnostics;
+using Messaging.Observability.Library.ActivitySourceLogging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-using System.Diagnostics;
-
-namespace Messaging.Library.Configuration;
+namespace Messaging.Observability.Library.Configuration;
 
 public static class ActivitySourceLoggingConfigurator
 {

@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace Messaging.Library.Configuration;
+namespace Messaging.Observability.Library.Configuration;
 
 /// <summary>
 /// General Application Instance Information

@@ -1,5 +1,6 @@
 ﻿using Messaging.EventHub.Library.Configuration;
 using Messaging.Library.Configuration;
+using Messaging.Observability.Library.Configuration;
 using Messaging.RabbitMq.Library.LegacySupport;
 
 using Microsoft.Extensions.Configuration;

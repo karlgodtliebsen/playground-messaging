@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Messaging.Library.ActivitySourceLogging;
+namespace Messaging.Observability.Library.ActivitySourceLogging;
 
 public class ActivitySourceBuilder
 {

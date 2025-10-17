@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
-namespace Messaging.Library.ActivitySourceLogging;
+namespace Messaging.Observability.Library.ActivitySourceLogging;
 
 public interface IActivitySourceFactory
 {
