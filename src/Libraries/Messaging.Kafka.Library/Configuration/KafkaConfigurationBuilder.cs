@@ -85,7 +85,7 @@ public static class KafkaConfigurationBuilder
         {
             //logging.SetMinimumLevel(LogLevel.Trace);
             logging.SetMinimumLevel(LogLevel.Information);
-            // logging.AddConsole();
+            logging.AddConsole();
         });
         services.AddOpenTelemetry()
             .WithTracing(tracing =>
@@ -155,7 +155,7 @@ public static class KafkaConfigurationBuilder
         {
             //logging.SetMinimumLevel(LogLevel.Trace);
             logging.SetMinimumLevel(LogLevel.Information);
-            //logging.AddConsole();
+            logging.AddConsole();
         });
         services.AddOpenTelemetry()
             .WithTracing(tracing =>

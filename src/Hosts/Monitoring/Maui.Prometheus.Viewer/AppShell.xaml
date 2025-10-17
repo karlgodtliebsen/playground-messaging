@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Maui.Prometheus.Viewer.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:Maui.Prometheus.Viewer.Pages"
+    xmlns:controls="clr-namespace:Maui.Prometheus.Viewer.Pages.Controls"
+    Shell.FlyoutBehavior="Flyout"
+    Title="Prometheus.Viewer">
+
+    <!--
+    Shell.FlyoutBehavior="Disabled"
+    Shell.FlyoutBehavior="Flyout"
+  
+    -->
+
+    <!--<TabBar>
+        <ShellContent Title="Dashboard"
+                      Icon="chart.png"
+                      ContentTemplate="{DataTemplate pages:DashboardPage}" />
+
+        <ShellContent Title="Settings"
+                      Icon="settings.png"
+                      ContentTemplate="{DataTemplate pages:SettingsPage}" />
+    </TabBar>-->
+
+    <ShellContent
+        Title="Dashboard"
+        Icon="{StaticResource IconDashboard}"
+        ContentTemplate="{DataTemplate pages:DashboardPage}"
+        Route="dashboard" />
+    
+    <ShellContent
+        Title="Settings"
+        Icon="{StaticResource IconMeta}"
+        ContentTemplate="{DataTemplate pages:SettingsPage}"
+        Route="settings" />
+    
+    <!--<ShellContent
+        Title="Exit"
+        Icon="{StaticResource IconDelete}"
+        ContentTemplate="{DataTemplate pages:SettingsPage}"
+        Route="settings" />
+    -->
+
+    <Shell.FlyoutFooter>
+        <Grid Padding="15">
+            <controls:ThemeToggle x:Name="ThemeToggle"
+                                  SelectedIndex="{Binding ThemeIndex}"
+                                  SelectionChanged="OnThemeSelectionChanged"
+                                  VerticalOptions="Center"
+                                  HorizontalOptions="End"/>
+
+        </Grid>
+    </Shell.FlyoutFooter>
+
+</Shell>

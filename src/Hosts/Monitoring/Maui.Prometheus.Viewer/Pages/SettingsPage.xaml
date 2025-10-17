@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Maui.Prometheus.Viewer.Pages.Controls"
+             x:Class="Maui.Prometheus.Viewer.Pages.SettingsPage"
+             Title="SettingsPage">
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="20">
+
+            <!--<Label Text="Settings" 
+                   FontSize="24" 
+                   FontAttributes="Bold"/>-->
+
+            <Border  Style="{StaticResource CardBorder}"
+                     BackgroundColor="#FF9800"
+                     Stroke="#FF9800">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label  
+                        TextColor="Black"
+                        Text="Prometheus URL"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center"
+                        />
+                    <Entry Text="http://localhost:9090" 
+                           TextColor="Black"
+                           Placeholder="Enter Prometheus URL"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border  Style="{StaticResource CardBorder}"
+                     BackgroundColor="#2196F3"
+                     Stroke="#2196F3">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label x:Name ="RefreshLabel"  
+                           TextColor="Black" 
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"
+                           Text="Refresh Interval"/>
+                    <Slider Minimum="1" Maximum="30" Value="5"/>
+                    <Label Text="5 seconds"                           
+                           TextColor="Black"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}"
+                    BackgroundColor="#4CAF50"
+                    Stroke="#4CAF50">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Padding="5">
+                    <Label Grid.Row="0" Grid.Column="0"
+                           Text="Theme"
+                           TextColor="Black"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"/>
+
+                    <controls:ThemeToggle Grid.Row="0" Grid.Column="1"
+                                          x:Name="ThemeToggle"
+                                          IconLight="light_mode.png"
+                                          IconDark="dark_mode.png"
+                                          SelectedIndex="{Binding ThemeIndex}"
+                                          SelectionChanged="OnThemeSelectionChanged"
+                                          VerticalOptions="Center"
+                                          HorizontalOptions="End"/>
+
+                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                           Text="Switch between light and dark theme"
+                           FontSize="12"
+                           TextColor="Black"
+                           Margin="0,5,0,0"/>
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Maui.Prometheus.Viewer.Pages.Controls"
+             xmlns:pageModels="clr-namespace:Maui.Prometheus.Viewer.PageModels"
+             x:Class="Maui.Prometheus.Viewer.Pages.DashboardPage"
+             x:DataType="pageModels:DashboardViewModel"
+             Title="DashboardPage">
+
+
+    <Grid RowDefinitions="Auto,*" Padding="10">
+
+        <!-- Header with connection status -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="10" Margin="0,0,0,10">
+            <Label Grid.Column="0" 
+                   Text="{Binding ConnectionStatus}"
+                   FontSize="14"
+                   VerticalOptions="Center"/>
+
+            <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                                 IsVisible="{Binding IsBusy}"
+                                 WidthRequest="20"
+                                 HeightRequest="20"/>
+                <Label Text="{Binding LastUpdated, StringFormat='Updated: {0}'}"
+                       FontSize="12"
+                       TextColor="Gray"
+                       VerticalOptions="Center"/>
+                <Button Text="↻" 
+                        Command="{Binding RefreshCommand}"
+                        WidthRequest="40"
+                        HeightRequest="40"/>
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Main content -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="15">
+
+                <!-- Metric Cards Row -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <controls:MetricCard Grid.Column="0"
+                                       Title="Events/sec"
+                                       Value="{Binding TotalEventsPerSecond, StringFormat='{0:F2}'}"
+                                       Unit="events"
+                                       CardColor="#2196F3"/>
+
+                    <controls:MetricCard Grid.Column="1"
+                                       Title="Subscribers"
+                                       Value="{Binding ActiveSubscribers}"
+                                       Unit="active"
+                                       CardColor="#4CAF50"/>
+
+                    <controls:MetricCard Grid.Column="2"
+                                       Title="Avg Time"
+                                       Value="{Binding AverageProcessingTime, StringFormat='{0:F1}'}"
+                                       Unit="ms"
+                                       CardColor="#FF9800"/>
+                </Grid>
+
+                <!-- Chart -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Event Rate (Last 15 min)" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+
+                        <controls:SimpleLineChart DataPoints="{Binding EventRateData}"
+                                                  HeightRequest="250"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Status Message -->
+                <Label Text="💡 Make sure Prometheus is running on http://localhost:9090"
+                       FontSize="12"
+                       TextColor="Gray"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="{Binding IsConnected, Converter={StaticResource InvertBoolConverter}}"/>
+
+                <!--<Label Text="{Binding TotalEventsPerSecond, StringFormat='Debug: {0:F2}'}" />
+                <Label Text="{Binding EventRateData.Count, StringFormat='Data points: {0}'}" />-->
+
+            </VerticalStackLayout>
+
+
+
+
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

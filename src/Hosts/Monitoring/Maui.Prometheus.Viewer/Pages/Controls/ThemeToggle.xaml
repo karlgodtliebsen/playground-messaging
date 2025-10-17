@@ -1,0 +1,56 @@
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Maui.Prometheus.Viewer.Pages.Controls.ThemeToggle"
+             HeightRequest="40"
+             WidthRequest="88">
+
+    <Border Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
+            StrokeThickness="1"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
+            Padding="2">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="20"/>
+        </Border.StrokeShape>
+
+        <Grid ColumnDefinitions="40,40" ColumnSpacing="4">
+
+            <!-- Light Mode Button -->
+            <Border Grid.Column="0"
+                    x:Name="LightBorder"
+                    BackgroundColor="Transparent"
+                    Padding="8">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="18"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLightTapped"/>
+                </Border.GestureRecognizers>
+
+                <Image Source="{StaticResource IconLight}"
+                       Aspect="AspectFit"
+                       WidthRequest="24"
+                       HeightRequest="24"/>
+            </Border>
+
+            <!-- Dark Mode Button -->
+            <Border Grid.Column="1"
+                    x:Name="DarkBorder"
+                    BackgroundColor="Transparent"
+                    Padding="8">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="18"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDarkTapped"/>
+                </Border.GestureRecognizers>
+
+                <Image Source="{StaticResource IconDark}"
+                       Aspect="AspectFit"
+                       WidthRequest="24"
+                       HeightRequest="24"/>
+            </Border>
+
+        </Grid>
+    </Border>
+
+</ContentView>
