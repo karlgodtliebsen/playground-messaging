@@ -4,17 +4,17 @@ using Messaging.EventHub.Library;
 
 namespace Maui.Prometheus.Viewer.Pages;
 
-
-public partial class DashboardPage : ContentPage
+public partial class SystemMetricsPage : ContentPage
 {
     private readonly IEventHub eventHub = null!;
     private readonly CancellationTokenSource cancellationTokenSource;
 
-    public DashboardPage()
+    public SystemMetricsPage()
     {
         InitializeComponent();
     }
-    public DashboardPage(IEventHub eventHub, CancellationTokenSource cancellationTokenSource, DashboardViewModel viewModel) : this()
+
+    public SystemMetricsPage(IEventHub eventHub, CancellationTokenSource cancellationTokenSource, SystemMetricsViewModel viewModel) : this()
     {
         this.eventHub = eventHub;
         this.cancellationTokenSource = cancellationTokenSource;
@@ -23,19 +23,23 @@ public partial class DashboardPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        eventHub.Publish("dashboard-initialize", cancellationTokenSource.Token).SafeFireAndForget();
+
+        // Initialize the view model when page appears
+        eventHub.Publish("system-metrics-initialize", cancellationTokenSource.Token).SafeFireAndForget();
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        eventHub.Publish("dashboard-stop", cancellationTokenSource.Token).SafeFireAndForget();
+
+        // Stop auto-refresh when navigating away
+        eventHub.Publish("system-metrics-stop", cancellationTokenSource.Token).SafeFireAndForget();
     }
 
     // Optional: Handle page lifecycle cleanup
     protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
     {
         base.OnNavigatedFrom(args);
-        eventHub.Publish("dashboard-cleanup", cancellationTokenSource.Token).SafeFireAndForget();
+        eventHub.Publish("system-metrics-cleanup", cancellationTokenSource.Token).SafeFireAndForget();
     }
 }

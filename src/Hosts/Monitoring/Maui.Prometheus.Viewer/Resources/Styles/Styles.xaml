@@ -3,8 +3,12 @@
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:services="clr-namespace:Maui.Prometheus.Viewer.Services">
-    <services:InvertBoolConverter x:Key="InvertBoolConverter"/>
+    xmlns:utilities="clr-namespace:Maui.Prometheus.Viewer.Utilities">
+
+    <!-- Value Converters -->
+    <utilities:InvertBoolConverter x:Key="InvertBoolConverter" />
+    <utilities:LessThanConverter x:Key="LessThanConverter" />
+    <utilities:GreaterThanConverter x:Key="GreaterThanConverter" />
 
     <Style TargetType="Border">
         <Setter Property="BackgroundColor" Value="{StaticResource White}"/>
@@ -19,7 +23,7 @@
         </Setter>
     </Style>
 
-    <Style x:Key="CardBorder" TargetType="Border">
+    <!--<Style x:Key="CardBorder" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{StaticResource White}"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="Padding" Value="15"/>
@@ -29,9 +33,54 @@
         <Setter Property="Shadow">
             <Shadow Brush="Black" Opacity="0.15" Radius="8" Offset="0,2"/>
         </Setter>
+    </Style>-->
+
+    <!-- Card Border Style -->
+    <Style x:Key="CardBorder" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="#2C2C2C"/>
+        <Setter Property="Stroke" Value="#404040"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="15"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="8"/>
+            </Setter.Value>
+        </Setter>
     </Style>
 
+    <!-- Alternative Card Border with Shadow (Optional) -->
+    <Style x:Key="CardBorderWithShadow" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="#2C2C2C"/>
+        <Setter Property="Stroke" Value="#404040"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="15"/>
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="Black" 
+                        Opacity="0.3" 
+                        Radius="10" 
+                        Offset="0,4"/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="8"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
+    <!-- Light Theme Card Border (Optional) -->
+    <Style x:Key="CardBorderLight" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="White"/>
+        <Setter Property="Stroke" Value="#E0E0E0"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="15"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="8"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
     </Style>

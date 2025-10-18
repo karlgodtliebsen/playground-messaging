@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Maui.Prometheus.Viewer.Pages.Controls"
+             xmlns:pageModels="clr-namespace:Maui.Prometheus.Viewer.PageModels"
+             x:Class="Maui.Prometheus.Viewer.Pages.EventHubDetailPage"
+             x:DataType="pageModels:EventHubDetailViewModel"
+             Title="EventHub Metrics">
+
+    <Grid RowDefinitions="Auto,*" Padding="10">
+
+        <!-- Header with connection status -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="10" Margin="0,0,0,10">
+            <Label Grid.Column="0" 
+                   Text="{Binding ConnectionStatus}"
+                   FontSize="14"
+                   VerticalOptions="Center"/>
+
+            <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                                   IsVisible="{Binding IsBusy}"
+                                   WidthRequest="20"
+                                   HeightRequest="20"/>
+                <Label Text="{Binding LastUpdated, StringFormat='Updated: {0}'}"
+                       FontSize="12"
+                       TextColor="Gray"
+                       VerticalOptions="Center"/>
+                <Button Text="↻" 
+                        Command="{Binding RefreshCommand}"
+                        WidthRequest="40"
+                        HeightRequest="40"/>
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="15">
+
+                <!-- Key Metrics -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="10">
+                    <controls:MetricCard Grid.Row="0" Grid.Column="0"
+                                       Title="Published"
+                                       Value="{Binding PublishedRate, StringFormat='{0:F2}'}"
+                                       Unit="events/s"
+                                       CardColor="#2196F3"/>
+
+                    <controls:MetricCard Grid.Row="0" Grid.Column="1"
+                                       Title="Processed"
+                                       Value="{Binding ProcessedRate, StringFormat='{0:F2}'}"
+                                       Unit="events/s"
+                                       CardColor="#4CAF50"/>
+
+                    <controls:MetricCard Grid.Row="1" Grid.Column="0"
+                                       Title="Subscribers"
+                                       Value="{Binding ActiveSubscribers}"
+                                       Unit="active"
+                                       CardColor="#9C27B0"/>
+
+                    <controls:MetricCard Grid.Row="1" Grid.Column="1"
+                                       Title="Channels"
+                                       Value="{Binding ActiveChannels}"
+                                       Unit="active"
+                                       CardColor="#FF9800"/>
+                </Grid>
+
+                <!-- Events Published Rate by Event -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Events Published Rate by Event" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding PublishedByEventData}"
+                                                  HeightRequest="300"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Processing Duration -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Event Processing Duration (avg )" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding ProcessingDurationData}"
+                                                  HeightRequest="300"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Error Rate -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Handler Error Rate by Event" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding ErrorRateData}"
+                                                  HeightRequest="250"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Event Distribution -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Event Type Distribution" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimplePieChart DataPoints="{Binding EventDistribution}"
+                                                HeightRequest="350"/>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

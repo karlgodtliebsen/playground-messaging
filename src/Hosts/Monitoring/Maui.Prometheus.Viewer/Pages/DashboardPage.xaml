@@ -5,8 +5,7 @@
              xmlns:pageModels="clr-namespace:Maui.Prometheus.Viewer.PageModels"
              x:Class="Maui.Prometheus.Viewer.Pages.DashboardPage"
              x:DataType="pageModels:DashboardViewModel"
-             Title="DashboardPage">
-
+             Title="Messaging Dashboard">
 
     <Grid RowDefinitions="Auto,*" Padding="10">
 
@@ -37,36 +36,139 @@
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="15">
 
-                <!-- Metric Cards Row -->
+                <!--  Metric Cards Row 1: System Metrics -->
+                <Label Text="System Metrics" 
+                       FontSize="18" 
+                       FontAttributes="Bold"
+                       Margin="0,20,0,10"/>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <controls:MetricCard Grid.Column="0"
+                                         Title="Memory"
+                                         Value="{Binding MemoryUsageMB, StringFormat='{0:F1}'}"
+                                         Unit="MB"
+                                         CardColor="#00BCD4"/>
+
+                    <controls:MetricCard Grid.Column="1"
+                                         Title="GC Rate"
+                                         Value="{Binding GcRate, StringFormat='{0:F2}'}"
+                                         Unit="ops/s"
+                                         CardColor="#FF5722"/>
+                </Grid>
+
+                <!-- Metric Cards Row 2: EventHub -->
+                <Label Text="EventHub Metrics" 
+                       FontSize="18" 
+                       FontAttributes="Bold"
+                       Margin="0,0,0,10"/>
+
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <controls:MetricCard Grid.Column="0"
                                        Title="Events/sec"
                                        Value="{Binding TotalEventsPerSecond, StringFormat='{0:F2}'}"
                                        Unit="events"
                                        CardColor="#2196F3"/>
-
                     <controls:MetricCard Grid.Column="1"
-                                       Title="Subscribers"
-                                       Value="{Binding ActiveSubscribers}"
-                                       Unit="active"
-                                       CardColor="#4CAF50"/>
-
-                    <controls:MetricCard Grid.Column="2"
                                        Title="Avg Time"
                                        Value="{Binding AverageProcessingTime, StringFormat='{0:F1}'}"
                                        Unit="ms"
                                        CardColor="#FF9800"/>
+                    <controls:MetricCard Grid.Column="2"
+                                       Title="Errors/sec"
+                                       Value="{Binding ErrorRate, StringFormat='{0:F3}'}"
+                                       Unit="errors"
+                                       CardColor="#F44336"/>
+
                 </Grid>
 
-                <!-- Chart -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,0,0,10">
+                     <controls:MetricCard Grid.Column="0"
+                                       Title="Subscribers"
+                                       Value="{Binding ActiveSubscribers}"
+                                       Unit="active"
+                                       CardColor="#4CAF50"/>    
+                     <controls:MetricCard Grid.Column="1"
+                                          Title="Channels"
+                                          Value="{Binding ActiveChannels}"
+                                          Unit="active"
+                                          CardColor="#9C27B0"/>
+                </Grid>
+
+                <!-- Event Rate Chart -->
                 <Border Style="{StaticResource CardBorder}">
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="Event Rate (Last 15 min)" 
+                        <Label Text="Event Published Rate (Last 15 min)" 
                                FontSize="16" 
                                FontAttributes="Bold"/>
-
-                        <controls:SimpleLineChart DataPoints="{Binding EventRateData}"
+                        <controls:SimpleLineChart DataPoints="{Binding EventRateData}" 
                                                   HeightRequest="250"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Processing Duration Chart -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Event Processing Duration" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding ProcessingDurationData}"
+                                                  HeightRequest="250"/>
+                    </VerticalStackLayout>
+                </Border>
+
+
+                <!-- Event Distribution Pie Chart -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Event Distribution" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimplePieChart DataPoints="{Binding EventDistribution}"
+                                                HeightRequest="300"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Error Rate Chart -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="EventHub - Error Rate" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding ErrorRateData}"
+                                                  HeightRequest="200"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Operation Duration Chart -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="ActivitySource - Operation Duration" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding OperationDurationData}"
+                                                  HeightRequest="250"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Memory Usage Chart -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Memory Usage" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding MemoryUsageData}"
+                                                  HeightRequest="200"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- GC Collections Chart -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="GC Collections per Second" 
+                               FontSize="16" 
+                               FontAttributes="Bold"/>
+                        <controls:SimpleLineChart DataPoints="{Binding GcCollectionsData}"
+                                                  HeightRequest="200"/>
                     </VerticalStackLayout>
                 </Border>
 
@@ -75,16 +177,10 @@
                        FontSize="12"
                        TextColor="Gray"
                        HorizontalTextAlignment="Center"
+                       Margin="0,20,0,20"
                        IsVisible="{Binding IsConnected, Converter={StaticResource InvertBoolConverter}}"/>
 
-                <!--<Label Text="{Binding TotalEventsPerSecond, StringFormat='Debug: {0:F2}'}" />
-                <Label Text="{Binding EventRateData.Count, StringFormat='Data points: {0}'}" />-->
-
             </VerticalStackLayout>
-
-
-
-
         </ScrollView>
 
     </Grid>

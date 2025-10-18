@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Messaging.EventHub.Library.Configuration;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Maui.Prometheus.Viewer.Configuration;
 
-public static class PrometheusConfigurator
+public static class PrometheusViewerConfigurator
 {
     public static IServiceCollection AddPrometheusServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -14,8 +16,9 @@ public static class PrometheusConfigurator
             options = new PrometheusOptions();
         }
         services.TryAddSingleton(Options.Create(options));
+        services.TryAddSingleton(new CancellationTokenSource());//Must be used when exiting app
 
-
+        services.AddEventHubServices(configuration);
         // Register Named Http Client For Prometheus Service
         services.AddHttpClient("PrometheusClient", client =>
         {
@@ -24,12 +27,18 @@ public static class PrometheusConfigurator
         });
 
         services.AddSingleton<IPrometheusService, PrometheusService>();
+        // Register Pages with models
+        services.AddTransient<DashboardPage>();
         services.AddTransient<DashboardViewModel>();
 
-        // Register Pages
-        services.AddTransient<DashboardPage>();
+        services.AddTransient<SystemMetricsPage>();
+        services.AddTransient<SystemMetricsViewModel>();
+
+        services.AddTransient<SettingsViewModel>();
         services.AddTransient<SettingsPage>();
 
+        services.AddTransient<EventHubDetailViewModel>();
+        services.AddTransient<EventHubDetailPage>();
         return services;
     }
 }

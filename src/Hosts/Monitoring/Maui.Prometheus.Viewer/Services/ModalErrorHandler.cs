@@ -1,3 +1,5 @@
+using AsyncAwaitBestPractices;
+
 namespace Maui.Prometheus.Viewer.Services
 {
     /// <summary>
@@ -13,7 +15,7 @@ namespace Maui.Prometheus.Viewer.Services
         /// <param name="ex">Exception.</param>
         public void HandleError(Exception ex)
         {
-            DisplayAlert(ex).FireAndForgetSafeAsync();
+            DisplayAlert(ex).SafeFireAndForget();
         }
 
         async Task DisplayAlert(Exception ex)

@@ -5,8 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:Maui.Prometheus.Viewer.Pages"
     xmlns:controls="clr-namespace:Maui.Prometheus.Viewer.Pages.Controls"
+    xmlns:viewer="http://schemas.microsoft.com/dotnet/maui/global"
     Shell.FlyoutBehavior="Flyout"
-    Title="Prometheus.Viewer">
+    Title="Prometheus Metrics Viewer">
 
     <!--
     Shell.FlyoutBehavior="Disabled"
@@ -24,7 +25,7 @@
                       ContentTemplate="{DataTemplate pages:SettingsPage}" />
     </TabBar>-->
 
-    <ShellContent
+    <!--<ShellContent
         Title="Dashboard"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pages:DashboardPage}"
@@ -34,7 +35,7 @@
         Title="Settings"
         Icon="{StaticResource IconMeta}"
         ContentTemplate="{DataTemplate pages:SettingsPage}"
-        Route="settings" />
+        Route="settings" />-->
     
     <!--<ShellContent
         Title="Exit"
@@ -42,11 +43,58 @@
         ContentTemplate="{DataTemplate pages:SettingsPage}"
         Route="settings" />
     -->
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#1E88E5" Padding="20" HeightRequest="150">
+            <VerticalStackLayout VerticalOptions="Center">
+                <Label Text="📊 Prometheus" 
+                       FontSize="24" 
+                       FontAttributes="Bold"
+                       TextColor="White"/>
+                <Label Text="Metrics Viewer" 
+                       FontSize="18" 
+                       TextColor="White"
+                       Opacity="0.8"/>
+                <Label Text="Messaging Platform" 
+                       FontSize="12" 
+                       TextColor="White"
+                       Opacity="0.6"
+                       Margin="0,10,0,0"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Title="Dashboard" Icon="{StaticResource IconDashboard}">
+        <ShellContent
+            Title="Overview"
+            ContentTemplate="{DataTemplate pages:DashboardPage}"
+            Route="dashboard" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="EventHub Metrics" Icon="{StaticResource IconProjects}">
+        <ShellContent
+            Title="EventHub Metrics"
+            ContentTemplate="{DataTemplate pages:EventHubDetailPage}"
+            Route="eventhub" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="System Metrics" Icon="{StaticResource IconMeta}">
+        <ShellContent
+            Title="System Performance Metrics"
+            ContentTemplate="{DataTemplate pages:SystemMetricsPage}"
+            Route="system" />
+    </FlyoutItem>
+    <FlyoutItem Title="Settings" Icon="{StaticResource IconMeta}">
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate pages:SettingsPage}"
+            Route="settings" />
+    </FlyoutItem>
+
 
     <Shell.FlyoutFooter>
-        <Grid Padding="15">
+        <Grid Padding="10">
             <controls:ThemeToggle x:Name="ThemeToggle"
-                                  SelectedIndex="{Binding ThemeIndex}"
+                                  
                                   SelectionChanged="OnThemeSelectionChanged"
                                   VerticalOptions="Center"
                                   HorizontalOptions="End"/>
@@ -55,3 +103,4 @@
     </Shell.FlyoutFooter>
 
 </Shell>
+<!--SelectedIndex="{Binding ThemeIndex}"-->

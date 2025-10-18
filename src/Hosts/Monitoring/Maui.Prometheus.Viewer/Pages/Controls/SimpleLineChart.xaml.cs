@@ -24,20 +24,18 @@ public partial class SimpleLineChart : ContentView
         set => SetValue(DataPointsProperty, value);
     }
 
+
     private ObservableCollection<DataPoint>? currentCollection;
 
     public SimpleLineChart()
     {
         InitializeComponent();
-        Debug.WriteLine("SimpleLineChart created");
     }
 
     private static void OnDataPointsChanged(BindableObject bindable, object oldValue, object newValue)
     {
         if (bindable is SimpleLineChart control)
         {
-            Debug.WriteLine($"DataPoints changed. Old: {oldValue != null}, New: {newValue != null}");
-
             // Unsubscribe from old collection
             if (control.currentCollection != null)
             {
@@ -49,7 +47,6 @@ public partial class SimpleLineChart : ContentView
             {
                 control.currentCollection = newCollection;
                 newCollection.CollectionChanged += control.OnCollectionChanged;
-                Debug.WriteLine($"Subscribed to collection with {newCollection.Count} items");
             }
             else
             {
@@ -62,7 +59,6 @@ public partial class SimpleLineChart : ContentView
 
     private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        Debug.WriteLine($"Collection changed: {e.Action}");
         UpdateChart();
     }
 
@@ -78,6 +74,8 @@ public partial class SimpleLineChart : ContentView
             }
 
             Debug.WriteLine($"Updating chart with {DataPoints.Count} data points");
+            chartView.Chart = null;
+            chartView.InvalidateSurface();
 
             var entries = DataPoints.Select(dp => new ChartEntry((float)dp.Value)
             {
