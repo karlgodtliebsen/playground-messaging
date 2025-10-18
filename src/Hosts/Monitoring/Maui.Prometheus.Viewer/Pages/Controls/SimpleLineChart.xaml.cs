@@ -68,12 +68,11 @@ public partial class SimpleLineChart : ContentView
         {
             if (DataPoints == null || DataPoints.Count == 0)
             {
-                Debug.WriteLine("No data points available for chart");
                 chartView.Chart = null;
+                chartView.InvalidateSurface();
                 return;
             }
 
-            Debug.WriteLine($"Updating chart with {DataPoints.Count} data points");
             chartView.Chart = null;
             chartView.InvalidateSurface();
 
@@ -97,9 +96,8 @@ public partial class SimpleLineChart : ContentView
                 LabelOrientation = Orientation.Horizontal,
                 IsAnimated = false
             };
-
             chartView.Chart = chart;
-            Debug.WriteLine("Chart updated successfully");
+            chartView.InvalidateSurface();
         }
         catch (Exception ex)
         {
